@@ -1,0 +1,74 @@
+@use 'variables' as v;
+
+// ---- Desktop-first responsive mixin ----
+// Usage: @include respond-below(tablet) { ... }
+@mixin respond-below($breakpoint) {
+  @if $breakpoint == xl {
+    @media (max-width: v.$bp-xl) {
+      @content;
+    }
+  } @else if $breakpoint == lg {
+    @media (max-width: v.$bp-lg) {
+      @content;
+    }
+  } @else if $breakpoint == md {
+    @media (max-width: v.$bp-md) {
+      @content;
+    }
+  } @else if $breakpoint == sm {
+    @media (max-width: v.$bp-sm) {
+      @content;
+    }
+  } @else if $breakpoint == tablet {
+    @media (max-width: v.$bp-tablet) {
+      @content;
+    }
+  } @else if $breakpoint == mobile {
+    @media (max-width: v.$bp-mobile) {
+      @content;
+    }
+  }
+}
+
+// ---- Accessible visible focus state ----
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid v.$color-primary;
+    outline-offset: 2px;
+  }
+}
+
+// ---- Surface / card treatment ----
+@mixin surface($radius: v.$radius-md, $shadow: v.$shadow-sm) {
+  background-color: v.$color-bg-surface;
+  border: 1px solid v.$color-border;
+  border-radius: $radius;
+  box-shadow: $shadow;
+}
+
+// ---- Text truncation ----
+@mixin truncate($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+// ---- Flex helpers ----
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

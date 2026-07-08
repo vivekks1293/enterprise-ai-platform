@@ -1,0 +1,29 @@
+// =============================================================
+// GLOBAL STYLES ENTRY POINT
+// Bootstrap is loaded separately via angular.json `styles` array.
+// This file wires together our own enterprise SCSS architecture.
+// =============================================================
+
+@use 'abstracts/variables';
+@use 'abstracts/mixins';
+@use 'abstracts/functions';
+
+@use 'bootstrap/bootstrap-overrides';
+
+@use 'base/reset';
+@use 'base/typography';
+@use 'base/spacing';
+
+@use 'layout/header';
+@use 'layout/sidebar';
+@use 'layout/grid';
+
+@use 'components/buttons';
+@use 'components/cards';
+@use 'components/forms';
+@use 'components/tables';
+
+@use 'themes/light';
+@use 'themes/dark';
+
+@use 'utilities/helpers';

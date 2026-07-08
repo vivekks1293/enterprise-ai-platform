@@ -1,0 +1,41 @@
+<aside
+  class="eap-sidebar scroll-thin"
+  [class.eap-sidebar--collapsed]="layout.sidebarCollapsed()"
+  [class.eap-sidebar--mobile-open]="layout.mobileSidebarOpen()"
+  aria-label="Primary navigation"
+>
+  <div class="eap-sidebar__brand">
+    <strong class="eap-sidebar__label">Enterprise AI</strong>
+  </div>
+
+  <nav class="eap-sidebar__nav">
+    <ul>
+      @for (item of primaryNavItems; track item.path) {
+        <li>
+          <a
+            class="eap-sidebar__item"
+            [routerLink]="item.path"
+            routerLinkActive="eap-sidebar__item--active"
+            [attr.aria-current]="null"
+          >
+            <i class="bi" [class]="item.icon" aria-hidden="true"></i>
+            <span class="eap-sidebar__label">{{ item.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+
+    <hr class="mt-eap-4 mb-eap-4" />
+
+    <ul>
+      @for (item of secondaryNavItems; track item.path) {
+        <li>
+          <a class="eap-sidebar__item" [routerLink]="item.path" routerLinkActive="eap-sidebar__item--active">
+            <i class="bi" [class]="item.icon" aria-hidden="true"></i>
+            <span class="eap-sidebar__label">{{ item.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+</aside>

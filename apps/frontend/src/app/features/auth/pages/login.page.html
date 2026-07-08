@@ -1,0 +1,25 @@
+<div class="eap-auth-page">
+  <eap-card title="Sign in" class="eap-auth-page__card">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <eap-input
+        label="Work email"
+        type="email"
+        placeholder="you@company.com"
+        formControlName="email"
+        [errorMessage]="form.controls.email.touched && form.controls.email.invalid ? 'Enter a valid email' : undefined"
+      ></eap-input>
+      <eap-input
+        label="Password"
+        type="password"
+        placeholder="••••••••"
+        formControlName="password"
+        [errorMessage]="
+          form.controls.password.touched && form.controls.password.invalid
+            ? 'Password must be at least 8 characters'
+            : undefined
+        "
+      ></eap-input>
+      <eap-button type="submit" [disabled]="form.invalid">Sign in</eap-button>
+    </form>
+  </eap-card>
+</div>

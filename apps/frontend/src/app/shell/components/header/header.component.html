@@ -1,0 +1,25 @@
+<header class="eap-header">
+  <div class="eap-header__left">
+    <button
+      type="button"
+      class="btn btn-sm btn-light"
+      (click)="layout.toggleSidebar()"
+      aria-label="Toggle sidebar"
+    >
+      <i class="bi bi-list" aria-hidden="true"></i>
+    </button>
+    <eap-breadcrumbs></eap-breadcrumbs>
+  </div>
+
+  <div class="eap-header__right">
+    <button type="button" class="btn btn-sm btn-light position-relative" aria-label="Notifications">
+      <i class="bi bi-bell" aria-hidden="true"></i>
+      @if (notifications.notifications().length > 0) {
+        <span class="position-absolute top-0 start-100 translate-middle">
+          <eap-badge variant="danger">{{ notifications.notifications().length }}</eap-badge>
+        </span>
+      }
+    </button>
+    <eap-user-menu></eap-user-menu>
+  </div>
+</header>

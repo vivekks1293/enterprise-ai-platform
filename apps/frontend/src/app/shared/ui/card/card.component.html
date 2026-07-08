@@ -1,0 +1,13 @@
+<div class="eap-card" [class.p-0]="noPadding()">
+  @if (title() || true) {
+    <div class="eap-card__header" *ngIf="title()">
+      <h3 class="eap-card__title">{{ title() }}</h3>
+      <div class="eap-card__actions">
+        <ng-content select="[cardActions]"></ng-content>
+      </div>
+    </div>
+  }
+  <div class="eap-card__body">
+    <ng-content></ng-content>
+  </div>
+</div>

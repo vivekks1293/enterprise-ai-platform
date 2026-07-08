@@ -1,0 +1,10 @@
+@use '../abstracts/variables' as v;
+@use '../abstracts/mixins' as m;
+
+.eap-btn {
+  @include m.focus-ring;
+  border-radius: v.$radius-md;
+  font-weight: v.$font-weight-medium;
+  font-size: v.$font-size-base;
+  transition: all v.$transition-fast;
+}

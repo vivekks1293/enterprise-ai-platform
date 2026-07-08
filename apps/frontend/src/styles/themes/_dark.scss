@@ -1,0 +1,14 @@
+// Dark theme — architecture only, not fully implemented yet.
+// ThemeService (see core/services/theme.service.ts) toggles
+// `data-theme="dark"` on <html>. Fill in the token overrides below
+// when dark mode is prioritized; every component already consumes
+// the --eap-* custom properties, so no component changes will be
+// needed when this is completed.
+
+[data-theme='dark'] {
+  --eap-bg-base: #14161f;
+  --eap-bg-surface: #1c1f2b;
+  --eap-text-primary: #f2f3f7;
+  --eap-text-secondary: #b3b7c9;
+  --eap-border: #2b2f3f;
+}

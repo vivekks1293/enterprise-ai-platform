@@ -1,0 +1,18 @@
+@use '../abstracts/variables' as v;
+@use '../abstracts/mixins' as m;
+
+.eap-card {
+  @include m.surface;
+  padding: v.$space-5;
+
+  &__header {
+    @include m.flex-between;
+    margin-bottom: v.$space-4;
+  }
+
+  &__title {
+    font-size: v.$font-size-md;
+    font-weight: v.$font-weight-semibold;
+    margin: 0;
+  }
+}

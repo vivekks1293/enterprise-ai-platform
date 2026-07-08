@@ -1,0 +1,18 @@
+<div class="eap-form-group">
+  @if (label()) {
+    <label class="eap-form-label">{{ label() }}</label>
+  }
+  <input
+    class="eap-form-control"
+    [class.is-invalid]="errorMessage()"
+    [type]="type()"
+    [placeholder]="placeholder()"
+    [disabled]="disabled"
+    [ngModel]="value"
+    (ngModelChange)="handleInput($event)"
+    (blur)="handleBlur()"
+  />
+  @if (errorMessage()) {
+    <div class="eap-form-error">{{ errorMessage() }}</div>
+  }
+</div>

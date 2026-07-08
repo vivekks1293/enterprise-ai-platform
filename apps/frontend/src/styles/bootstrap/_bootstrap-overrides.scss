@@ -1,0 +1,39 @@
+// This file documents Bootstrap variable overrides.
+// Because Bootstrap is compiled from node_modules via angular.json's
+// `styles` array (compiled as a separate bundle), true Sass variable
+// overrides require Bootstrap to be imported via @use from this file
+// instead. This file is the designated seam for that migration:
+//
+//   @use '../../../node_modules/bootstrap/scss/bootstrap' with (
+//     $primary: variables.$color-primary,
+//     $font-family-base: variables.$font-family-base,
+//     ...
+//   );
+//
+// Until that migration happens, CSS custom-property overrides below
+// keep Bootstrap's rendered output aligned with our design tokens
+// without forking the Bootstrap build.
+
+@use '../abstracts/variables' as v;
+
+:root {
+  --bs-primary: #{v.$color-primary};
+  --bs-primary-rgb: 47, 95, 219;
+  --bs-success: #{v.$color-success};
+  --bs-warning: #{v.$color-warning};
+  --bs-danger: #{v.$color-danger};
+  --bs-info: #{v.$color-info};
+  --bs-body-font-family: #{v.$font-family-base};
+  --bs-body-font-size: #{v.$font-size-base};
+  --bs-body-color: #{v.$color-text-primary};
+  --bs-body-bg: #{v.$color-bg-base};
+  --bs-border-color: #{v.$color-border};
+  --bs-border-radius: #{v.$radius-md};
+}
+
+.btn-primary {
+  --bs-btn-bg: #{v.$color-primary};
+  --bs-btn-border-color: #{v.$color-primary};
+  --bs-btn-hover-bg: #{v.$color-primary-hover};
+  --bs-btn-hover-border-color: #{v.$color-primary-hover};
+}

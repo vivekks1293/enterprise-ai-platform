@@ -1,0 +1,32 @@
+@use '../abstracts/variables' as v;
+
+$scale: (
+  0: v.$space-0,
+  1: v.$space-1,
+  2: v.$space-2,
+  3: v.$space-3,
+  4: v.$space-4,
+  5: v.$space-5,
+  6: v.$space-6,
+  7: v.$space-7,
+  8: v.$space-8,
+  9: v.$space-9
+);
+
+@each $key, $value in $scale {
+  .m-eap-#{$key} {
+    margin: $value;
+  }
+  .mt-eap-#{$key} {
+    margin-top: $value;
+  }
+  .mb-eap-#{$key} {
+    margin-bottom: $value;
+  }
+  .p-eap-#{$key} {
+    padding: $value;
+  }
+  .gap-eap-#{$key} {
+    gap: $value;
+  }
+}

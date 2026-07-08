@@ -1,0 +1,19 @@
+<button
+  class="eap-btn btn"
+  [class.btn-primary]="variant() === 'primary'"
+  [class.btn-secondary]="variant() === 'secondary'"
+  [class.btn-success]="variant() === 'success'"
+  [class.btn-warning]="variant() === 'warning'"
+  [class.btn-danger]="variant() === 'danger'"
+  [class.btn-info]="variant() === 'info'"
+  [class.btn-sm]="size() === 'sm'"
+  [class.btn-lg]="size() === 'lg'"
+  [type]="type()"
+  [disabled]="disabled() || loading()"
+  (click)="onClick($event)"
+>
+  @if (loading()) {
+    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+  }
+  <ng-content></ng-content>
+</button>

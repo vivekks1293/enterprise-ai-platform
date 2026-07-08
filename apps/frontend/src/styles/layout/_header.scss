@@ -1,0 +1,23 @@
+@use '../abstracts/variables' as v;
+@use '../abstracts/mixins' as m;
+
+.eap-header {
+  @include m.flex-between;
+  height: v.$header-height;
+  padding: 0 v.$space-5;
+  background-color: v.$color-bg-surface;
+  border-bottom: 1px solid v.$color-border;
+  position: sticky;
+  top: 0;
+  z-index: v.$z-index-header;
+}
+
+.eap-header__left {
+  @include m.flex-between;
+  gap: v.$space-4;
+}
+
+.eap-header__right {
+  @include m.flex-between;
+  gap: v.$space-3;
+}

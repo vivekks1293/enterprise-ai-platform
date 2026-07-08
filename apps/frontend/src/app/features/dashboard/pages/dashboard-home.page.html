@@ -1,0 +1,32 @@
+<div class="page-container">
+  <div class="content-wrapper">
+    <div class="page-header">
+      <div>
+        <h1>Dashboard</h1>
+        <p class="text-secondary-eap">Platform overview at a glance.</p>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="row g-4">
+        @for (stat of stats; track stat.label) {
+          <div class="col-12 col-md-6 col-xl-3">
+            <eap-card>
+              <div class="text-secondary-eap mb-eap-2">{{ stat.label }}</div>
+              <div class="d-flex align-items-baseline gap-eap-2">
+                <h2 class="mb-0">{{ stat.value }}</h2>
+                <eap-badge [variant]="stat.trendVariant">{{ stat.trend }}</eap-badge>
+              </div>
+            </eap-card>
+          </div>
+        }
+      </div>
+
+      <eap-card title="Recent Activity">
+        <p class="text-muted-eap mb-0">
+          Activity feed placeholder — wire to a Facade once the backend for this widget is defined.
+        </p>
+      </eap-card>
+    </div>
+  </div>
+</div>

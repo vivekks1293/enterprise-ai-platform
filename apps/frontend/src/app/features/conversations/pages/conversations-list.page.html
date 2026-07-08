@@ -1,0 +1,54 @@
+<div class="page-container">
+  <div class="content-wrapper">
+    <div class="page-header">
+      <div>
+        <h1>Conversations</h1>
+        <p class="text-secondary-eap">History of your AI chat sessions.</p>
+      </div>
+    </div>
+
+    <div class="page-content">
+      @switch (facade.loadState()) {
+        @case ('loading') {
+          <eap-loading-state message="Loading conversations…"></eap-loading-state>
+        }
+        @case ('error') {
+          <eap-error-state
+            title="Couldn't load conversations"
+            description="Please try again."
+            (retry)="facade.loadConversations()"
+          ></eap-error-state>
+        }
+        @default {
+          @if (facade.conversations().length === 0) {
+            <eap-empty-state
+              title="No conversations yet"
+              description="Start a new chat to see it appear here."
+            ></eap-empty-state>
+          } @else {
+            <eap-card [noPadding]="true">
+              <table class="eap-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Messages</th>
+                    <th>Last activity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (conversation of facade.conversations(); track conversation.id) {
+                    <tr>
+                      <td>{{ conversation.title }}</td>
+                      <td><eap-badge variant="secondary">{{ conversation.messageCount }}</eap-badge></td>
+                      <td>{{ conversation.lastMessageAt | eapRelativeTime }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </eap-card>
+          }
+        }
+      }
+    </div>
+  </div>
+</div>

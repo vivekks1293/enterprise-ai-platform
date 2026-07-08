@@ -1,0 +1,25 @@
+@use '../abstracts/variables' as v;
+
+.eap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: v.$font-size-sm;
+
+  th {
+    text-align: left;
+    font-weight: v.$font-weight-semibold;
+    color: v.$color-text-secondary;
+    padding: v.$space-3 v.$space-4;
+    border-bottom: 1px solid v.$color-border-strong;
+  }
+
+  td {
+    padding: v.$space-3 v.$space-4;
+    border-bottom: 1px solid v.$color-border;
+    color: v.$color-text-primary;
+  }
+
+  tbody tr:hover {
+    background-color: v.$color-bg-muted;
+  }
+}

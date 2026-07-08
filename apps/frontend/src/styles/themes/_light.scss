@@ -1,0 +1,14 @@
+// Light theme is the default and is already expressed via the base
+// tokens in abstracts/_variables.scss. This file exists so the theme
+// architecture is explicit and symmetrical with _dark.scss, and so a
+// future ThemeService can toggle a `data-theme` attribute cleanly.
+
+@use '../abstracts/variables' as v;
+
+[data-theme='light'] {
+  --eap-bg-base: #{v.$color-bg-base};
+  --eap-bg-surface: #{v.$color-bg-surface};
+  --eap-text-primary: #{v.$color-text-primary};
+  --eap-text-secondary: #{v.$color-text-secondary};
+  --eap-border: #{v.$color-border};
+}

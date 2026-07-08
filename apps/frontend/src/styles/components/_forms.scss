@@ -1,0 +1,35 @@
+@use '../abstracts/variables' as v;
+@use '../abstracts/mixins' as m;
+
+.eap-form-group {
+  margin-bottom: v.$space-4;
+}
+
+.eap-form-label {
+  display: block;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  color: v.$color-text-secondary;
+  margin-bottom: v.$space-2;
+}
+
+.eap-form-control {
+  @include m.focus-ring;
+  width: 100%;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-md;
+  padding: v.$space-3;
+  font-size: v.$font-size-base;
+  background-color: v.$color-bg-surface;
+  color: v.$color-text-primary;
+
+  &::placeholder {
+    color: v.$color-text-muted;
+  }
+}
+
+.eap-form-error {
+  color: v.$color-danger;
+  font-size: v.$font-size-xs;
+  margin-top: v.$space-1;
+}
