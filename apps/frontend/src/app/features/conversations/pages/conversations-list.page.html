@@ -15,7 +15,7 @@
         @case ('error') {
           <eap-error-state
             title="Couldn't load conversations"
-            description="Please try again."
+            [description]="facade.error()?.message ?? 'Please try again.'"
             (retry)="facade.loadConversations()"
           ></eap-error-state>
         }

@@ -2,16 +2,24 @@
   @if (label()) {
     <label class="eap-form-label">{{ label() }}</label>
   }
-  <input
-    class="eap-form-control"
-    [class.is-invalid]="errorMessage()"
-    [type]="type()"
-    [placeholder]="placeholder()"
-    [disabled]="disabled"
-    [ngModel]="value"
-    (ngModelChange)="handleInput($event)"
-    (blur)="handleBlur()"
-  />
+  <div class="eap-input-wrapper">
+    <input
+      class="eap-form-control"
+      [class.is-invalid]="errorMessage()"
+      [class.eap-form-control--has-suffix]="hasSuffix()"
+      [type]="type()"
+      [placeholder]="placeholder()"
+      [disabled]="disabled"
+      [ngModel]="value"
+      (ngModelChange)="handleInput($event)"
+      (blur)="handleBlur()"
+    />
+    @if (hasSuffix()) {
+      <div class="eap-input-suffix">
+        <ng-content select="[suffix]"></ng-content>
+      </div>
+    }
+  </div>
   @if (errorMessage()) {
     <div class="eap-form-error">{{ errorMessage() }}</div>
   }

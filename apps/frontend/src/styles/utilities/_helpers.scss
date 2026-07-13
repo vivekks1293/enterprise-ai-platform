@@ -43,3 +43,83 @@
     max-width: 400px;
   }
 }
+
+// ---- Auth feature: branding, alerts, and inline controls ----
+// Kept in shared global utilities (not auth-scoped SCSS) because
+// this is generic auth-page chrome any unauthenticated screen
+// (forgot-password, SSO callback) can reuse.
+.eap-auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+
+  &__mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.5rem;
+    background-color: var(--bs-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+  }
+
+  &__name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #1a1d29;
+  }
+}
+
+.eap-form-alert {
+  background-color: #fdecea;
+  color: #a92419;
+  border: 1px solid #f6c4bd;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  margin-bottom: 1rem;
+}
+
+.eap-auth-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  font-size: 0.8125rem;
+}
+
+.eap-auth-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: #5b6072;
+  cursor: pointer;
+}
+
+.eap-link-btn {
+  border: none;
+  background: transparent;
+  color: var(--bs-primary);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.eap-input-suffix-btn {
+  border: none;
+  background: transparent;
+  color: #8a8fa3;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0.25rem;
+
+  &:hover {
+    color: #5b6072;
+  }
+}

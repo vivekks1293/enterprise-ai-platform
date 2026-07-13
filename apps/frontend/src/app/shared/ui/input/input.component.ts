@@ -22,6 +22,10 @@ export class InputComponent implements ControlValueAccessor {
   public readonly placeholder = input<string>('');
   public readonly type = input<'text' | 'email' | 'password' | 'number'>('text');
   public readonly errorMessage = input<string | undefined>(undefined);
+  /** Reserves trailing space inside the field for projected content
+   *  (e.g. a password show/hide toggle) via the `suffix` slot. Generic
+   *  and reusable — not specific to any one field's needs. */
+  public readonly hasSuffix = input<boolean>(false);
 
   protected value = '';
   protected disabled = false;

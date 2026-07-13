@@ -12,7 +12,10 @@ import { UiSize, UiVariant } from '@shared/types/ui.types';
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './button.component.html',
-  styleUrl: './button.component.scss'
+  styleUrl: './button.component.scss',
+  host: {
+    '[class.d-block]': 'fullWidth()'
+  }
 })
 export class ButtonComponent {
   public readonly variant = input<UiVariant>('primary');
@@ -20,6 +23,7 @@ export class ButtonComponent {
   public readonly disabled = input<boolean>(false);
   public readonly loading = input<boolean>(false);
   public readonly type = input<'button' | 'submit' | 'reset'>('button');
+  public readonly fullWidth = input<boolean>(false);
 
   public readonly clicked = output<MouseEvent>();
 

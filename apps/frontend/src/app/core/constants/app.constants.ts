@@ -6,7 +6,8 @@
 export const ROUTE_PATHS = {
   auth: {
     root: 'auth',
-    login: 'login'
+    login: 'login',
+    logout: 'logout'
   },
   dashboard: 'dashboard',
   chat: 'chat',
@@ -20,7 +21,9 @@ export const ROUTE_PATHS = {
 export const STORAGE_KEYS = {
   theme: 'eap.theme',
   sidebarCollapsed: 'eap.sidebar.collapsed',
-  authToken: 'eap.auth.token'
+  authToken: 'eap.auth.token',
+  authUser: 'eap.auth.user',
+  authExpiresAt: 'eap.auth.expiresAt'
 } as const;
 
 /** Default layout values not already covered by SCSS design tokens. */

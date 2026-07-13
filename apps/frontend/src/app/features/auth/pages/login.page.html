@@ -1,25 +1,63 @@
 <div class="eap-auth-page">
-  <eap-card title="Sign in" class="eap-auth-page__card">
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <eap-input
-        label="Work email"
-        type="email"
-        placeholder="you@company.com"
-        formControlName="email"
-        [errorMessage]="form.controls.email.touched && form.controls.email.invalid ? 'Enter a valid email' : undefined"
-      ></eap-input>
-      <eap-input
-        label="Password"
-        type="password"
-        placeholder="••••••••"
-        formControlName="password"
-        [errorMessage]="
-          form.controls.password.touched && form.controls.password.invalid
-            ? 'Password must be at least 8 characters'
-            : undefined
-        "
-      ></eap-input>
-      <eap-button type="submit" [disabled]="form.invalid">Sign in</eap-button>
-    </form>
-  </eap-card>
+  <div class="eap-auth-page__card">
+    <div class="eap-auth-brand">
+      <div class="eap-auth-brand__mark">EA</div>
+      <div class="eap-auth-brand__name">Enterprise AI Platform</div>
+    </div>
+
+    <eap-card title="Sign in">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        @if (facade.error(); as error) {
+          <div class="eap-form-alert" role="alert">
+            {{ error.message }}
+          </div>
+        }
+
+        <eap-input
+          label="Work email"
+          type="email"
+          placeholder="you@company.com"
+          formControlName="email"
+          [errorMessage]="
+            form.controls.email.touched && form.controls.email.invalid ? 'Enter a valid email address' : undefined
+          "
+        ></eap-input>
+
+        <eap-input
+          label="Password"
+          [type]="passwordVisible() ? 'text' : 'password'"
+          placeholder="••••••••"
+          formControlName="password"
+          [hasSuffix]="true"
+          [errorMessage]="
+            form.controls.password.touched && form.controls.password.invalid
+              ? 'Password must be at least 8 characters'
+              : undefined
+          "
+        >
+          <button
+            suffix
+            type="button"
+            class="eap-input-suffix-btn"
+            [attr.aria-label]="passwordVisible() ? 'Hide password' : 'Show password'"
+            (click)="togglePasswordVisibility()"
+          >
+            <i class="bi" [class.bi-eye]="!passwordVisible()" [class.bi-eye-slash]="passwordVisible()"></i>
+          </button>
+        </eap-input>
+
+        <div class="eap-auth-row">
+          <label class="eap-auth-checkbox">
+            <input type="checkbox" formControlName="rememberMe" />
+            <span>Remember me</span>
+          </label>
+          <button type="button" class="eap-link-btn" (click)="onForgotPassword()">Forgot password?</button>
+        </div>
+
+        <eap-button type="submit" [fullWidth]="true" [loading]="facade.isSubmitting()" [disabled]="form.invalid">
+          Sign in
+        </eap-button>
+      </form>
+    </eap-card>
+  </div>
 </div>

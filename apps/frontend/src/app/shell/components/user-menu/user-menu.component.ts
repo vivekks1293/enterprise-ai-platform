@@ -1,23 +1,49 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { AvatarComponent } from '@shared/ui/avatar/avatar.component';
 import { ClickOutsideDirective } from '@shared/directives/click-outside.directive';
+import { AuthSessionService } from '@core/services/auth-session.service';
+import { ROUTE_PATHS } from '@core/constants/app.constants';
 
+/**
+ * Reads the current user from Core's AuthSessionService — allowed,
+ * since Core is foundational, not a feature. "Sign out" is a
+ * `routerLink` to `/auth/logout` rather than a call into
+ * `AuthFacade` — Shell references a URL string, exactly like
+ * `authGuard` does, and never imports anything from `features/auth`.
+ * This is what keeps Shell independent of business features true even
+ * though it needs a working sign-out control.
+ */
 @Component({
   selector: 'eap-user-menu',
   standalone: true,
-  imports: [CommonModule, AvatarComponent, ClickOutsideDirective],
+  imports: [CommonModule, RouterModule, AvatarComponent, ClickOutsideDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="eap-user-menu" (eapClickOutside)="close()">
-      <button type="button" class="eap-user-menu__trigger" (click)="toggle()" aria-haspopup="true" [attr.aria-expanded]="isOpen()">
-        <eap-avatar name="Vivek Kumar" size="sm"></eap-avatar>
+      <button
+        type="button"
+        class="eap-user-menu__trigger"
+        (click)="toggle()"
+        aria-haspopup="true"
+        [attr.aria-expanded]="isOpen()"
+      >
+        <eap-avatar [name]="session.currentUser()?.displayName ?? ''" size="sm"></eap-avatar>
       </button>
       @if (isOpen()) {
         <div class="eap-user-menu__dropdown" role="menu">
-          <a class="eap-user-menu__item" role="menuitem">Profile</a>
-          <a class="eap-user-menu__item" role="menuitem">Settings</a>
-          <a class="eap-user-menu__item" role="menuitem">Sign out</a>
+          @if (session.currentUser(); as user) {
+            <div class="eap-user-menu__identity">
+              <div class="eap-user-menu__name">{{ user.displayName }}</div>
+              <div class="eap-user-menu__email">{{ user.email }}</div>
+            </div>
+          }
+          <a class="eap-user-menu__item" role="menuitem" [routerLink]="profilePath">Profile</a>
+          <a class="eap-user-menu__item" role="menuitem" [routerLink]="settingsPath">Settings</a>
+          <a class="eap-user-menu__item eap-user-menu__item--danger" role="menuitem" [routerLink]="logoutPath">
+            Sign out
+          </a>
         </div>
       }
     </div>
@@ -40,9 +66,22 @@ import { ClickOutsideDirective } from '@shared/directives/click-outside.directiv
       border: 1px solid #e2e4ec;
       border-radius: 0.5rem;
       box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
-      min-width: 180px;
+      min-width: 200px;
       z-index: 300;
       overflow: hidden;
+    }
+    .eap-user-menu__identity {
+      padding: 0.75rem 0.875rem;
+      border-bottom: 1px solid #e2e4ec;
+    }
+    .eap-user-menu__name {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #1a1d29;
+    }
+    .eap-user-menu__email {
+      font-size: 0.75rem;
+      color: #8a8fa3;
     }
     .eap-user-menu__item {
       display: block;
@@ -53,10 +92,20 @@ import { ClickOutsideDirective } from '@shared/directives/click-outside.directiv
       &:hover {
         background-color: #eef0f5;
       }
+
+      &.eap-user-menu__item--danger {
+        color: #d64545;
+      }
     }
   `
 })
 export class UserMenuComponent {
+  protected readonly session = inject(AuthSessionService);
+
+  protected readonly profilePath = `/${ROUTE_PATHS.profile}`;
+  protected readonly settingsPath = `/${ROUTE_PATHS.settings}`;
+  protected readonly logoutPath = `/${ROUTE_PATHS.auth.root}/${ROUTE_PATHS.auth.logout}`;
+
   private readonly _isOpen = signal(false);
   protected readonly isOpen = this._isOpen.asReadonly();
 

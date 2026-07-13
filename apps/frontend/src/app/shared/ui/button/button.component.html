@@ -8,6 +8,7 @@
   [class.btn-info]="variant() === 'info'"
   [class.btn-sm]="size() === 'sm'"
   [class.btn-lg]="size() === 'lg'"
+  [class.w-100]="fullWidth()"
   [type]="type()"
   [disabled]="disabled() || loading()"
   (click)="onClick($event)"

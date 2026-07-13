@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { ROUTE_PATHS } from '@core/constants/app.constants';
+import { authGuard } from '@core/guards/auth.guard';
 import { AppLayoutComponent } from '@shell/layouts/app-layout/app-layout.component';
 import { AuthLayoutComponent } from '@shell/layouts/auth-layout/auth-layout.component';
 
@@ -18,6 +19,11 @@ export const APP_ROUTES: Routes = [
   {
     path: '',
     component: AppLayoutComponent,
+    // Gates every child route below — a single guard declaration here
+    // protects Dashboard, Chat, Conversations, Documents, Settings,
+    // and Profile alike, and any future feature added as a child
+    // inherits the same protection automatically.
+    canActivateChild: [authGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: ROUTE_PATHS.dashboard },
       {
