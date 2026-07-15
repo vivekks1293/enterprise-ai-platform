@@ -1,0 +1,51 @@
+<aside class="eap-chat-sidebar" [class.eap-chat-sidebar--collapsed]="collapsed()">
+  <div class="eap-chat-sidebar__inner">
+    <div class="eap-chat-sidebar__header">
+      <eap-button variant="primary" [fullWidth]="true" (clicked)="newConversation.emit()">
+        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+        New conversation
+      </eap-button>
+    </div>
+
+    <div class="eap-chat-sidebar__search">
+      <eap-search-box placeholder="Search conversations…" (searchChange)="searchTermChange.emit($event)"></eap-search-box>
+    </div>
+
+    <div class="eap-chat-sidebar__list scroll-thin">
+      @if (pinnedConversations().length === 0 && recentConversations().length === 0) {
+        <eap-empty-state title="No conversations" description="Start a new conversation to see it here."></eap-empty-state>
+      } @else {
+        @if (pinnedConversations().length > 0) {
+          <div class="eap-chat-sidebar__section-label">Pinned</div>
+          @for (conversation of pinnedConversations(); track conversation.id) {
+            <eap-conversation-item
+              [conversation]="conversation"
+              [active]="conversation.id === selectedConversationId()"
+              (select)="selectConversation.emit($event)"
+            ></eap-conversation-item>
+          }
+        }
+
+        @if (recentConversations().length > 0) {
+          <div class="eap-chat-sidebar__section-label">Recent</div>
+          @for (conversation of recentConversations(); track conversation.id) {
+            <eap-conversation-item
+              [conversation]="conversation"
+              [active]="conversation.id === selectedConversationId()"
+              (select)="selectConversation.emit($event)"
+            ></eap-conversation-item>
+          }
+        }
+      }
+    </div>
+  </div>
+
+  <button
+    type="button"
+    class="eap-chat-sidebar__toggle"
+    [attr.aria-label]="collapsed() ? 'Expand conversation list' : 'Collapse conversation list'"
+    (click)="toggleCollapse.emit()"
+  >
+    <i class="bi" [class.bi-chevron-left]="!collapsed()" [class.bi-chevron-right]="collapsed()"></i>
+  </button>
+</aside>

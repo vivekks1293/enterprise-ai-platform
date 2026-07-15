@@ -185,6 +185,55 @@ LoginPageComponent → AuthFacade → AuthRepository → AuthApiService → ApiC
 This is the pattern every future feature (Chat, Documents, Settings, Profile,
 Agents) should copy.
 
+## Conversation Workspace (Sprint 1 Phase 4) — the reference for reusable UI
+
+Not the AI Chat implementation — the enterprise workspace AI Chat will later live
+inside. No backend, no streaming yet; realistic mock data only.
+
+```
+ChatPage (only component that injects ChatFacade)
+  └─ ConversationWorkspace (pure layout coordinator, zero Facade knowledge)
+      ├─ ConversationSidebar → ConversationItem × N
+      ├─ ConversationHeader
+      ├─ MessageList → MessageBubble × N
+      ├─ PromptComposer          (shared/ui — reusable outside Chat entirely)
+      └─ RightPanel
+```
+
+- **Container/presentational split, deliberately verbose.** Only `ChatPage`
+  injects `ChatFacade`. Everything below receives plain inputs and emits plain
+  outputs, prop-drilled through `ConversationWorkspace`. Traded for maximum
+  reuse of `MessageBubble`/`PromptComposer` elsewhere later. UI-only placeholder
+  actions (copy, regenerate, rename, delete, menu) skip the Facade entirely and
+  inject `NotificationService` (Core) directly for a "coming soon" toast — same
+  precedent as `HeaderComponent`'s bell icon and the Login page's "Forgot
+  password?" link.
+- **`shared/ui/prompt-composer/`** — auto-growing textarea, configurable
+  Enter-to-send vs Ctrl+Enter-to-send, character counter, permanently-disabled
+  attachment/mic buttons. Emits `submit(text: string)` only — no idea Chat, AI,
+  or a backend exists. Reusable anywhere an "ask AI" input is needed later.
+- **`shared/ui/typing-indicator/`** — generic pending-response indicator, not
+  chat-specific; reusable for agent progress or background job status later.
+- **The exact streaming seam:** `ChatFacade.sendMessage()` appends a user
+  message, then appends a placeholder assistant message with
+  `status: 'streaming'` and empty content, waits ~900ms via `timer(...)`, then
+  fills that same message's `content` in place. That update-in-place pattern is
+  structurally identical to what `StreamingClientService.connect()` will do —
+  swapping the `timer(...).subscribe(...)` body for a real stream subscription
+  is the entire integration; `MessageBubble` never changes.
+- **`features/chat/models/`** — `ChatConversationSummary` and `ChatMessage` are
+  deliberately NOT shared with `features/conversations`' `Conversation` model,
+  even though they'll likely converge once a real conversation-history endpoint
+  exists. Flagged here rather than silently forced together — premature
+  coupling between two features that don't share a data shape yet.
+- **Right panel** (Citations, Sources, Metadata, Execution Timeline, Agent
+  Progress) is five static placeholder cards today. Wiring one to real data
+  later is additive — the panel's collapse/responsive behavior doesn't change.
+- **Responsive:** desktop shows all three columns; the right panel becomes an
+  overlay on tablet and hides below `$bp-mobile`; the conversation sidebar
+  becomes a fixed-position drawer below `$bp-mobile`, mirroring the Shell's own
+  sidebar pattern in `styles/layout/_sidebar.scss`.
+
 ## Theming
 
 Light theme is fully implemented via CSS custom properties
@@ -197,9 +246,11 @@ Light theme is fully implemented via CSS custom properties
 **Fully implemented:** shell (sidebar/header/breadcrumbs/user menu, now session-aware),
 all three layouts, routing (with route guards wired), SCSS/design-token system,
 shared UI kit, Dashboard, Authentication (complete vertical slice — login, logout,
-guards, session persistence), Conversations (full Component→Facade→Repository
-chain with mock data).
+guards, session persistence, now calling the real backend), Conversations history
+(full Component→Facade→Repository chain with mock data), AI Chat workspace
+(complete three-panel UX — sidebar, header, messages, composer, right panel —
+with realistic mock data; no AI/streaming integration yet).
 
 **Scaffolded placeholders** (route + page exist, ready for real implementation):
-AI Chat, Documents, Settings, Profile. Wiring up their real UI is a matter of
-following the Auth or Conversations pattern — no architectural changes needed.
+Documents, Settings, Profile. Wiring up their real UI is a matter of following
+the Auth, Conversations, or Chat pattern — no architectural changes needed.

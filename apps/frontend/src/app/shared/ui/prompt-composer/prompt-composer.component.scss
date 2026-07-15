@@ -1,0 +1,98 @@
+@use 'abstracts/variables' as v;
+@use 'abstracts/mixins' as m;
+
+:host {
+  display: block;
+}
+
+.eap-composer {
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-lg;
+  background-color: v.$color-bg-surface;
+  padding: v.$space-3 v.$space-3 v.$space-2;
+  box-shadow: v.$shadow-sm;
+}
+
+.eap-composer__row {
+  display: flex;
+  align-items: flex-end;
+  gap: v.$space-2;
+}
+
+.eap-composer__textarea {
+  flex: 1;
+  resize: none;
+  border: none;
+  outline: none;
+  max-height: 200px;
+  min-height: 24px;
+  font-family: v.$font-family-base;
+  font-size: v.$font-size-base;
+  line-height: v.$line-height-base;
+  color: v.$color-text-primary;
+  padding: v.$space-2 0;
+
+  &::placeholder {
+    color: v.$color-text-muted;
+  }
+
+  &:disabled {
+    background-color: transparent;
+    color: v.$color-text-muted;
+  }
+}
+
+.eap-composer__icon-btn {
+  @include m.flex-center;
+  @include m.focus-ring;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: v.$radius-md;
+  color: v.$color-text-muted;
+  flex-shrink: 0;
+
+  &:not(:disabled):hover {
+    background-color: v.$color-bg-muted;
+    color: v.$color-text-secondary;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.eap-composer__send-btn {
+  @include m.flex-center;
+  @include m.focus-ring;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: v.$radius-md;
+  background-color: v.$color-primary;
+  color: v.$color-text-inverse;
+  flex-shrink: 0;
+  transition: background-color v.$transition-fast;
+
+  &:not(:disabled):hover {
+    background-color: v.$color-primary-hover;
+  }
+
+  &:disabled {
+    background-color: v.$color-border-strong;
+    cursor: not-allowed;
+  }
+}
+
+.eap-composer__footer {
+  @include m.flex-between;
+  padding: v.$space-1 v.$space-2 0;
+}
+
+.eap-composer__hint,
+.eap-composer__counter {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+}

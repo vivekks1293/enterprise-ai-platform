@@ -20,24 +20,27 @@ export class AuthApiService {
     return this.apiClient.post<LoginResponseDto>('identity/login', payload);
   }
 
+  /** Path is a guess (`identity/logout`, matching the confirmed
+   *  `identity/login`) — not yet verified against Swagger. Confirm and
+   *  update if it differs. */
   public logout(): Observable<void> {
-    return this.apiClient.post<void>('auth/logout', {});
+    return this.apiClient.post<void>('identity/logout', {});
   }
 
   /**
-   * Placeholder — not called by any component yet. Exists so
-   * session-restore-on-reload and silent-authentication can call it
-   * later without adding a new layer.
+   * Placeholder — not called by any component yet, and path is an
+   * unconfirmed guess (`identity/me`). Confirm against Swagger before
+   * wiring this up for session-restore-on-reload / silent auth.
    */
   public getCurrentUser(): Observable<UserDto> {
-    return this.apiClient.get<UserDto>('auth/me');
+    return this.apiClient.get<UserDto>('identity/me');
   }
 
   /**
-   * Placeholder — no refresh-token flow is implemented yet, but the
-   * endpoint shape is reserved so token refresh is additive later.
+   * Placeholder — no refresh-token flow implemented yet, and path is
+   * an unconfirmed guess (`identity/refresh`).
    */
   public refreshSession(): Observable<LoginResponseDto> {
-    return this.apiClient.post<LoginResponseDto>('auth/refresh', {});
+    return this.apiClient.post<LoginResponseDto>('identity/refresh', {});
   }
 }

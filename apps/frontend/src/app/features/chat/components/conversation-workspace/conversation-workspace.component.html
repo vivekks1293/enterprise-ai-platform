@@ -1,0 +1,32 @@
+<div class="eap-workspace">
+  <eap-conversation-sidebar
+    [pinnedConversations]="pinnedConversations()"
+    [recentConversations]="recentConversations()"
+    [selectedConversationId]="selectedConversationId()"
+    [collapsed]="sidebarCollapsed()"
+    (newConversation)="newConversation.emit()"
+    (selectConversation)="selectConversation.emit($event)"
+    (searchTermChange)="searchTermChange.emit($event)"
+    (toggleCollapse)="toggleSidebar.emit()"
+  ></eap-conversation-sidebar>
+
+  <div class="eap-workspace__main">
+    <eap-conversation-header
+      [conversation]="selectedConversation()"
+      [rightPanelCollapsed]="rightPanelCollapsed()"
+      (toggleRightPanel)="toggleRightPanel.emit()"
+    ></eap-conversation-header>
+
+    <eap-message-list [messages]="messages()"></eap-message-list>
+
+    <div class="eap-workspace__composer">
+      <eap-prompt-composer
+        placeholder="Send a message… (this is placeholder UI, no AI is connected yet)"
+        [loading]="isSending()"
+        (submit)="sendMessage.emit($event)"
+      ></eap-prompt-composer>
+    </div>
+  </div>
+
+  <eap-right-panel [conversation]="selectedConversation()" [collapsed]="rightPanelCollapsed()"></eap-right-panel>
+</div>

@@ -1,0 +1,102 @@
+@use 'abstracts/variables' as v;
+
+.eap-chat-sidebar {
+  position: relative;
+  width: 280px;
+  flex-shrink: 0;
+  border-right: 1px solid v.$color-border;
+  background-color: v.$color-bg-surface;
+  transition: width v.$transition-base;
+  display: flex;
+  overflow: hidden;
+
+  &--collapsed {
+    width: 0;
+    border-right-color: transparent;
+
+    .eap-chat-sidebar__inner {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+}
+
+.eap-chat-sidebar__inner {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  transition: opacity v.$transition-fast;
+}
+
+.eap-chat-sidebar__header {
+  padding: v.$space-3;
+  border-bottom: 1px solid v.$color-border;
+}
+
+.eap-chat-sidebar__search {
+  padding: v.$space-3 v.$space-3 0;
+
+  eap-search-box {
+    max-width: none;
+    display: block;
+  }
+}
+
+.eap-chat-sidebar__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: v.$space-3;
+}
+
+.eap-chat-sidebar__section-label {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: v.$color-text-muted;
+  padding: v.$space-3 v.$space-2 v.$space-1;
+}
+
+.eap-chat-sidebar__toggle {
+  position: absolute;
+  top: v.$space-3;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid v.$color-border;
+  background-color: v.$color-bg-surface;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6875rem;
+  color: v.$color-text-secondary;
+  cursor: pointer;
+  z-index: 2;
+
+  &:hover {
+    background-color: v.$color-bg-muted;
+  }
+}
+
+@media (max-width: v.$bp-mobile) {
+  .eap-chat-sidebar {
+    position: fixed;
+    top: v.$header-height;
+    bottom: 0;
+    left: 0;
+    z-index: v.$z-index-sidebar;
+    box-shadow: v.$shadow-lg;
+
+    &--collapsed {
+      width: 0;
+    }
+
+    &:not(&--collapsed) {
+      width: 280px;
+    }
+  }
+}

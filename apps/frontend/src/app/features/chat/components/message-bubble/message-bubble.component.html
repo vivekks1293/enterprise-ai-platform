@@ -1,0 +1,36 @@
+<div class="eap-msg" [class.eap-msg--user]="isUser()">
+  <eap-avatar [name]="authorName()" size="sm"></eap-avatar>
+
+  <div class="eap-msg__body">
+    <div class="eap-msg__meta">
+      <span class="eap-msg__author">{{ authorName() }}</span>
+      <span class="eap-msg__time">{{ message().createdAt | eapRelativeTime }}</span>
+    </div>
+
+    <div class="eap-msg__bubble">
+      @if (isEmptyStreaming()) {
+        <eap-typing-indicator></eap-typing-indicator>
+      } @else {
+        <p class="eap-msg__text">{{ message().content }}</p>
+      }
+    </div>
+
+    @if (!isUser() && !isEmptyStreaming()) {
+      <div class="eap-msg__actions">
+        <button type="button" class="eap-msg__action-btn" (click)="onCopy()" aria-label="Copy message">
+          <i class="bi bi-clipboard" aria-hidden="true"></i>
+        </button>
+        <button
+          type="button"
+          class="eap-msg__action-btn"
+          disabled
+          title="Regenerate — coming soon"
+          aria-label="Regenerate response (coming soon)"
+          (click)="onRegenerate()"
+        >
+          <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+        </button>
+      </div>
+    }
+  </div>
+</div>

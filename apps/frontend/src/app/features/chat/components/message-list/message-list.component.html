@@ -1,0 +1,16 @@
+<div #scrollRegion class="eap-msg-list scroll-thin">
+  @if (messages().length === 0) {
+    <div class="eap-msg-list__empty">
+      <eap-empty-state
+        title="Start the conversation"
+        description="Type a message below to begin. This is placeholder UI — no AI is connected yet."
+      ></eap-empty-state>
+    </div>
+  } @else {
+    <div class="eap-msg-list__inner">
+      @for (message of messages(); track message.id) {
+        <eap-message-bubble [message]="message"></eap-message-bubble>
+      }
+    </div>
+  }
+</div>

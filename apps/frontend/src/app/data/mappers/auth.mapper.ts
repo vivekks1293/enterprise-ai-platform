@@ -6,8 +6,8 @@ export function mapUserDtoToModel(dto: UserDto): User {
   return {
     id: dto.id,
     email: dto.email,
-    displayName: dto.display_name,
-    roles: dto.roles
+    displayName: dto.name,
+    roles: dto.roles ?? []
   };
 }
 

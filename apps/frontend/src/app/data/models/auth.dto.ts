@@ -12,8 +12,11 @@ export interface LoginRequestDto {
 export interface UserDto {
   readonly id: string;
   readonly email: string;
-  readonly display_name: string;
-  readonly roles: readonly string[];
+  readonly name: string;
+  /** Not sent by the backend yet — optional so this DTO matches the
+   *  real payload today. mapUserDtoToModel() defaults it to `[]`.
+   *  Once the backend adds roles, just remove the `?` here. */
+  readonly roles?: readonly string[];
 }
 
 export interface LoginResponseDto {

@@ -1,0 +1,36 @@
+<header class="eap-conv-header">
+  @if (conversation(); as conv) {
+    <div class="eap-conv-header__main">
+      <h2 class="eap-conv-header__title">{{ conv.title }}</h2>
+      <div class="eap-conv-header__meta">
+        <span>Updated {{ conv.updatedAt | eapRelativeTime }}</span>
+        <span class="eap-conv-header__dot">·</span>
+        <span class="eap-conv-header__model" title="Model selection is coming soon">Standard model</span>
+      </div>
+    </div>
+
+    <div class="eap-conv-header__actions">
+      <button type="button" class="eap-conv-header__btn" (click)="onRename()" aria-label="Rename conversation">
+        <i class="bi bi-pencil" aria-hidden="true"></i>
+      </button>
+      <button type="button" class="eap-conv-header__btn" (click)="onDelete()" aria-label="Delete conversation">
+        <i class="bi bi-trash" aria-hidden="true"></i>
+      </button>
+      <button type="button" class="eap-conv-header__btn" (click)="onMenu()" aria-label="More actions">
+        <i class="bi bi-three-dots" aria-hidden="true"></i>
+      </button>
+      <button
+        type="button"
+        class="eap-conv-header__btn"
+        [attr.aria-label]="rightPanelCollapsed() ? 'Show info panel' : 'Hide info panel'"
+        (click)="toggleRightPanel.emit()"
+      >
+        <i class="bi bi-layout-sidebar-inset-reverse" aria-hidden="true"></i>
+      </button>
+    </div>
+  } @else {
+    <div class="eap-conv-header__main">
+      <h2 class="eap-conv-header__title text-muted-eap">No conversation selected</h2>
+    </div>
+  }
+</header>

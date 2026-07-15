@@ -1,0 +1,34 @@
+<aside class="eap-right-panel" [class.eap-right-panel--collapsed]="collapsed()">
+  <div class="eap-right-panel__inner scroll-thin">
+    <eap-card title="Citations">
+      <p class="text-muted-eap mb-0 small">Citations will appear here once a response references sources.</p>
+    </eap-card>
+
+    <eap-card title="Sources">
+      <p class="text-muted-eap mb-0 small">Referenced documents and links will be listed here.</p>
+    </eap-card>
+
+    <eap-card title="Conversation metadata">
+      @if (conversation(); as conv) {
+        <dl class="eap-right-panel__meta">
+          <dt>ID</dt>
+          <dd>{{ conv.id }}</dd>
+          <dt>Last updated</dt>
+          <dd>{{ conv.updatedAt | eapRelativeTime }}</dd>
+          <dt>Pinned</dt>
+          <dd>{{ conv.pinned ? 'Yes' : 'No' }}</dd>
+        </dl>
+      } @else {
+        <p class="text-muted-eap mb-0 small">Select a conversation to see its details.</p>
+      }
+    </eap-card>
+
+    <eap-card title="Execution timeline">
+      <p class="text-muted-eap mb-0 small">Agent and tool execution steps will appear here in a future release.</p>
+    </eap-card>
+
+    <eap-card title="Agent progress">
+      <p class="text-muted-eap mb-0 small">Multi-step agent progress will be tracked here in a future release.</p>
+    </eap-card>
+  </div>
+</aside>

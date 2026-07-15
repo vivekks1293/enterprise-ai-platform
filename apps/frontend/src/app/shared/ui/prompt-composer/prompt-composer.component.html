@@ -1,0 +1,54 @@
+<div class="eap-composer">
+  <div class="eap-composer__row">
+    <button
+      type="button"
+      class="eap-composer__icon-btn"
+      disabled
+      title="Attachments — coming soon"
+      aria-label="Add attachment (coming soon)"
+    >
+      <i class="bi bi-paperclip" aria-hidden="true"></i>
+    </button>
+
+    <textarea
+      #textareaRef
+      class="eap-composer__textarea"
+      rows="1"
+      [placeholder]="placeholder()"
+      [maxLength]="maxLength()"
+      [disabled]="disabled() || loading()"
+      [ngModel]="text()"
+      (ngModelChange)="onInput($event)"
+      (keydown)="onKeydown($event)"
+    ></textarea>
+
+    <button
+      type="button"
+      class="eap-composer__icon-btn"
+      disabled
+      title="Voice input — coming soon"
+      aria-label="Voice input (coming soon)"
+    >
+      <i class="bi bi-mic" aria-hidden="true"></i>
+    </button>
+
+    <button
+      type="button"
+      class="eap-composer__send-btn"
+      [disabled]="disabled() || loading() || text().trim().length === 0"
+      aria-label="Send message"
+      (click)="trySend()"
+    >
+      @if (loading()) {
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      } @else {
+        <i class="bi bi-send" aria-hidden="true"></i>
+      }
+    </button>
+  </div>
+
+  <div class="eap-composer__footer">
+    <span class="eap-composer__hint">{{ shortcutHint() }}</span>
+    <span class="eap-composer__counter">{{ text().length }} / {{ maxLength() }}</span>
+  </div>
+</div>

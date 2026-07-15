@@ -3,7 +3,7 @@ export const environment = {
   debugMode: false,
   appName: 'Enterprise AI Platform',
   appVersion: '0.1.0',
-  apiBaseUrl: 'http://localhost:8000/api/v1/',
+  apiBaseUrl: '/api',
   streamingBaseUrl: '/api/stream',
   enableMockData: false,
   featureFlags: {

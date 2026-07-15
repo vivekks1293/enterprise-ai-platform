@@ -1,0 +1,22 @@
+@if (facade.isWorkspaceLoading()) {
+  <div class="eap-chat-page__loading">
+    <eap-loading-state message="Loading your workspace…"></eap-loading-state>
+  </div>
+} @else {
+  <eap-conversation-workspace
+    [pinnedConversations]="facade.pinnedConversations()"
+    [recentConversations]="facade.recentConversations()"
+    [selectedConversationId]="facade.selectedConversationId()"
+    [selectedConversation]="facade.selectedConversation()"
+    [messages]="facade.messages()"
+    [isSending]="facade.isSending()"
+    [sidebarCollapsed]="facade.sidebarCollapsed()"
+    [rightPanelCollapsed]="facade.rightPanelCollapsed()"
+    (newConversation)="facade.startNewConversation()"
+    (selectConversation)="facade.selectConversation($event)"
+    (searchTermChange)="facade.setSearchTerm($event)"
+    (toggleSidebar)="facade.toggleSidebar()"
+    (toggleRightPanel)="facade.toggleRightPanel()"
+    (sendMessage)="facade.sendMessage($event)"
+  ></eap-conversation-workspace>
+}

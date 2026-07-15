@@ -1,0 +1,61 @@
+@use 'abstracts/variables' as v;
+@use 'abstracts/mixins' as m;
+
+.eap-conv-header {
+  @include m.flex-between;
+  height: v.$header-height;
+  padding: 0 v.$space-4;
+  border-bottom: 1px solid v.$color-border;
+  background-color: v.$color-bg-surface;
+  position: sticky;
+  top: 0;
+  z-index: v.$z-index-base;
+  flex-shrink: 0;
+}
+
+.eap-conv-header__title {
+  font-size: v.$font-size-md;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 480px;
+}
+
+.eap-conv-header__meta {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+  display: flex;
+  align-items: center;
+  gap: v.$space-1;
+}
+
+.eap-conv-header__dot {
+  color: v.$color-border-strong;
+}
+
+.eap-conv-header__model {
+  color: v.$color-text-secondary;
+}
+
+.eap-conv-header__actions {
+  display: flex;
+  align-items: center;
+  gap: v.$space-1;
+  flex-shrink: 0;
+}
+
+.eap-conv-header__btn {
+  @include m.flex-center;
+  @include m.focus-ring;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: v.$radius-md;
+  color: v.$color-text-secondary;
+
+  &:hover {
+    background-color: v.$color-bg-muted;
+  }
+}

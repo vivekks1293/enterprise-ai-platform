@@ -1,0 +1,22 @@
+@use 'abstracts/variables' as v;
+
+.eap-msg-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: v.$space-5;
+}
+
+.eap-msg-list__empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eap-msg-list__inner {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-5;
+  max-width: 800px;
+  margin: 0 auto;
+}

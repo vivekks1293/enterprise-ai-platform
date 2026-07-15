@@ -1,0 +1,69 @@
+@use 'abstracts/variables' as v;
+
+.eap-right-panel {
+  width: 320px;
+  flex-shrink: 0;
+  border-left: 1px solid v.$color-border;
+  background-color: v.$color-bg-base;
+  overflow: hidden;
+  transition: width v.$transition-base;
+
+  &--collapsed {
+    width: 0;
+    border-left-color: transparent;
+
+    .eap-right-panel__inner {
+      opacity: 0;
+    }
+  }
+}
+
+.eap-right-panel__inner {
+  width: 320px;
+  height: 100%;
+  overflow-y: auto;
+  padding: v.$space-4;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-4;
+  transition: opacity v.$transition-fast;
+}
+
+.eap-right-panel__meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: v.$space-1 v.$space-3;
+  margin: 0;
+  font-size: v.$font-size-xs;
+
+  dt {
+    color: v.$color-text-muted;
+  }
+
+  dd {
+    margin: 0;
+    color: v.$color-text-primary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// Tablet and below: right panel is opt-in only, never auto-shown,
+// to keep the main conversation column usable at narrower widths.
+@media (max-width: v.$bp-tablet) {
+  .eap-right-panel:not(.eap-right-panel--collapsed) {
+    position: fixed;
+    right: 0;
+    top: v.$header-height;
+    bottom: 0;
+    z-index: v.$z-index-sidebar;
+    box-shadow: v.$shadow-lg;
+  }
+}
+
+@media (max-width: v.$bp-mobile) {
+  .eap-right-panel {
+    display: none;
+  }
+}
