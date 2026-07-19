@@ -8,6 +8,12 @@ from app.application.identity.exceptions import (
     UserNotFoundError,
 )
 
+from app.delivery.api.schemas.common import ErrorResponse
+
+from app.application.conversation.exceptions import (
+    ConversationNotFoundError,
+)
+
 
 def _error_response(
     status_code: int,
@@ -63,4 +69,19 @@ def register_exception_handlers(
         return _error_response(
             status.HTTP_404_NOT_FOUND,
             "User not found.",
+        )
+    
+    @app.exception_handler(ConversationNotFoundError)
+    async def conversation_not_found_handler(
+        request: Request,
+        exc: ConversationNotFoundError,
+    ):
+        response = ErrorResponse(
+            error="ConversationNotFound",
+            message=str(exc),
+        )
+
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=response.model_dump(mode="json"),
         )

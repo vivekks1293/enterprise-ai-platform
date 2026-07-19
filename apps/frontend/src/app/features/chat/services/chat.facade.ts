@@ -1,37 +1,47 @@
-import { DestroyRef, Injectable, computed, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { timer } from 'rxjs';
+import { Injectable, Signal, computed, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ChatStateService } from '@features/chat/state/chat-state.service';
 import { ChatMessage } from '@features/chat/models/chat-message.model';
 import { ChatConversationSummary } from '@features/chat/models/chat-conversation-summary.model';
-import { MOCK_ASSISTANT_REPLIES, MOCK_CONVERSATIONS, MOCK_MESSAGES } from '@features/chat/services/chat.mock';
+import { ChatRepository } from '@data/repositories/chat.repository';
 import { generateId } from '@core/utils/id.util';
+import { ROUTE_PATHS } from '@core/constants/app.constants';
+import { NotificationService } from '@core/services/notification.service';
+import { ApiError } from '@shared/models/api-error.model';
 
 /**
  * The only thing ChatPage is allowed to inject. No component below
- * ChatPage in the tree talks to this Facade directly — they receive
- * plain inputs/outputs from ChatPage via ConversationWorkspace. See
- * this phase's architecture note for why that prop-drilling is a
- * deliberate trade-off here.
+ * ChatPage in the tree talks to this Facade directly — see this
+ * feature's Phase 4 architecture note for why.
  *
- * `sendMessage()` is the seam future streaming replaces: it appends a
- * user message, appends a placeholder assistant message with
- * `status: 'streaming'`, then fills that same message's content in
- * place after a delay. A future StreamingClientService integration
- * swaps the `timer(...).subscribe(...)` body for
- * `streamingClient.connect(...)` — MessageBubble's rendering and every
- * signal this Facade exposes stay exactly as they are today.
+ * Phase 5 note on error display: the three REST calls this Facade
+ * makes (create/list/get conversation) go through ApiClientService,
+ * which means `error.interceptor.ts` ALREADY normalizes and toasts
+ * their failures globally — this Facade only needs to update its own
+ * loading/error signals for those, never call NotificationService
+ * itself (that would double-toast). Streaming failures bypass the
+ * HTTP interceptor entirely (StreamingClientService uses raw `fetch`),
+ * so those ARE explicitly toasted here — the one asymmetry worth
+ * remembering when extending this class.
  */
 @Injectable()
 export class ChatFacade {
   private readonly state = inject(ChatStateService);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly repository = inject(ChatRepository);
+  private readonly router = inject(Router);
+  private readonly notifications = inject(NotificationService);
 
   public readonly searchTerm = this.state.searchTerm;
   public readonly sidebarCollapsed = this.state.sidebarCollapsed;
   public readonly rightPanelCollapsed = this.state.rightPanelCollapsed;
-  public readonly isWorkspaceLoading = this.state.isWorkspaceLoading;
+  /** Conversation LIST loading (sidebar). */
+  public readonly isConversationsLoading = this.state.isWorkspaceLoading;
+  /** Conversation DETAIL loading (main pane) — distinct per spec's
+   *  "Conversation List Loading" vs "Conversation Detail Loading". */
+  public readonly conversationDetailLoadState = this.state.conversationDetailLoadState;
   public readonly isSending = this.state.isSending;
+  public readonly error = this.state.error;
   public readonly selectedConversationId = this.state.selectedConversationId;
 
   private readonly filteredConversations = computed(() => {
@@ -43,15 +53,18 @@ export class ChatFacade {
     return list.filter((c) => c.title.toLowerCase().includes(term));
   });
 
+  // Always empty today — the backend has no pinning concept yet (see
+  // ChatConversationSummary.pinned doc comment). Kept so the sidebar's
+  // Pinned/Recent split needs no changes if pinning is added later.
   public readonly pinnedConversations = computed(() => this.filteredConversations().filter((c) => c.pinned));
   public readonly recentConversations = computed(() => this.filteredConversations().filter((c) => !c.pinned));
 
-  public readonly selectedConversation = computed<ChatConversationSummary | null>(() => {
+  public readonly selectedConversation: Signal<ChatConversationSummary | null> = computed(() => {
     const id = this.state.selectedConversationId();
     return this.state.conversations().find((c) => c.id === id) ?? null;
   });
 
-  public readonly messages = computed<readonly ChatMessage[]>(() => {
+  public readonly messages: Signal<readonly ChatMessage[]> = computed(() => {
     const id = this.state.selectedConversationId();
     if (!id) {
       return [];
@@ -59,44 +72,93 @@ export class ChatFacade {
     return this.state.messagesByConversation().get(id) ?? [];
   });
 
-  /**
-   * Simulates an initial "fetch" so the loading-state UX matches what
-   * a real conversation-history request will look like once the
-   * backend endpoint exists — same pattern as ConversationsFacade,
-   * just with a timer instead of an HTTP call underneath it.
-   */
-  public initWorkspace(): void {
+  /** Subscription to the in-flight prompt stream, if any — held so
+   *  `stopGeneration()` can unsubscribe it, which triggers
+   *  StreamingClientService's AbortController teardown automatically. */
+  private activeStreamSubscription?: Subscription;
+
+  /** Loads the conversation list for the sidebar. Called once from
+   *  ChatPage's ngOnInit — independent of which conversation (if any)
+   *  is currently open, since ChatPage is reused across
+   *  /chat/:id1 → /chat/:id2 navigations. */
+  public loadConversations(): void {
     this.state.setWorkspaceLoading(true);
-
-    timer(400)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.state.setConversations(MOCK_CONVERSATIONS);
-        for (const [conversationId, messages] of MOCK_MESSAGES) {
-          this.state.setMessagesForConversation(conversationId, messages);
-        }
-        const first = MOCK_CONVERSATIONS[0];
-        if (first) {
-          this.state.setSelectedConversationId(first.id);
-        }
+    this.repository.listConversations().subscribe({
+      next: (conversations) => {
+        this.state.setConversations(conversations);
         this.state.setWorkspaceLoading(false);
-      });
+      },
+      error: (error: ApiError) => {
+        // Already toasted by error.interceptor.ts — just reflect state here.
+        this.state.setError(error);
+        this.state.setWorkspaceLoading(false);
+      }
+    });
   }
 
-  public selectConversation(id: string): void {
-    this.state.setSelectedConversationId(id);
+  /**
+   * Loads one conversation's detail (header + messages) from the
+   * backend. Called reactively by ChatPage whenever the
+   * `:conversationId` route param changes.
+   *
+   * Session-local cache: if this conversation's messages are already
+   * in `messagesByConversation` (visited earlier this session, or just
+   * created), this is a pure selection switch with no network call —
+   * standard chat-app behavior, not a violation of "history always
+   * comes from the backend" (the cached data DID come from the backend;
+   * this just avoids re-fetching it every time the user flips back to
+   * a conversation they already opened).
+   */
+  public loadConversation(conversationId: string): void {
+    this.state.setSelectedConversationId(conversationId);
+
+    if (this.state.hasCachedMessages(conversationId)) {
+      return;
+    }
+
+    this.state.setConversationDetailLoadState('loading');
+    this.repository.getConversation(conversationId).subscribe({
+      next: ({ messages }) => {
+        this.state.setMessagesForConversation(conversationId, messages);
+        this.state.setConversationDetailLoadState('success');
+      },
+      error: (error: ApiError) => {
+        // Already toasted by error.interceptor.ts — just reflect state here.
+        this.state.setError(error);
+        this.state.setConversationDetailLoadState('error');
+      }
+    });
   }
 
+  /** Called by ChatPage when the route has no `:conversationId` (bare /chat). */
+  public deselectConversation(): void {
+    this.state.setSelectedConversationId(null);
+    this.state.setConversationDetailLoadState('idle');
+  }
+
+  /** Explicit "New conversation" button — always creates a blank,
+   *  generically-titled conversation and navigates to it. Distinct from
+   *  the implicit auto-create inside `sendMessage()`, which titles the
+   *  conversation from the user's first prompt instead. */
   public startNewConversation(): void {
-    const conversation: ChatConversationSummary = {
-      id: generateId(),
-      title: 'New conversation',
-      preview: 'No messages yet',
-      updatedAt: new Date(),
-      pinned: false
-    };
-    this.state.addConversation(conversation);
-    this.state.setSelectedConversationId(conversation.id);
+    this.repository.createConversation('New conversation').subscribe({
+      next: (summary) => {
+        this.state.addConversation(summary);
+        void this.router.navigateByUrl(`/${ROUTE_PATHS.chat}/${summary.id}`);
+      },
+      error: (error: ApiError) => {
+        this.state.setError(error);
+      }
+    });
+  }
+
+  /** Sidebar conversation click. Navigating (rather than setting local
+   *  state directly) makes the URL the source of truth for which
+   *  conversation is open — bookmarkable, and consistent with how
+   *  `startNewConversation()` already behaves. `ChatPage`'s route-param
+   *  effect is what actually triggers `loadConversation()`. */
+  public selectConversation(id: string): void {
+    void this.router.navigateByUrl(`/${ROUTE_PATHS.chat}/${id}`);
   }
 
   public setSearchTerm(term: string): void {
@@ -117,25 +179,56 @@ export class ChatFacade {
       return;
     }
 
-    let conversationId = this.state.selectedConversationId();
-    if (!conversationId) {
-      this.startNewConversation();
-      conversationId = this.state.selectedConversationId();
-    }
-    if (!conversationId) {
+    const existingId = this.state.selectedConversationId();
+    if (existingId) {
+      this.dispatchPrompt(existingId, trimmed);
       return;
     }
 
-    const now = new Date();
+    // No conversation open yet — create one first, titled from the
+    // prompt itself, then send against the new id. Mirrors the Phase 4
+    // mock behavior of implicitly starting a conversation when the
+    // user types without selecting one first.
+    this.state.setSending(true);
+    const seedTitle = trimmed.length > 60 ? `${trimmed.slice(0, 60)}…` : trimmed;
+
+    this.repository.createConversation(seedTitle).subscribe({
+      next: (summary) => {
+        this.state.addConversation(summary);
+        this.state.setSelectedConversationId(summary.id);
+        void this.router.navigateByUrl(`/${ROUTE_PATHS.chat}/${summary.id}`);
+        this.dispatchPrompt(summary.id, trimmed);
+      },
+      error: (error: ApiError) => {
+        this.state.setSending(false);
+        this.state.setError(error);
+      }
+    });
+  }
+
+  /**
+   * The exact seam Phase 4 was built around: append the user message,
+   * append an empty `status: 'streaming'` assistant placeholder, then
+   * fill that same message's content in place as chunks arrive. The
+   * only thing that changed from Phase 4 is what fills it — real
+   * StreamEvent chunks via ChatRepository.streamPrompt() instead of a
+   * timer and a canned string.
+   *
+   * IDs generated here (`generateId()`) are client-local, rendering-only
+   * identifiers — never sent to the backend, never treated as
+   * authoritative. They get superseded by the backend's real message
+   * IDs the next time this conversation is loaded fresh via
+   * `getConversation()` (e.g. a future session, or a forced reload).
+   */
+  private dispatchPrompt(conversationId: string, prompt: string): void {
     const userMessage: ChatMessage = {
       id: generateId(),
       role: 'user',
-      content: trimmed,
-      createdAt: now,
+      content: prompt,
+      createdAt: new Date(),
       status: 'complete'
     };
     this.state.appendMessage(conversationId, userMessage);
-    this.state.updateConversationPreview(conversationId, trimmed, now);
 
     const assistantMessageId = generateId();
     const placeholder: ChatMessage = {
@@ -147,19 +240,63 @@ export class ChatFacade {
     };
     this.state.appendMessage(conversationId, placeholder);
     this.state.setSending(true);
+    this.state.setError(null);
 
-    const finalConversationId = conversationId;
-    const reply = MOCK_ASSISTANT_REPLIES[Math.floor(Math.random() * MOCK_ASSISTANT_REPLIES.length)];
+    this.activeStreamSubscription = this.repository.streamPrompt(conversationId, prompt).subscribe({
+      next: (event) => {
+        if (event.kind === 'message') {
+          this.state.appendToMessageContent(conversationId, assistantMessageId, event.data);
+        } else if (event.kind === 'done') {
+          this.finalizeAssistantMessage(conversationId, assistantMessageId);
+        } else if (event.kind === 'error') {
+          this.handleStreamError(conversationId, assistantMessageId, event.error);
+        }
+      },
+      error: (error: ApiError) => this.handleStreamError(conversationId, assistantMessageId, error),
+      // Some transports (ours included, in 'text' mode) complete via
+      // reader done rather than an explicit 'done' event — finalize
+      // covers both; it's a no-op if already finalized.
+      complete: () => this.finalizeAssistantMessage(conversationId, assistantMessageId)
+    });
+  }
 
-    timer(900)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.state.updateMessage(finalConversationId, assistantMessageId, {
-          content: reply,
-          status: 'complete'
-        });
-        this.state.updateConversationPreview(finalConversationId, reply, new Date());
-        this.state.setSending(false);
-      });
+  /** Stops an in-flight generation. Per spec: leaves the user message
+   *  intact, finalizes whatever partial content the assistant message
+   *  already has rather than creating a duplicate message. */
+  public stopGeneration(): void {
+    this.activeStreamSubscription?.unsubscribe();
+    this.activeStreamSubscription = undefined;
+
+    const conversationId = this.state.selectedConversationId();
+    if (!conversationId) {
+      this.state.setSending(false);
+      return;
+    }
+    const messages = this.state.messagesByConversation().get(conversationId) ?? [];
+    const inFlight = [...messages].reverse().find((m) => m.role === 'assistant' && m.status === 'streaming');
+    if (inFlight) {
+      this.state.updateMessage(conversationId, inFlight.id, { status: 'complete' });
+    }
+    this.state.setSending(false);
+  }
+
+  private finalizeAssistantMessage(conversationId: string, messageId: string): void {
+    if (!this.state.isSending()) {
+      return; // already finalized via stopGeneration() or a prior error
+    }
+    this.state.updateMessage(conversationId, messageId, { status: 'complete' });
+    this.state.setSending(false);
+    // Refresh sidebar ordering/updated_at now that this conversation had activity.
+    this.loadConversations();
+  }
+
+  private handleStreamError(conversationId: string, assistantMessageId: string, error: ApiError): void {
+    this.state.updateMessage(conversationId, assistantMessageId, { status: 'error' });
+    this.state.setSending(false);
+    this.state.setError(error);
+    // Streaming bypasses the HTTP interceptor chain entirely, so unlike
+    // the REST methods above, this toast is NOT automatic — it has to
+    // happen here.
+    this.notifications.notify(error.message, 'error');
   }
 }

@@ -11,16 +11,33 @@ export interface StreamConnectOptions {
   readonly method?: 'GET' | 'POST';
   readonly body?: unknown;
   readonly headers?: Record<string, string>;
+  /**
+   * 'sse' (default) — `text/event-stream` framing, parsed by
+   * SseFrameParser, completion signaled by a server `event: done` frame.
+   * 'text' — raw plain-text transport (e.g. FastAPI's
+   * `StreamingResponse(media_type="text/plain")`): no frame parsing,
+   * each decoded chunk is emitted as-is, completion is detected purely
+   * from the reader reaching `done: true` since plain text has no
+   * explicit end-of-stream marker of its own.
+   */
+  readonly format?: 'sse' | 'text';
 }
 
 /**
- * The single reusable abstraction for consuming Server-Sent Events.
+ * The single reusable abstraction for consuming server-pushed streams.
  * This is the streaming-layer equivalent of ApiClientService: it is
  * the ONLY class in the app allowed to open a raw streaming
- * connection. Feature-specific streaming services (e.g. a future
- * `ChatStreamService`) build on top of this and layer their own
- * event-shape mapping — this class knows nothing about chat, agents,
- * or tool calls.
+ * connection. Feature-specific streaming services (e.g. ChatRepository)
+ * build on top of this and layer their own event-shape mapping — this
+ * class knows nothing about chat, agents, or tool calls.
+ *
+ * Supports two wire formats via `StreamConnectOptions.format`:
+ * `'sse'` (default) for `text/event-stream` framing, and `'text'` for
+ * raw plain-text transports like FastAPI's
+ * `StreamingResponse(media_type="text/plain")` — added in Sprint 1
+ * Phase 5 once a real backend streaming endpoint existed to integrate
+ * against. Existing SSE callers are unaffected; `format` defaults to
+ * `'sse'`.
  *
  * Built on `fetch` + `ReadableStream` rather than the native
  * `EventSource` API specifically because `EventSource` cannot attach
@@ -32,7 +49,8 @@ export interface StreamConnectOptions {
  *  - `connect()` returns a cold Observable<StreamEvent<T>>.
  *  - Subscribing opens the connection; unsubscribing aborts it via
  *    AbortController — this is how cancellation and automatic cleanup
- *    (e.g. a component destroyed mid-stream) are guaranteed.
+ *    (e.g. a component destroyed mid-stream, or an explicit "Stop
+ *    generation" action) are guaranteed.
  *  - A `{ kind: 'done' }` event is emitted and the Observable completes
  *    when the server closes the stream normally.
  *  - Any failure (network, non-2xx, malformed frame) is normalized into
@@ -85,7 +103,7 @@ export class StreamingClientService {
         method: options.method ?? 'GET',
         body: options.body ? JSON.stringify(options.body) : undefined,
         signal: abortController.signal,
-        headers: this.buildHeaders(options.headers)
+        headers: this.buildHeaders(options.headers, options.format ?? 'sse')
       });
 
       if (!response.ok || !response.body) {
@@ -98,6 +116,24 @@ export class StreamingClientService {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      const format = options.format ?? 'sse';
+
+      if (format === 'text') {
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) {
+            break;
+          }
+          const chunk = decoder.decode(value, { stream: true });
+          if (chunk.length > 0) {
+            subscriber.next({ kind: 'message', event: 'chunk', data: chunk as unknown as TPayload });
+          }
+        }
+        subscriber.next({ kind: 'done' });
+        subscriber.complete();
+        return;
+      }
+
       const parser = new SseFrameParser();
 
       for (;;) {
@@ -137,10 +173,10 @@ export class StreamingClientService {
     return `${this.config.streamingBaseUrl}/${path.replace(/^\//, '')}`;
   }
 
-  private buildHeaders(extra?: Record<string, string>): Record<string, string> {
+  private buildHeaders(extra: Record<string, string> | undefined, format: 'sse' | 'text'): Record<string, string> {
     const token = this.session.getToken();
     return {
-      Accept: 'text/event-stream',
+      Accept: format === 'text' ? 'text/plain' : 'text/event-stream',
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...extra

@@ -234,6 +234,64 @@ ChatPage (only component that injects ChatFacade)
   becomes a fixed-position drawer below `$bp-mobile`, mirroring the Shell's own
   sidebar pattern in `styles/layout/_sidebar.scss`.
 
+## Chat backend integration (Sprint 1 Phase 5)
+
+Replaces Phase 4's mock data with real backend calls. UI/component
+responsibilities unchanged — only `ChatFacade`, `ChatStateService`, and the
+data layer changed.
+
+```
+PromptComposer → ChatFacade → ChatRepository → ChatApiService (REST) → ApiClientService → Backend
+                                             ↘ StreamingClientService (POST + text/plain stream) → Backend
+```
+
+- **`data/models/chat.dto.ts`, `data/mappers/chat.mapper.ts`,
+  `data/api-services/chat-api.service.ts`, `data/repositories/chat.repository.ts`**
+  — new, deliberately separate from the unrelated (still-mocked) `conversation.dto.ts`
+  /`ConversationsRepository` used by the history feature — the two don't share a
+  data source yet.
+- **Route is the source of truth for which conversation is open.** `/chat/:conversationId`
+  (new param route, both `''` and `:conversationId` load the same `ChatPageComponent`
+  via `withComponentInputBinding()` — no `ActivatedRoute` injection). `ChatPage` reacts
+  to the param changing via `effect()`, since the Router reuses the same component
+  instance across `/chat/:id1` → `/chat/:id2`. `ChatFacade.selectConversation()` and
+  `startNewConversation()` both navigate rather than set local state directly.
+- **Plain-text streaming, not SSE.** The backend streams via FastAPI's
+  `StreamingResponse(media_type="text/plain")`. `StreamingClientService` (Sprint 1B)
+  gained a `format: 'sse' | 'text'` option on `connect()` — defaults to `'sse'`, fully
+  backward compatible — that skips SSE frame parsing and emits each decoded chunk
+  directly in `'text'` mode. `streamingBaseUrl` now equals `apiBaseUrl`: there's no
+  separate streaming gateway, just one endpoint whose response happens to stream.
+- **The Phase 4 streaming seam paid off exactly as designed.** `ChatFacade.sendMessage()`
+  still appends a user message, then an empty `status: 'streaming'` assistant
+  placeholder, then fills it in place — only the fill source changed, from a
+  `timer(900ms)` to real `StreamEvent` chunks via `ChatRepository.streamPrompt()`.
+  `MessageBubble` needed zero changes.
+- **Client-local IDs are rendering-only, never authoritative.** `generateId()` on an
+  optimistic user/assistant message is for Angular's `@for track` only — never sent to
+  the backend, superseded by the real backend ID next time that conversation is loaded
+  fresh via `getConversation()`.
+- **Session-local message cache.** `loadConversation(id)` skips the network call
+  entirely if that conversation's messages are already in `messagesByConversation`
+  (visited earlier this session) — switching back to a previously-opened conversation
+  is instant. The cached data still originated from the backend; this doesn't violate
+  "history always comes from the backend," it just avoids redundant re-fetches.
+- **Error handling asymmetry, worth remembering when extending this feature:** the three
+  REST calls (create/list/get conversation) go through `ApiClientService`, so
+  `error.interceptor.ts` already normalizes and toasts their failures globally —
+  `ChatFacade` only updates its own loading/error signals for those. Streaming errors
+  bypass the HTTP interceptor chain entirely (`StreamingClientService` uses raw `fetch`),
+  so `ChatFacade` explicitly calls `NotificationService` for those — the one place this
+  feature calls it directly instead of relying on the global interceptor.
+- **Stop Generation** — `PromptComposer` gained `showStop`/`stop` (additive, generic,
+  not chat-specific). `ChatFacade.stopGeneration()` unsubscribes the active stream
+  subscription, which triggers `StreamingClientService`'s `AbortController` teardown
+  automatically; the in-flight assistant message is finalized with whatever partial
+  content it has, per spec — no duplicate message, user message left untouched.
+- **Still mocked, unchanged from Phase 4's scope:** Citations, Sources, Inspector Panel
+  data, Tool Calls, Agent Timeline, Execution Metadata, Uploads, Markdown, Syntax
+  Highlighting.
+
 ## Theming
 
 Light theme is fully implemented via CSS custom properties
@@ -244,13 +302,13 @@ Light theme is fully implemented via CSS custom properties
 ## What's real vs. scaffolded in this sprint
 
 **Fully implemented:** shell (sidebar/header/breadcrumbs/user menu, now session-aware),
-all three layouts, routing (with route guards wired), SCSS/design-token system,
-shared UI kit, Dashboard, Authentication (complete vertical slice — login, logout,
-guards, session persistence, now calling the real backend), Conversations history
-(full Component→Facade→Repository chain with mock data), AI Chat workspace
-(complete three-panel UX — sidebar, header, messages, composer, right panel —
-with realistic mock data; no AI/streaming integration yet).
+all three layouts, routing (with route guards and conversation-scoped routes wired),
+SCSS/design-token system, shared UI kit, Dashboard, Authentication (complete vertical
+slice, calling the real backend), Conversations history (mock data — unrelated feature,
+untouched this phase), AI Chat (complete three-panel UX, now fully backend-integrated:
+create/list/load conversations, streaming prompt submission with Stop Generation, all
+against the real API — no mock data left in this feature).
 
 **Scaffolded placeholders** (route + page exist, ready for real implementation):
 Documents, Settings, Profile. Wiring up their real UI is a matter of following
-the Auth, Conversations, or Chat pattern — no architectural changes needed.
+the Auth or Chat pattern — no architectural changes needed.

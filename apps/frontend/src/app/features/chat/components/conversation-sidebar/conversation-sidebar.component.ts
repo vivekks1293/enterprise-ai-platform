@@ -4,12 +4,20 @@ import { ChatConversationSummary } from '@features/chat/models/chat-conversation
 import { ButtonComponent } from '@shared/ui/button/button.component';
 import { SearchBoxComponent } from '@shared/ui/search-box/search-box.component';
 import { EmptyStateComponent } from '@shared/ui/empty-state/empty-state.component';
+import { SkeletonLoaderComponent } from '@shared/ui/skeleton-loader/skeleton-loader.component';
 import { ConversationItemComponent } from '@features/chat/components/conversation-item/conversation-item.component';
 
 @Component({
   selector: 'eap-conversation-sidebar',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, SearchBoxComponent, EmptyStateComponent, ConversationItemComponent],
+  imports: [
+    CommonModule,
+    ButtonComponent,
+    SearchBoxComponent,
+    EmptyStateComponent,
+    SkeletonLoaderComponent,
+    ConversationItemComponent
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './conversation-sidebar.component.html',
   styleUrl: './conversation-sidebar.component.scss'
@@ -19,6 +27,7 @@ export class ConversationSidebarComponent {
   public readonly recentConversations = input<readonly ChatConversationSummary[]>([]);
   public readonly selectedConversationId = input<string | null>(null);
   public readonly collapsed = input<boolean>(false);
+  public readonly loading = input<boolean>(false);
 
   public readonly newConversation = output<void>();
   public readonly selectConversation = output<string>();

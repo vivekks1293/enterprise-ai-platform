@@ -86,6 +86,14 @@
   }
 }
 
+.eap-composer__send-btn.eap-composer__send-btn--stop {
+  background-color: v.$color-danger;
+
+  &:hover {
+    background-color: #b03a3a;
+  }
+}
+
 .eap-composer__footer {
   @include m.flex-between;
   padding: v.$space-1 v.$space-2 0;

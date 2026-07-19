@@ -37,8 +37,14 @@ export class PromptComposerComponent {
   /** true = plain Enter sends, Shift+Enter for a newline (default).
    *  false = only Ctrl/Cmd+Enter sends, plain Enter always inserts a newline. */
   public readonly sendOnEnter = input<boolean>(true);
+  /** When true, the send button becomes a Stop button that emits
+   *  `stop` instead of `submit` — set by the parent while a response
+   *  is actively generating. Generic (not chat-specific): any
+   *  long-running generation this composer drives can use it. */
+  public readonly showStop = input<boolean>(false);
 
   public readonly submit = output<string>();
+  public readonly stop = output<void>();
 
   @ViewChild('textareaRef') private readonly textareaRef?: ElementRef<HTMLTextAreaElement>;
 

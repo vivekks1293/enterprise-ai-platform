@@ -4,6 +4,7 @@
     [recentConversations]="recentConversations()"
     [selectedConversationId]="selectedConversationId()"
     [collapsed]="sidebarCollapsed()"
+    [loading]="conversationsLoading()"
     (newConversation)="newConversation.emit()"
     (selectConversation)="selectConversation.emit($event)"
     (searchTermChange)="searchTermChange.emit($event)"
@@ -17,13 +18,21 @@
       (toggleRightPanel)="toggleRightPanel.emit()"
     ></eap-conversation-header>
 
-    <eap-message-list [messages]="messages()"></eap-message-list>
+    @if (mainLoading()) {
+      <div class="eap-workspace__main-loading">
+        <eap-loading-state message="Loading conversation…"></eap-loading-state>
+      </div>
+    } @else {
+      <eap-message-list [messages]="messages()"></eap-message-list>
+    }
 
     <div class="eap-workspace__composer">
       <eap-prompt-composer
-        placeholder="Send a message… (this is placeholder UI, no AI is connected yet)"
+        placeholder="Send a message…"
         [loading]="isSending()"
+        [showStop]="isSending()"
         (submit)="sendMessage.emit($event)"
+        (stop)="stopGeneration.emit()"
       ></eap-prompt-composer>
     </div>
   </div>

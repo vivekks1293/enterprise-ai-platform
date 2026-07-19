@@ -7,11 +7,21 @@
       <span class="eap-msg__time">{{ message().createdAt | eapRelativeTime }}</span>
     </div>
 
-    <div class="eap-msg__bubble">
+    <div class="eap-msg__bubble" [class.eap-msg__bubble--error]="isError()">
       @if (isEmptyStreaming()) {
         <eap-typing-indicator></eap-typing-indicator>
+      } @else if (isError() && message().content.length === 0) {
+        <p class="eap-msg__text eap-msg__text--error">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          Something went wrong generating this response.
+        </p>
       } @else {
-        <p class="eap-msg__text">{{ message().content }}</p>
+        <div class="eap-msg__bubble-content">
+          <p class="eap-msg__text">{{ message().content }}</p>
+          @if (isError()) {
+            <p class="eap-msg__error-note">Generation was interrupted before finishing.</p>
+          }
+        </div>
       }
     </div>
 

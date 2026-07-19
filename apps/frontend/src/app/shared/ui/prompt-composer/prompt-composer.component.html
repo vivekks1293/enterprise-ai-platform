@@ -35,11 +35,14 @@
     <button
       type="button"
       class="eap-composer__send-btn"
-      [disabled]="disabled() || loading() || text().trim().length === 0"
-      aria-label="Send message"
-      (click)="trySend()"
+      [class.eap-composer__send-btn--stop]="showStop()"
+      [disabled]="!showStop() && (disabled() || loading() || text().trim().length === 0)"
+      [attr.aria-label]="showStop() ? 'Stop generating' : 'Send message'"
+      (click)="showStop() ? stop.emit() : trySend()"
     >
-      @if (loading()) {
+      @if (showStop()) {
+        <i class="bi bi-stop-fill" aria-hidden="true"></i>
+      } @else if (loading()) {
         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
       } @else {
         <i class="bi bi-send" aria-hidden="true"></i>

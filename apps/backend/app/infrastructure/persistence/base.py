@@ -1,15 +1,12 @@
-# app/infrastructure/persistence/base.py
-
 from sqlalchemy.orm import DeclarativeBase
 
 
 class Base(DeclarativeBase):
-    """
-    Base class for all SQLAlchemy ORM models.
-
-    Every persistence model in the application should inherit
-    from this class so that SQLAlchemy and Alembic share a
-    single metadata registry.
-    """
-
+    """Shared SQLAlchemy metadata."""
     pass
+
+
+# Import all models so Alembic sees them
+# from app.infrastructure.identity.models.user_model import UserModel
+# from app.infrastructure.conversation.models.conversation_model import ConversationModel
+# from app.infrastructure.conversation.models.message_model import MessageModel

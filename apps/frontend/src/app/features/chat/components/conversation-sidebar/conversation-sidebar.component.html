@@ -12,7 +12,11 @@
     </div>
 
     <div class="eap-chat-sidebar__list scroll-thin">
-      @if (pinnedConversations().length === 0 && recentConversations().length === 0) {
+      @if (loading()) {
+        <div class="eap-chat-sidebar__skeleton">
+          <eap-skeleton-loader [rows]="6" [lineHeight]="40"></eap-skeleton-loader>
+        </div>
+      } @else if (pinnedConversations().length === 0 && recentConversations().length === 0) {
         <eap-empty-state title="No conversations" description="Start a new conversation to see it here."></eap-empty-state>
       } @else {
         @if (pinnedConversations().length > 0) {

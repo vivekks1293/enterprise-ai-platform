@@ -42,6 +42,8 @@ export class MessageBubbleComponent {
     () => this.message().status === 'streaming' && this.message().content.length === 0
   );
 
+  protected readonly isError = computed(() => this.message().status === 'error');
+
   protected onCopy(): void {
     this.notifications.notify('Copy is coming soon.', 'info');
   }

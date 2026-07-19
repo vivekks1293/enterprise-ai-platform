@@ -55,6 +55,29 @@
   min-height: 40px;
   display: flex;
   align-items: center;
+
+  &--error {
+    border-color: v.$color-danger;
+    background-color: #fdecea;
+  }
+}
+
+.eap-msg__bubble-content {
+  width: 100%;
+}
+
+.eap-msg__text--error {
+  color: #a92419;
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  margin: 0;
+}
+
+.eap-msg__error-note {
+  margin: v.$space-1 0 0;
+  font-size: v.$font-size-xs;
+  color: v.$color-danger;
 }
 
 .eap-msg__text {

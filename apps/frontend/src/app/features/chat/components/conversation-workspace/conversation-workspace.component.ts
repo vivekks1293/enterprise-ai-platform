@@ -7,6 +7,7 @@ import { ConversationHeaderComponent } from '@features/chat/components/conversat
 import { MessageListComponent } from '@features/chat/components/message-list/message-list.component';
 import { RightPanelComponent } from '@features/chat/components/right-panel/right-panel.component';
 import { PromptComposerComponent } from '@shared/ui/prompt-composer/prompt-composer.component';
+import { LoadingStateComponent } from '@shared/ui/loading-state/loading-state.component';
 
 /**
  * Arranges the three columns (sidebar, main, right panel) and forwards
@@ -24,7 +25,8 @@ import { PromptComposerComponent } from '@shared/ui/prompt-composer/prompt-compo
     ConversationHeaderComponent,
     MessageListComponent,
     RightPanelComponent,
-    PromptComposerComponent
+    PromptComposerComponent,
+    LoadingStateComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './conversation-workspace.component.html',
@@ -39,6 +41,10 @@ export class ConversationWorkspaceComponent {
   public readonly isSending = input<boolean>(false);
   public readonly sidebarCollapsed = input<boolean>(false);
   public readonly rightPanelCollapsed = input<boolean>(false);
+  /** Sidebar's own "conversation list loading" state. */
+  public readonly conversationsLoading = input<boolean>(false);
+  /** Main pane's "this specific conversation's messages are loading" state. */
+  public readonly mainLoading = input<boolean>(false);
 
   public readonly newConversation = output<void>();
   public readonly selectConversation = output<string>();
@@ -46,4 +52,5 @@ export class ConversationWorkspaceComponent {
   public readonly toggleSidebar = output<void>();
   public readonly toggleRightPanel = output<void>();
   public readonly sendMessage = output<string>();
+  public readonly stopGeneration = output<void>();
 }

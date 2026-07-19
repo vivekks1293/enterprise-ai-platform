@@ -4,7 +4,7 @@ export const environment = {
   appName: 'Enterprise AI Platform',
   appVersion: '0.1.0',
   apiBaseUrl: 'http://localhost:8000/api/v1',
-  streamingBaseUrl: 'http://localhost:8000/api/v1/stream',
+  streamingBaseUrl: 'http://localhost:8000/api/v1',
   enableMockData: false,
   featureFlags: {
     streamingEnabled: true,
