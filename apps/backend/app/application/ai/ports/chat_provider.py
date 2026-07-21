@@ -6,7 +6,7 @@ from app.application.ai.contracts.provider_request import ProviderRequest
 from app.application.ai.contracts.provider_response import ProviderResponse
 
 
-class ChatModel(ABC):
+class ChatProvider(ABC):
     """
     Contract implemented by all chat model providers.
 

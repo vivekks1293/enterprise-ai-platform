@@ -17,7 +17,7 @@ import { TruncatePipe } from '@shared/pipes/truncate.pipe';
       (click)="select.emit(conversation().id)"
     >
       <div class="eap-conv-item__title">{{ conversation().title }}</div>
-      <div class="eap-conv-item__preview">{{ (conversation().preview ?? 'No messages yet') | eapTruncate: 56 }}</div>
+      <div class="eap-conv-item__preview">{{ (conversation().preview ?? 'Open to view messages') | eapTruncate: 56 }}</div>
       <div class="eap-conv-item__time">{{ conversation().updatedAt | eapRelativeTime }}</div>
     </button>
   `,

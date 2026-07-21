@@ -85,7 +85,11 @@ export class ChatFacade {
     this.state.setWorkspaceLoading(true);
     this.repository.listConversations().subscribe({
       next: (conversations) => {
-        this.state.setConversations(conversations);
+        // Backend list responses carry no last-message snippet — merge
+        // in previews we've already derived locally for any conversation
+        // whose messages we have cached, so this refresh (called after
+        // every send, per finalizeAssistantMessage) doesn't blank them out.
+        this.state.setConversations(this.withCachedPreviews(conversations));
         this.state.setWorkspaceLoading(false);
       },
       error: (error: ApiError) => {
@@ -120,6 +124,7 @@ export class ChatFacade {
     this.repository.getConversation(conversationId).subscribe({
       next: ({ messages }) => {
         this.state.setMessagesForConversation(conversationId, messages);
+        this.syncPreviewFromMessages(conversationId);
         this.state.setConversationDetailLoadState('success');
       },
       error: (error: ApiError) => {
@@ -229,6 +234,7 @@ export class ChatFacade {
       status: 'complete'
     };
     this.state.appendMessage(conversationId, userMessage);
+    this.syncPreviewFromMessages(conversationId);
 
     const assistantMessageId = generateId();
     const placeholder: ChatMessage = {
@@ -285,9 +291,48 @@ export class ChatFacade {
       return; // already finalized via stopGeneration() or a prior error
     }
     this.state.updateMessage(conversationId, messageId, { status: 'complete' });
+    this.syncPreviewFromMessages(conversationId);
     this.state.setSending(false);
     // Refresh sidebar ordering/updated_at now that this conversation had activity.
     this.loadConversations();
+  }
+
+  /** The backend doesn't return a last-message snippet anywhere — this
+   *  derives one from actual message content already loaded/appended
+   *  locally and reflects it in the sidebar. Skips the in-flight empty
+   *  assistant placeholder so the preview doesn't briefly blank out
+   *  between "user sent" and "assistant replied". */
+  private syncPreviewFromMessages(conversationId: string): void {
+    const messages = this.state.messagesByConversation().get(conversationId) ?? [];
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const content = messages[i].content.trim();
+      if (content.length > 0) {
+        this.state.updateConversationPreview(conversationId, content);
+        return;
+      }
+    }
+  }
+
+  /** Preserves previews already derived this session when a fresh
+   *  conversation list comes back from the backend (which never
+   *  includes a preview field itself) — otherwise every list refresh
+   *  (called after each send) would blank previews back out. */
+  private withCachedPreviews(
+    conversations: readonly ChatConversationSummary[]
+  ): readonly ChatConversationSummary[] {
+    return conversations.map((conversation) => {
+      const cached = this.state.messagesByConversation().get(conversation.id);
+      if (!cached) {
+        return conversation;
+      }
+      for (let i = cached.length - 1; i >= 0; i--) {
+        const content = cached[i].content.trim();
+        if (content.length > 0) {
+          return { ...conversation, preview: content };
+        }
+      }
+      return conversation;
+    });
   }
 
   private handleStreamError(conversationId: string, assistantMessageId: string, error: ApiError): void {

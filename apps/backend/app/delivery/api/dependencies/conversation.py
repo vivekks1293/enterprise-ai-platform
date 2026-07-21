@@ -1,6 +1,6 @@
 from fastapi import Depends
 
-from app.application.ai.ports.chat_model_resolver import ChatModelResolver
+from app.application.ai.ports.chat_provider_resolver import ChatProviderResolver
 from app.application.common.ports.unit_of_work import UnitOfWork
 from app.application.conversation.use_cases.create_conversation import (
     CreateConversationUseCase,
@@ -14,7 +14,7 @@ from app.application.conversation.use_cases.list_conversations import (
 from app.application.conversation.use_cases.send_prompt import (
     SendPromptUseCase,
 )
-from app.core.dependencies.ai import get_chat_model_resolver
+from app.core.dependencies.ai import get_chat_provider_resolver
 from app.core.dependencies.common import get_unit_of_work
 from app.core.dependencies.conversation import (
     get_conversation_repository,
@@ -67,14 +67,14 @@ def get_send_prompt_use_case(
     message_repository: MessageRepository = Depends(
         get_message_repository
     ),
-    chat_model_resolver: ChatModelResolver = Depends(
-        get_chat_model_resolver
+    chat_provider_resolver: ChatProviderResolver = Depends(
+        get_chat_provider_resolver
     ),
     unit_of_work: UnitOfWork = Depends(get_unit_of_work),
 ) -> SendPromptUseCase:
     return SendPromptUseCase(
         conversation_repository,
         message_repository,
-        chat_model_resolver,
+        chat_provider_resolver,
         unit_of_work,
     )

@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
 
 
 class Settings(BaseSettings):
@@ -26,6 +27,23 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+    )
+
+    openai_api_key: str = Field(alias="OPENAI_API_KEY")
+
+    openai_chat_model: str = Field(
+        default="gpt-4.1-mini",
+        alias="OPENAI_CHAT_MODEL",
+    )
+
+    openai_temperature: float = Field(
+        default=0.7,
+        alias="OPENAI_TEMPERATURE",
+    )
+
+    openai_max_tokens: int = Field(
+        default=4096,
+        alias="OPENAI_MAX_TOKENS",
     )
 
 settings = Settings()

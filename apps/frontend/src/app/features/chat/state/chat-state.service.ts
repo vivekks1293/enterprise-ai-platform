@@ -49,6 +49,13 @@ export class ChatStateService {
     this._conversations.update((list) => [conversation, ...list]);
   }
 
+  /** The backend's list/create/detail responses don't include a
+   *  last-message snippet — ChatFacade derives one from actual message
+   *  content it has loaded and calls this to reflect it in the sidebar. */
+  public updateConversationPreview(id: string, preview: string): void {
+    this._conversations.update((list) => list.map((c) => (c.id === id ? { ...c, preview } : c)));
+  }
+
   public setMessagesForConversation(conversationId: string, messages: readonly ChatMessage[]): void {
     this._messagesByConversation.update((map) => {
       const next = new Map(map);

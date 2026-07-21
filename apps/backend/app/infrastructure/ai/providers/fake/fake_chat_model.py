@@ -4,10 +4,10 @@ from collections.abc import AsyncIterator
 from app.application.ai.contracts.provider_chunk import ProviderChunk
 from app.application.ai.contracts.provider_request import ProviderRequest
 from app.application.ai.contracts.provider_response import ProviderResponse
-from app.application.ai.ports.chat_model import ChatModel
+from app.application.ai.ports.chat_provider import ChatProvider
 
 
-class FakeChatModel(ChatModel):
+class FakeChatModel(ChatProvider):
     """
     Fake chat model used for local development,
     integration testing and UI development.
