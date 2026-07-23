@@ -46,4 +46,15 @@ class Settings(BaseSettings):
         alias="OPENAI_MAX_TOKENS",
     )
 
+    ai_system_prompt: str = """
+You are an Enterprise AI Assistant.
+
+You provide accurate, concise and professional responses.
+
+Always answer in Markdown.
+
+If you don't know the answer,
+say you don't know instead of making up information.
+""".strip()
+
 settings = Settings()

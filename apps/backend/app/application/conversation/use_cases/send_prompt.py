@@ -11,6 +11,7 @@ from app.application.conversation.exceptions import (
 from app.domain.ai.models.chat_message import ChatMessage
 from app.domain.ai.models.chat_request import ChatRequest
 from app.domain.conversation.entities.message import Message
+from app.application.ai.ports.prompt_builder import PromptBuilder
 from app.domain.conversation.enums.message_role import MessageRole
 from app.domain.conversation.repositories.conversation_repository import (
     ConversationRepository,
@@ -30,12 +31,14 @@ class SendPromptUseCase:
         conversation_repository: ConversationRepository,
         message_repository: MessageRepository,
         chat_provider_resolver: ChatProviderResolver,
+        prompt_builder: PromptBuilder,
         unit_of_work: UnitOfWork,
     ) -> None:
         self._conversation_repository = conversation_repository
         self._message_repository = message_repository
         self._chat_provider_resolver = chat_provider_resolver
         self._unit_of_work = unit_of_work
+        self._prompt_builder = prompt_builder
 
     async def execute(
         self,
@@ -87,7 +90,7 @@ class SendPromptUseCase:
         # Step 5 - Build AI request
         # -----------------------------------------------------
 
-        chat_request = ChatRequest(
+        chat_request = await self._prompt_builder.build(
             messages=chat_messages,
         )
 

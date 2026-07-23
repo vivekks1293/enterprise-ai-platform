@@ -14,6 +14,13 @@ from app.infrastructure.ai.resolver.default_chat_provider_resolver import (
     DefaultChatProviderResolver,
 )
 
+from app.application.ai.ports.prompt_builder import PromptBuilder
+# from app.application.ai.services.default_prompt_template_provider import DefaultPromptBuilder
+from app.application.ai.ports.prompt_builder import PromptBuilder
+from app.application.ai.services.default_prompt_builder import (
+    DefaultPromptBuilder,
+)
+
 
 def get_chat_provider() -> ChatProvider:
     chat_model = ChatOpenAI(
@@ -32,3 +39,6 @@ def get_chat_provider_resolver(
     chat_provider: ChatProvider = Depends(get_chat_provider),
 ) -> ChatProviderResolver:
     return DefaultChatProviderResolver(chat_provider)
+
+def get_prompt_builder() -> PromptBuilder:
+    return DefaultPromptBuilder()

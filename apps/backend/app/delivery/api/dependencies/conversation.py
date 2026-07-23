@@ -14,7 +14,8 @@ from app.application.conversation.use_cases.list_conversations import (
 from app.application.conversation.use_cases.send_prompt import (
     SendPromptUseCase,
 )
-from app.core.dependencies.ai import get_chat_provider_resolver
+from app.core.dependencies.ai import (get_chat_provider_resolver, get_prompt_builder)
+from app.application.ai.ports.prompt_builder import PromptBuilder
 from app.core.dependencies.common import get_unit_of_work
 from app.core.dependencies.conversation import (
     get_conversation_repository,
@@ -70,11 +71,15 @@ def get_send_prompt_use_case(
     chat_provider_resolver: ChatProviderResolver = Depends(
         get_chat_provider_resolver
     ),
+    prompt_builder: PromptBuilder = Depends(
+        get_prompt_builder
+    ),
     unit_of_work: UnitOfWork = Depends(get_unit_of_work),
 ) -> SendPromptUseCase:
     return SendPromptUseCase(
         conversation_repository,
         message_repository,
         chat_provider_resolver,
+        prompt_builder,
         unit_of_work,
     )
