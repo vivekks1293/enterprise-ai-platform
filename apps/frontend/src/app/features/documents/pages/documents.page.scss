@@ -1,0 +1,33 @@
+@use 'abstracts/variables' as v;
+@use 'abstracts/mixins' as m;
+
+.eap-doc-actions {
+  display: flex;
+  gap: v.$space-1;
+  justify-content: flex-end;
+}
+
+.eap-doc-actions__btn {
+  @include m.flex-center;
+  @include m.focus-ring;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  border-radius: v.$radius-sm;
+  color: v.$color-text-secondary;
+
+  &:not(:disabled):hover {
+    background-color: v.$color-bg-muted;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &--danger:not(:disabled):hover {
+    background-color: #fdecea;
+    color: v.$color-danger;
+  }
+}

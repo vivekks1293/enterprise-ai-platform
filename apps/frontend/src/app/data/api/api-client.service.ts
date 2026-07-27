@@ -33,6 +33,27 @@ export class ApiClientService {
     );
   }
 
+  /**
+   * For endpoints that return a raw file (not JSON) — e.g. document
+   * download. Angular's `responseType: 'blob'` skips JSON parsing
+   * entirely. Known caveat: if the server returns a non-2xx status
+   * with a JSON error body, Angular may still deliver that error body
+   * as a Blob rather than parsed JSON (a long-standing HttpClient
+   * quirk with binary responseTypes), so `api-error.util.ts`'s
+   * `extractBackendMessage` can fail to read the backend's specific
+   * message for a failed blob request — it falls back to a generic
+   * per-status message instead, which is still safe, just less
+   * specific. Not worth a bespoke error-parsing path for one endpoint
+   * this early — flagged here for whoever hits it next.
+   */
+  public getBlob(path: string, options?: ApiRequestOptions): Observable<Blob> {
+    return this.http.get(this.buildUrl(path), {
+      params: this.buildParams(options?.params),
+      headers: this.buildHeaders(options?.headers),
+      responseType: 'blob'
+    });
+  }
+
   public post<T>(path: string, body: unknown, options?: ApiRequestOptions): Observable<T> {
     return this.withRetry(
       this.http.post<T>(this.buildUrl(path), body, {

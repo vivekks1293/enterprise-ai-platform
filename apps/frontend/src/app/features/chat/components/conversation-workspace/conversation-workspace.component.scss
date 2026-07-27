@@ -1,5 +1,15 @@
 @use 'abstracts/variables' as v;
 
+// Same reasoning as MessageListComponent's :host rule: without an
+// explicit min-height: 0 here, this host could still be pushed taller
+// than its available space by content inside it, even though
+// AppLayout's flex row gives it a height via align-items: stretch.
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
 .eap-workspace {
   display: flex;
   height: 100%;

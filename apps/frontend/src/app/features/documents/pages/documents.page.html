@@ -1,0 +1,104 @@
+<div class="page-container">
+  <div class="content-wrapper">
+    <div class="page-header">
+      <div>
+        <h1>Documents</h1>
+        <p class="text-secondary-eap">Upload and manage files for your knowledge base.</p>
+      </div>
+      <div>
+        <input #fileInput type="file" hidden (change)="onFileSelected($event)" />
+        <eap-button variant="primary" [loading]="facade.uploading()" (clicked)="triggerFilePicker()">
+          <i class="bi bi-upload me-1" aria-hidden="true"></i>
+          Upload document
+        </eap-button>
+      </div>
+    </div>
+
+    <div class="page-content">
+      @switch (facade.loadState()) {
+        @case ('loading') {
+          <eap-loading-state message="Loading documents…"></eap-loading-state>
+        }
+        @case ('error') {
+          <eap-error-state
+            title="Couldn't load documents"
+            [description]="facade.error()?.message ?? 'Please try again.'"
+            (retry)="facade.loadDocuments()"
+          ></eap-error-state>
+        }
+        @default {
+          @if (!facade.hasDocuments()) {
+            <eap-empty-state
+              title="No documents yet"
+              description="Upload a file to add it to your knowledge base."
+            ></eap-empty-state>
+          } @else {
+            <eap-card [noPadding]="true">
+              <table class="eap-table">
+                <thead>
+                  <tr>
+                    <th>Filename</th>
+                    <th>Size</th>
+                    <th>Status</th>
+                    <th>Uploaded</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (document of facade.documents(); track document.id) {
+                    <tr>
+                      <td>{{ document.filename }}</td>
+                      <td>{{ document.sizeBytes | eapFileSize }}</td>
+                      <td><eap-badge [variant]="statusVariant(document.status)">{{ document.status }}</eap-badge></td>
+                      <td>{{ document.createdAt | eapRelativeTime }}</td>
+                      <td>
+                        <div class="eap-doc-actions">
+                          <button
+                            type="button"
+                            class="eap-doc-actions__btn"
+                            [disabled]="document.status !== 'available'"
+                            [attr.aria-label]="'Download ' + document.filename"
+                            [title]="document.status === 'available' ? 'Download' : 'Not available for download'"
+                            (click)="onDownload(document)"
+                          >
+                            <i class="bi bi-download" aria-hidden="true"></i>
+                          </button>
+                          <button
+                            type="button"
+                            class="eap-doc-actions__btn eap-doc-actions__btn--danger"
+                            [disabled]="facade.isDeleting(document.id)"
+                            [attr.aria-label]="'Delete ' + document.filename"
+                            title="Delete"
+                            (click)="confirmDelete(document)"
+                          >
+                            @if (facade.isDeleting(document.id)) {
+                              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            } @else {
+                              <i class="bi bi-trash" aria-hidden="true"></i>
+                            }
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </eap-card>
+          }
+        }
+      }
+    </div>
+  </div>
+</div>
+
+<eap-modal [open]="pendingDelete() !== null" title="Delete document" size="sm" (closed)="cancelDelete()">
+  @if (pendingDelete(); as document) {
+    <p class="mb-0">
+      Delete <strong>{{ document.filename }}</strong>? This can't be undone.
+    </p>
+  }
+  <div modalFooter class="d-flex justify-content-end gap-2">
+    <eap-button variant="secondary" (clicked)="cancelDelete()">Cancel</eap-button>
+    <eap-button variant="danger" (clicked)="onDeleteConfirmed()">Delete</eap-button>
+  </div>
+</eap-modal>

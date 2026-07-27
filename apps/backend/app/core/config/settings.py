@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     database_pool_size: int = 10
 
     database_max_overflow: int = 20
+    
+    knowledge_storage_directory: str = "data/knowledge"
 
     # ==========================================
     # JWT Configuration

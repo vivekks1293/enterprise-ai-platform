@@ -292,6 +292,52 @@ PromptComposer → ChatFacade → ChatRepository → ChatApiService (REST) → A
   data, Tool Calls, Agent Timeline, Execution Metadata, Uploads, Markdown, Syntax
   Highlighting.
 
+## Documents / Knowledge base (Sprint 1 Phase 6)
+
+Full CRUD vertical slice for the Knowledge API, following the exact same
+layered pattern as Auth and Chat — single-page feature, so no deeper
+prop-drilled component tree this time, just `DocumentsPageComponent` → `KnowledgeFacade`.
+
+```
+DocumentsPage → KnowledgeFacade → KnowledgeRepository → KnowledgeApiService → ApiClientService → Backend
+```
+
+- **`ApiClientService.getBlob()`** — new, additive method for the download
+  endpoint (`responseType: 'blob'`). Upload needed no ApiClientService changes
+  at all: `post()` already worked with a `FormData` body, since it never
+  force-sets `Content-Type` — the browser generates the multipart boundary
+  automatically as long as no caller sets that header explicitly.
+- **Status casing normalized defensively** (`data/mappers/document.mapper.ts`)
+  — same lesson as Chat's message-role casing bug: the backend's documented
+  contract and its actual response casing aren't guaranteed to match, so the
+  mapper lowercases before comparing and fails safe (unrecognized status →
+  `'failed'`, never silently treated as `'available'`).
+- **No client-side sorting violation here** — unlike Conversations (which
+  explicitly documents `updated_at DESC` and forbids re-sorting),
+  the Documents list endpoint has no documented ordering at all, so
+  `KnowledgeRepository` sorts newest-first client-side. Explicitly not the
+  same situation as second-guessing a documented backend order.
+- **Download filename** comes from the `KnowledgeDocument` object the UI
+  already has (`document.filename`), not by parsing the `Content-Disposition`
+  header — simpler, and the component still never touches storage internals.
+- **Ownership is entirely implicit** — no `owner_id`/`user_id` is ever sent;
+  the backend derives it from the JWT the existing `authInterceptor` already
+  attaches to every request.
+- **All errors flow through the existing global interceptor** — Knowledge has
+  no streaming (unlike Chat), so `KnowledgeFacade` never calls
+  `NotificationService` itself; every REST failure is already normalized and
+  toasted automatically, the Facade only reflects loading/error signals.
+- **`core/utils/file-download.util.ts`** — generic Blob-to-browser-download
+  trigger, not documents-specific, reusable for any future export/report
+  feature.
+- **`shared/pipes/file-size.pipe.ts`** — generic byte-count formatting,
+  same "if reusable, put it in Shared" principle established in Chat.
+- **Known, flagged trade-off:** Angular's `responseType: 'blob'` can cause a
+  failed download's JSON error body to arrive as a `Blob` instead of parsed
+  JSON — a long-standing HttpClient quirk. A failed download shows a safe,
+  generic error message rather than the backend's specific one. Documented in
+  `ApiClientService.getBlob()`'s doc comment rather than silently left as a gap.
+
 ## Theming
 
 Light theme is fully implemented via CSS custom properties
@@ -305,10 +351,10 @@ Light theme is fully implemented via CSS custom properties
 all three layouts, routing (with route guards and conversation-scoped routes wired),
 SCSS/design-token system, shared UI kit, Dashboard, Authentication (complete vertical
 slice, calling the real backend), Conversations history (mock data — unrelated feature,
-untouched this phase), AI Chat (complete three-panel UX, now fully backend-integrated:
-create/list/load conversations, streaming prompt submission with Stop Generation, all
-against the real API — no mock data left in this feature).
+untouched this phase), AI Chat (complete three-panel UX, fully backend-integrated —
+create/list/load conversations, streaming prompt submission with Stop Generation),
+Documents (complete CRUD — upload, list, download, delete — against the real Knowledge API).
 
 **Scaffolded placeholders** (route + page exist, ready for real implementation):
-Documents, Settings, Profile. Wiring up their real UI is a matter of following
-the Auth or Chat pattern — no architectural changes needed.
+Settings, Profile. Wiring up their real UI is a matter of following the Auth,
+Chat, or Documents pattern — no architectural changes needed.

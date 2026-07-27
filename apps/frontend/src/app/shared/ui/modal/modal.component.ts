@@ -53,10 +53,10 @@ import { UiSize } from '@shared/types/ui.types';
       flex-direction: column;
       box-shadow: 0 12px 32px rgba(16, 24, 40, 0.12);
 
-      &--sm {
+      &.eap-modal--sm {
         width: 360px;
       }
-      &--lg {
+      &.eap-modal--lg {
         width: 720px;
       }
     }
