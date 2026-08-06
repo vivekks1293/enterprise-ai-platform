@@ -28,8 +28,16 @@ from enum import Enum
 
 
 class DocumentStatus(str, Enum):
+    """
+    Represents the lifecycle of a knowledge document.
+    """
+
     UPLOADING = "uploading"
+
     AVAILABLE = "available"
-    PROCESSING = "processing"
-    PROCESSED = "processed"
+
+    INDEXING = "indexing"
+
+    INDEXED = "indexed"
+
     FAILED = "failed"

@@ -73,6 +73,22 @@ from uuid import UUID
 
 from fastapi import Path
 
+from app.application.knowledge.dto.index_document import (
+    IndexDocumentRequest,
+)
+
+from app.application.knowledge.use_cases.index_document import (
+    IndexDocumentUseCase,
+)
+
+from app.delivery.dependencies.knowledge import (
+    get_index_document_use_case,
+)
+
+from app.delivery.api.schemas.knowledge import (
+    IndexDocumentResponse,
+)
+
 router = APIRouter(
     prefix="/documents",
     tags=["Knowledge"],
@@ -260,3 +276,34 @@ async def ingest_document(
             metadata=result.parsed_document.metadata,
         ),
     )
+
+
+@router.post(
+    "/{document_id}/index",
+    response_model=IndexDocumentResponse,
+)
+async def index_document(
+    document_id=Path(...),
+    current_user=Depends(get_current_user),
+    use_case: IndexDocumentUseCase = Depends(
+        get_index_document_use_case,
+    ),
+):
+    """
+    Indexes a document into the configured vector store.
+    """
+
+    result = await use_case.execute(
+        IndexDocumentRequest(
+            owner_id=current_user.id,
+            document_id=document_id,
+        )
+    )
+
+    return IndexDocumentResponse(
+        document_id=result.document_id,
+        status=result.status,
+        chunk_count=result.chunk_count,
+    )
+
+#715b2f68-976a-4ff6-8439-364514e4932c

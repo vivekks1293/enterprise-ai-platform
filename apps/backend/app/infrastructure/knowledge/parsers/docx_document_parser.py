@@ -22,17 +22,17 @@ class DocxDocumentParser(DocumentParser):
     async def parse(
         self,
         *,
-        content: AsyncIterator[bytes],
+        content: bytes,
         filename: str,
     ) -> ParsedDocument:
 
-        raw_content = bytearray()
+        # raw_content = bytearray()
 
-        async for chunk in content:
-            raw_content.extend(chunk)
+        # async for chunk in content:
+        #     raw_content.extend(chunk)
 
         document = DocxDocument(
-            BytesIO(raw_content)
+            BytesIO(content)
         )
 
         paragraphs = [

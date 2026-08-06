@@ -50,3 +50,14 @@ class IngestDocumentResponse(BaseModel):
     document_id: UUID
     status: str
     parsed_document: ParsedDocumentResponse
+
+class IndexDocumentResponse(BaseModel):
+    """
+    Response returned after indexing completes.
+    """
+
+    document_id: UUID
+
+    status: str
+
+    chunk_count: int

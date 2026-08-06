@@ -35,10 +35,10 @@ class Document:
 
     def mark_processing(self) -> None:
         """
-        Marks the document as currently being ingested.
+        Marks the document as currently being indexed.
         """
 
-        self.status = DocumentStatus.PROCESSING
+        self.status = DocumentStatus.INDEXING
         self.updated_at = datetime.now(timezone.utc)
 
     def mark_processed(self) -> None:
@@ -46,7 +46,7 @@ class Document:
         Marks the document as successfully ingested.
         """
 
-        self.status = DocumentStatus.PROCESSED
+        self.status = DocumentStatus.INDEXED
         self.updated_at = datetime.now(timezone.utc)
 
     def mark_failed(self) -> None:
@@ -54,5 +54,28 @@ class Document:
         Marks the document as failed.
         """
 
+        self.status = DocumentStatus.FAILED
+        self.updated_at = datetime.now(timezone.utc)
+
+    def mark_indexing(self) -> None:
+        """
+        Marks the document as currently being indexed.
+        """
+        self.status = DocumentStatus.INDEXING
+        self.updated_at = datetime.now(timezone.utc)
+
+
+    def mark_indexed(self) -> None:
+        """
+        Marks the document as successfully indexed.
+        """
+        self.status = DocumentStatus.INDEXED
+        self.updated_at = datetime.now(timezone.utc)
+
+
+    def mark_failed(self) -> None:
+        """
+        Marks the document as failed.
+        """
         self.status = DocumentStatus.FAILED
         self.updated_at = datetime.now(timezone.utc)

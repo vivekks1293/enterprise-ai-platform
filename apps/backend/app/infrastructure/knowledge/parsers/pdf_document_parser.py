@@ -25,17 +25,12 @@ class PdfDocumentParser(DocumentParser):
     async def parse(
         self,
         *,
-        content: AsyncIterator[bytes],
+        content: bytes,
         filename: str,
     ) -> ParsedDocument:
 
-        raw_content = bytearray()
-
-        async for chunk in content:
-            raw_content.extend(chunk)
-
         reader = PdfReader(
-            BytesIO(raw_content)
+            BytesIO(content)
         )
 
         sections: list[ParsedDocumentSection] = []

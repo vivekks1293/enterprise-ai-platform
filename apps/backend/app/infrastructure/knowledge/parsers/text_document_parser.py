@@ -19,16 +19,16 @@ class TextDocumentParser(DocumentParser):
     async def parse(
         self,
         *,
-        content: AsyncIterator[bytes],
+        content: bytes,
         filename: str,
     ) -> ParsedDocument:
 
-        raw_content = bytearray()
+        # raw_content = bytearray()
 
-        async for chunk in content:
-            raw_content.extend(chunk)
+        # async for chunk in content:
+        #     raw_content.extend(chunk)
 
-        text = raw_content.decode("utf-8")
+        text = content.decode("utf-8")
 
         normalized_text = text.strip()
 

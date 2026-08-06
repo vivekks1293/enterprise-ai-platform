@@ -14,8 +14,26 @@ class Settings(BaseSettings):
     database_pool_size: int = 10
 
     database_max_overflow: int = 20
+
+    knowledge_chunk_size: int = 1000
+
+    knowledge_chunk_overlap: int = 200
     
     knowledge_storage_directory: str = "data/knowledge"
+
+    # ---------------------------------------------------------
+    # Chroma
+    # ---------------------------------------------------------
+
+    knowledge_chroma_directory: str = "./data/chroma"
+
+    knowledge_collection_name: str = "knowledge"
+
+    # ---------------------------------------------------------
+    # Embeddings
+    # ---------------------------------------------------------
+
+    openai_embedding_model: str = "text-embedding-3-small"
 
     # ==========================================
     # JWT Configuration
