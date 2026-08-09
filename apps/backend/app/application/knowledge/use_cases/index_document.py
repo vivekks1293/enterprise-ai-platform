@@ -51,6 +51,7 @@ class IndexDocumentUseCase:
         if document is None:
             raise DocumentNotFoundError()
 
+
         # --------------------------------------------------
         # 2. Mark indexing started
         # --------------------------------------------------

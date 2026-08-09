@@ -12,6 +12,7 @@ import { LoadingStateComponent } from '@shared/ui/loading-state/loading-state.co
 import { ErrorStateComponent } from '@shared/ui/error-state/error-state.component';
 import { RelativeTimePipe } from '@shared/pipes/relative-time.pipe';
 import { FileSizePipe } from '@shared/pipes/file-size.pipe';
+import { MimeTypeLabelPipe } from '@shared/pipes/mime-type-label.pipe';
 import { UiVariant } from '@shared/types/ui.types';
 
 /**
@@ -33,7 +34,8 @@ import { UiVariant } from '@shared/types/ui.types';
     LoadingStateComponent,
     ErrorStateComponent,
     RelativeTimePipe,
-    FileSizePipe
+    FileSizePipe,
+    MimeTypeLabelPipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [KnowledgeStateService, KnowledgeFacade],
@@ -72,6 +74,10 @@ export class DocumentsPageComponent implements OnInit {
     this.facade.downloadDocument(document);
   }
 
+  protected onIndex(document: KnowledgeDocument): void {
+    this.facade.indexDocument(document.id);
+  }
+
   protected confirmDelete(document: KnowledgeDocument): void {
     this.pendingDelete.set(document);
   }
@@ -88,12 +94,19 @@ export class DocumentsPageComponent implements OnInit {
     }
   }
 
+  /** available: uploaded, not yet searchable (neutral).
+   *  indexing: in progress (info/blue).
+   *  indexed: ready for AI search (success/green).
+   *  failed: indexing failed (danger/red) — the file itself is still
+   *  downloadable, only the AI-search step failed. */
   protected statusVariant(status: KnowledgeDocument['status']): UiVariant {
     switch (status) {
       case 'available':
-        return 'success';
-      case 'uploading':
+        return 'secondary';
+      case 'indexing':
         return 'info';
+      case 'indexed':
+        return 'success';
       case 'failed':
         return 'danger';
     }

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { retry as retryOperator } from 'rxjs/operators';
 import { APP_CONFIG } from '@core/tokens/app.tokens';
@@ -35,22 +35,30 @@ export class ApiClientService {
 
   /**
    * For endpoints that return a raw file (not JSON) — e.g. document
-   * download. Angular's `responseType: 'blob'` skips JSON parsing
-   * entirely. Known caveat: if the server returns a non-2xx status
-   * with a JSON error body, Angular may still deliver that error body
-   * as a Blob rather than parsed JSON (a long-standing HttpClient
-   * quirk with binary responseTypes), so `api-error.util.ts`'s
+   * download. Returns the full HttpResponse (not just the body)
+   * specifically so callers can read response headers — most
+   * importantly Content-Disposition, to recover the server's
+   * preferred filename (see core/utils/file-download.util.ts's
+   * extractFilenameFromContentDisposition). Angular's `responseType:
+   * 'blob'` skips JSON parsing entirely for the body.
+   *
+   * Known caveat: if the server returns a non-2xx status with a JSON
+   * error body, Angular may still deliver that error body as a Blob
+   * rather than parsed JSON (a long-standing HttpClient quirk with
+   * binary responseTypes — applies regardless of `observe: 'response'`
+   * vs the body-only form), so `api-error.util.ts`'s
    * `extractBackendMessage` can fail to read the backend's specific
    * message for a failed blob request — it falls back to a generic
    * per-status message instead, which is still safe, just less
    * specific. Not worth a bespoke error-parsing path for one endpoint
    * this early — flagged here for whoever hits it next.
    */
-  public getBlob(path: string, options?: ApiRequestOptions): Observable<Blob> {
+  public getBlob(path: string, options?: ApiRequestOptions): Observable<HttpResponse<Blob>> {
     return this.http.get(this.buildUrl(path), {
       params: this.buildParams(options?.params),
       headers: this.buildHeaders(options?.headers),
-      responseType: 'blob'
+      responseType: 'blob',
+      observe: 'response'
     });
   }
 

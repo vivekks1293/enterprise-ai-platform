@@ -1,9 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { HttpResponse } from '@angular/common/http';
 import { KnowledgeApiService } from '@data/api-services/knowledge-api.service';
-import { mapDocumentDtoToModel } from '@data/mappers/document.mapper';
+import { mapDocumentDtoToModel, mapIndexResponseDtoToModel } from '@data/mappers/document.mapper';
 import { KnowledgeDocument } from '@features/documents/models/knowledge-document.model';
+import { IndexResult } from '@features/documents/models/index-result.model';
 
 /**
  * Unlike the Conversations API (which explicitly documents
@@ -33,11 +35,18 @@ export class KnowledgeRepository {
     return this.api.getById(documentId).pipe(map(mapDocumentDtoToModel));
   }
 
-  public downloadDocument(documentId: string): Observable<Blob> {
+  /** Returns the full HttpResponse (headers + body) — the Facade needs
+   *  the Content-Disposition header to recover the server's preferred
+   *  filename before triggering the browser download. */
+  public downloadDocument(documentId: string): Observable<HttpResponse<Blob>> {
     return this.api.download(documentId);
   }
 
   public deleteDocument(documentId: string): Observable<void> {
     return this.api.delete(documentId);
+  }
+
+  public indexDocument(documentId: string): Observable<IndexResult> {
+    return this.api.index(documentId).pipe(map(mapIndexResponseDtoToModel));
   }
 }

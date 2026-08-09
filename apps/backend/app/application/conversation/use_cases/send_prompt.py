@@ -2,17 +2,21 @@ from collections.abc import AsyncIterator
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from app.application.ai.ports.chat_provider_resolver import ChatProviderResolver
+from app.application.ai.orchestrator.ai_orchestrator import (
+    AIOrchestrator,
+)
 from app.application.common.ports.unit_of_work import UnitOfWork
-from app.application.conversation.dto.send_prompt import SendPromptRequest
+from app.application.conversation.dto.send_prompt import (
+    SendPromptRequest,
+)
 from app.application.conversation.exceptions import (
     ConversationNotFoundError,
 )
 from app.domain.ai.models.chat_message import ChatMessage
-from app.domain.ai.models.chat_request import ChatRequest
 from app.domain.conversation.entities.message import Message
-from app.application.ai.ports.prompt_builder import PromptBuilder
-from app.domain.conversation.enums.message_role import MessageRole
+from app.domain.conversation.enums.message_role import (
+    MessageRole,
+)
 from app.domain.conversation.repositories.conversation_repository import (
     ConversationRepository,
 )
@@ -30,15 +34,14 @@ class SendPromptUseCase:
         self,
         conversation_repository: ConversationRepository,
         message_repository: MessageRepository,
-        chat_provider_resolver: ChatProviderResolver,
-        prompt_builder: PromptBuilder,
+        ai_orchestrator: AIOrchestrator,
         unit_of_work: UnitOfWork,
     ) -> None:
+
         self._conversation_repository = conversation_repository
         self._message_repository = message_repository
-        self._chat_provider_resolver = chat_provider_resolver
+        self._ai_orchestrator = ai_orchestrator
         self._unit_of_work = unit_of_work
-        self._prompt_builder = prompt_builder
 
     async def execute(
         self,
@@ -71,7 +74,7 @@ class SendPromptUseCase:
         # -----------------------------------------------------
 
         messages = await self._message_repository.list_by_conversation(
-            request.conversation_id
+            request.conversation_id,
         )
 
         # -----------------------------------------------------
@@ -87,35 +90,24 @@ class SendPromptUseCase:
         ]
 
         # -----------------------------------------------------
-        # Step 5 - Build AI request
-        # -----------------------------------------------------
-
-        chat_request = await self._prompt_builder.build(
-            messages=chat_messages,
-        )
-
-        # -----------------------------------------------------
-        # Step 6 - Resolve provider
-        # -----------------------------------------------------
-
-        chat_provider = await self._chat_provider_resolver.resolve()
-
-        # -----------------------------------------------------
-        # Step 7 - Stream AI response
+        # Step 5 - Execute AI Runtime
         # -----------------------------------------------------
 
         response_parts: list[str] = []
 
-        async for chunk in chat_provider.stream(chat_request):
+        async for token in self._ai_orchestrator.respond(
+            conversation_id=request.conversation_id,
+            owner_id=request.owner_id,
+            messages=chat_messages,
+        ):
+            response_parts.append(token)
 
-            response_parts.append(chunk.content)
-
-            yield chunk.content
+            yield token
 
         assistant_response = "".join(response_parts)
 
         # -----------------------------------------------------
-        # Step 8 - Persist assistant response
+        # Step 6 - Persist assistant response
         # -----------------------------------------------------
 
         await self._save_assistant_message(

@@ -10,6 +10,24 @@ from app.infrastructure.knowledge.vectorstore.chroma_metadata_mapper import (
     ChromaMetadataMapper,
 )
 
+from app.application.knowledge.contracts.retrieved_chunk import (
+    RetrievedChunk,
+)
+from app.application.knowledge.contracts.vector_search_result import (
+    VectorSearchResult,
+)
+from app.application.knowledge.contracts.chunk_metadata import (
+    ChunkMetadata,
+)
+from app.application.knowledge.contracts.embedding_vector import (
+    EmbeddingVector,
+)
+from uuid import UUID
+
+from app.application.knowledge.contracts.vector_search_filter import (
+    VectorSearchFilter,
+)
+
 
 class ChromaVectorStore(VectorStore):
     """
@@ -60,4 +78,55 @@ class ChromaVectorStore(VectorStore):
             documents=documents,
             embeddings=embeddings,
             metadatas=metadatas,
+        )
+
+    async def search(
+    self,
+    *,
+    embedding: EmbeddingVector,
+    filter: VectorSearchFilter,
+    top_k: int,
+) -> VectorSearchResult:
+
+        result = self._collection._collection.query(
+        query_embeddings=[embedding.values],
+        n_results=top_k,
+        where={
+            "owner_id": str(filter.owner_id),
+        },
+        include=[
+            "documents",
+            "metadatas",
+            "distances",
+        ],
+    )
+
+        chunks: list[RetrievedChunk] = []
+
+        documents = result["documents"][0]
+        metadatas = result["metadatas"][0]
+        distances = result["distances"][0]
+
+        for document, metadata, distance in zip(
+            documents,
+            metadatas,
+            distances,
+        ):
+
+            chunks.append(
+                RetrievedChunk(
+                    content=document,
+                    metadata=ChunkMetadata(
+                        document_id=UUID(metadata["document_id"]),
+                        owner_id=UUID(metadata["owner_id"]),
+                        filename=metadata["filename"],
+                        chunk_index=metadata["chunk_index"],
+                        page_number=metadata.get("page_number"),
+                    ),
+                    similarity_score=1 - distance,
+                )
+            )
+
+        return VectorSearchResult(
+            chunks=chunks,
         )

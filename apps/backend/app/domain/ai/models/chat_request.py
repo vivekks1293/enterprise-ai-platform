@@ -1,11 +1,14 @@
 from dataclasses import dataclass, field
+from typing import Any
 
 from app.domain.ai.models.chat_message import ChatMessage
 
 
 @dataclass(slots=True, frozen=True)
 class ChatRequest:
-    """Represents a chat completion request."""
+    """
+    Represents a provider-agnostic chat completion request.
+    """
 
     messages: list[ChatMessage]
 
@@ -15,4 +18,4 @@ class ChatRequest:
 
     stream: bool = True
 
-    metadata: dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)

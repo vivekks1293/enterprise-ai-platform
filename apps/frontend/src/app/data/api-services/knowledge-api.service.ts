@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { HttpResponse } from '@angular/common/http';
 import { ApiClientService } from '@data/api/api-client.service';
-import { DocumentDto } from '@data/models/document.dto';
+import { DocumentDto, IndexDocumentResponseDto } from '@data/models/document.dto';
 
 /**
  * Feature API Service: knows the document endpoints, their DTO
@@ -34,12 +35,20 @@ export class KnowledgeApiService {
     return this.apiClient.get<DocumentDto>(`documents/${documentId}`);
   }
 
-  public download(documentId: string): Observable<Blob> {
+  /** Returns the full response (not just the Blob body) so the
+   *  Repository/Facade can read Content-Disposition for the server's
+   *  preferred filename. */
+  public download(documentId: string): Observable<HttpResponse<Blob>> {
     return this.apiClient.getBlob(`documents/${documentId}/download`);
   }
 
   /** 204 No Content on success — nothing to parse, `void` is correct. */
   public delete(documentId: string): Observable<void> {
     return this.apiClient.delete<void>(`documents/${documentId}`);
+  }
+
+  /** No request body per the documented contract. */
+  public index(documentId: string): Observable<IndexDocumentResponseDto> {
+    return this.apiClient.post<IndexDocumentResponseDto>(`documents/${documentId}/index`, {});
   }
 }

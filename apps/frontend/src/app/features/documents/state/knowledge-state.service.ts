@@ -12,6 +12,7 @@ import { ApiError } from '@shared/models/api-error.model';
  * one row shows a busy state only on that row, not the whole list.
  * A reasonable reading of "deleting" as a concept, not a spec
  * violation — the doc doesn't mandate granularity either way.
+ * `indexingIds` follows the identical pattern for the Index action.
  */
 @Injectable()
 export class KnowledgeStateService {
@@ -19,12 +20,14 @@ export class KnowledgeStateService {
   private readonly _loadState = signal<LoadState>('idle');
   private readonly _uploading = signal<boolean>(false);
   private readonly _deletingIds = signal<ReadonlySet<string>>(new Set());
+  private readonly _indexingIds = signal<ReadonlySet<string>>(new Set());
   private readonly _error = signal<ApiError | null>(null);
 
   public readonly documents = this._documents.asReadonly();
   public readonly loadState = this._loadState.asReadonly();
   public readonly uploading = this._uploading.asReadonly();
   public readonly deletingIds = this._deletingIds.asReadonly();
+  public readonly indexingIds = this._indexingIds.asReadonly();
   public readonly error = this._error.asReadonly();
 
   public setDocuments(documents: readonly KnowledgeDocument[]): void {
@@ -52,18 +55,24 @@ export class KnowledgeStateService {
   }
 
   public setDeleting(documentId: string, deleting: boolean): void {
-    this._deletingIds.update((ids) => {
-      const next = new Set(ids);
-      if (deleting) {
-        next.add(documentId);
-      } else {
-        next.delete(documentId);
-      }
-      return next;
-    });
+    this._deletingIds.update((ids) => this.toggleId(ids, documentId, deleting));
+  }
+
+  public setIndexing(documentId: string, indexing: boolean): void {
+    this._indexingIds.update((ids) => this.toggleId(ids, documentId, indexing));
   }
 
   public setError(error: ApiError | null): void {
     this._error.set(error);
+  }
+
+  private toggleId(ids: ReadonlySet<string>, id: string, present: boolean): ReadonlySet<string> {
+    const next = new Set(ids);
+    if (present) {
+      next.add(id);
+    } else {
+      next.delete(id);
+    }
+    return next;
   }
 }

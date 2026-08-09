@@ -13,13 +13,14 @@ from app.application.knowledge.ports.embedding_provider import (
     EmbeddingProvider,
 )
 
+from app.application.knowledge.contracts.embedding_vector import (
+    EmbeddingVector,
+)
+
 
 class OpenAIEmbeddingProvider(
     EmbeddingProvider,
 ):
-    """
-    Generates embeddings using OpenAI.
-    """
 
     def __init__(
         self,
@@ -39,7 +40,7 @@ class OpenAIEmbeddingProvider(
         ]
 
         vectors = await self._embedding_model.aembed_documents(
-            texts
+            texts,
         )
 
         records: list[VectorRecord] = []
@@ -60,3 +61,16 @@ class OpenAIEmbeddingProvider(
             )
 
         return records
+
+    async def embed_query(
+        self,
+        query: str,
+    ) -> EmbeddingVector:
+
+        vector = await self._embedding_model.aembed_query(
+            query,
+        )
+
+        return EmbeddingVector(
+            values=vector,
+        )

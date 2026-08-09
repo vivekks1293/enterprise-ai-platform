@@ -87,7 +87,7 @@ class IngestDocumentUseCase:
         # 5. Mark processing
         # --------------------------------------------------
 
-        document.mark_processing()
+        document.mark_indexing()
 
         await self._document_repository.update(document)
         await self._unit_of_work.commit()

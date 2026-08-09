@@ -1,5 +1,6 @@
-import { DocumentDto } from '@data/models/document.dto';
+import { DocumentDto, IndexDocumentResponseDto } from '@data/models/document.dto';
 import { DocumentStatus, KnowledgeDocument } from '@features/documents/models/knowledge-document.model';
+import { IndexResult } from '@features/documents/models/index-result.model';
 
 export function mapDocumentDtoToModel(dto: DocumentDto): KnowledgeDocument {
   return {
@@ -13,15 +14,23 @@ export function mapDocumentDtoToModel(dto: DocumentDto): KnowledgeDocument {
   };
 }
 
+export function mapIndexResponseDtoToModel(dto: IndexDocumentResponseDto): IndexResult {
+  return {
+    documentId: dto.document_id,
+    status: normalizeStatus(dto.status),
+    chunkCount: dto.chunk_count
+  };
+}
+
 /**
  * Normalizes case defensively (see the DTO's status field comment)
  * and fails safe: an unrecognized status maps to 'failed' rather than
- * 'available', so the UI never implies a document is usable/downloadable
- * when we can't actually confirm that from what the backend sent.
+ * 'available'/'indexed', so the UI never implies a document is in a
+ * better state than we can actually confirm from what the backend sent.
  */
 function normalizeStatus(raw: string): DocumentStatus {
   const normalized = raw.toLowerCase();
-  if (normalized === 'available' || normalized === 'uploading' || normalized === 'failed') {
+  if (normalized === 'available' || normalized === 'indexing' || normalized === 'indexed' || normalized === 'failed') {
     return normalized;
   }
   return 'failed';

@@ -13,7 +13,9 @@ from app.domain.knowledge.enums.document_status import DocumentStatus
 from app.domain.knowledge.repositories.document_repository import (
     DocumentRepository,
 )
-
+from app.application.knowledge.services.document_indexing_service import (
+    DocumentIndexingService,
+)
 
 class UploadDocumentUseCase:
     """
@@ -28,10 +30,12 @@ class UploadDocumentUseCase:
         document_repository: DocumentRepository,
         file_storage: FileStorage,
         unit_of_work: UnitOfWork,
+        document_indexing_service: DocumentIndexingService
     ) -> None:
         self._document_repository = document_repository
         self._file_storage = file_storage
         self._unit_of_work = unit_of_work
+        self._document_indexing_service = document_indexing_service
 
     async def execute(
         self,
@@ -82,6 +86,14 @@ class UploadDocumentUseCase:
 
         await self._document_repository.update(document)
         await self._unit_of_work.commit()
+        await self._document_indexing_service.index(
+            document,
+        )
+
+        await self._document_indexing_service.index(
+            document,
+        )
+
 
         return UploadDocumentResponse(
             id=document.id,

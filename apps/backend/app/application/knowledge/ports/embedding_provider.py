@@ -8,6 +8,10 @@ from app.application.knowledge.contracts.embedded_document_chunk import (
     EmbeddedDocumentChunk,
 )
 
+from app.application.knowledge.contracts.embedding_vector import (
+    EmbeddingVector,
+)
+
 
 class EmbeddingProvider(ABC):
 
@@ -17,3 +21,15 @@ class EmbeddingProvider(ABC):
         chunks: list[DocumentChunk],
     ) -> list[EmbeddedDocumentChunk]:
         raise NotImplementedError
+
+    @abstractmethod
+    async def embed_query(
+        self,
+        query: str,
+    ) -> EmbeddingVector:
+        """
+        Generates an embedding for a user query.
+        """
+        raise NotImplementedError
+
+    

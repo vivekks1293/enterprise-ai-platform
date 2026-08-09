@@ -298,6 +298,39 @@ Full CRUD vertical slice for the Knowledge API, following the exact same
 layered pattern as Auth and Chat — single-page feature, so no deeper
 prop-drilled component tree this time, just `DocumentsPageComponent` → `KnowledgeFacade`.
 
+### Indexing + refined contract (Phase 6 follow-up)
+
+The initial integration assumed a `'uploading' | 'available' | 'failed'` status
+based on an early draft of the contract. The real backend lifecycle is
+`'available' → 'indexing' → 'indexed' → 'failed'`, with upload returning
+`'available'` immediately (there's no server-side "uploading" status). Updated
+`DocumentStatus` and the mapper's defensive normalization accordingly.
+
+- **`POST /documents/{id}/index`** — new endpoint. `KnowledgeFacade.indexDocument()`
+  tracks in-flight indexing per-document (`indexingIds`, mirroring `deletingIds`)
+  and, per the documented flow, refreshes the whole list on success rather than
+  patching one row. That refresh deliberately does NOT reuse `loadDocuments()` —
+  doing so would toggle the page-level `loadState` to `'loading'` and swap the
+  entire table out for a full-page spinner on every Index click. Added a private
+  `refreshDocumentsSilently()` instead, so the list still refreshes exactly as
+  specified, without the unintended full-page flash.
+- **Download now honors `Content-Disposition`** — `ApiClientService.getBlob()`
+  changed to `observe: 'response'`, returning the full `HttpResponse<Blob>` so
+  `extractFilenameFromContentDisposition()` (`core/utils/file-download.util.ts`)
+  can read the server's preferred filename, falling back to the document's
+  already-known filename if the header is absent.
+- **Download is available in every status**, not gated to `'available'` only —
+  an indexing failure only affects AI-search readiness, not whether the
+  originally uploaded file itself is retrievable.
+- **`shared/pipes/mime-type-label.pipe.ts`** — new, generic, reusable
+  content-type → friendly-label formatter (e.g. the DOCX MIME string → "Word"),
+  same "if reusable, put it in Shared" precedent as `FileSizePipe`.
+- **Failed documents show a disabled "Retry" placeholder** — consistent with
+  every other "coming soon" disabled-button convention already in the app
+  (Rename/Delete conversation, Regenerate message, composer attachment/mic).
+  Architecture is ready for real retry later (repository/facade method is
+  additive, not a redesign) without implementing it now.
+
 ```
 DocumentsPage → KnowledgeFacade → KnowledgeRepository → KnowledgeApiService → ApiClientService → Backend
 ```

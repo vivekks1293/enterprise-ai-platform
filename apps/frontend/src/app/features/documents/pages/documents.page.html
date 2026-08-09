@@ -38,6 +38,7 @@
                 <thead>
                   <tr>
                     <th>Filename</th>
+                    <th>File type</th>
                     <th>Size</th>
                     <th>Status</th>
                     <th>Uploaded</th>
@@ -48,25 +49,58 @@
                   @for (document of facade.documents(); track document.id) {
                     <tr>
                       <td>{{ document.filename }}</td>
+                      <td>{{ document.contentType | eapMimeTypeLabel }}</td>
                       <td>{{ document.sizeBytes | eapFileSize }}</td>
                       <td><eap-badge [variant]="statusVariant(document.status)">{{ document.status }}</eap-badge></td>
                       <td>{{ document.createdAt | eapRelativeTime }}</td>
                       <td>
                         <div class="eap-doc-actions">
+                          <!-- Download is available regardless of status — indexing
+                               failure only affects AI-search readiness, not whether
+                               the originally uploaded file itself is retrievable. -->
                           <button
                             type="button"
                             class="eap-doc-actions__btn"
-                            [disabled]="document.status !== 'available'"
                             [attr.aria-label]="'Download ' + document.filename"
-                            [title]="document.status === 'available' ? 'Download' : 'Not available for download'"
+                            title="Download"
                             (click)="onDownload(document)"
                           >
                             <i class="bi bi-download" aria-hidden="true"></i>
                           </button>
+
+                          @if (document.status === 'available' || document.status === 'indexing') {
+                            <button
+                              type="button"
+                              class="eap-doc-actions__btn"
+                              [disabled]="document.status === 'indexing' || facade.isIndexing(document.id)"
+                              [attr.aria-label]="'Index ' + document.filename"
+                              title="Index for AI search"
+                              (click)="onIndex(document)"
+                            >
+                              @if (document.status === 'indexing' || facade.isIndexing(document.id)) {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                              } @else {
+                                <i class="bi bi-search" aria-hidden="true"></i>
+                              }
+                            </button>
+                          }
+
+                          @if (document.status === 'failed') {
+                            <button
+                              type="button"
+                              class="eap-doc-actions__btn"
+                              disabled
+                              title="Retry indexing — coming soon"
+                              [attr.aria-label]="'Retry indexing ' + document.filename + ' (coming soon)'"
+                            >
+                              <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                            </button>
+                          }
+
                           <button
                             type="button"
                             class="eap-doc-actions__btn eap-doc-actions__btn--danger"
-                            [disabled]="facade.isDeleting(document.id)"
+                            [disabled]="facade.isDeleting(document.id) || facade.isIndexing(document.id)"
                             [attr.aria-label]="'Delete ' + document.filename"
                             title="Delete"
                             (click)="confirmDelete(document)"

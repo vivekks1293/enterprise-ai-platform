@@ -14,3 +14,29 @@ export function triggerBlobDownload(blob: Blob, filename: string): void {
   document.body.removeChild(anchor);
   URL.revokeObjectURL(url);
 }
+
+/**
+ * Extracts a filename from a Content-Disposition header value, e.g.
+ * `attachment; filename="report.pdf"` or the RFC 5987 extended form
+ * `attachment; filename*=UTF-8''report.pdf`. Returns null if the
+ * header is absent or doesn't contain a recognizable filename, so
+ * callers can fall back to a filename they already know client-side
+ * (e.g. from the document's own metadata) rather than failing outright.
+ */
+export function extractFilenameFromContentDisposition(headerValue: string | null): string | null {
+  if (!headerValue) {
+    return null;
+  }
+
+  const extendedMatch = /filename\*=(?:UTF-8'')?([^;]+)/i.exec(headerValue);
+  if (extendedMatch?.[1]) {
+    try {
+      return decodeURIComponent(extendedMatch[1].trim().replace(/["']/g, ''));
+    } catch {
+      // Malformed percent-encoding — fall through to the simple form below.
+    }
+  }
+
+  const simpleMatch = /filename="?([^";]+)"?/i.exec(headerValue);
+  return simpleMatch?.[1]?.trim() ?? null;
+}

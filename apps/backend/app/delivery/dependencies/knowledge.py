@@ -91,6 +91,48 @@ from app.core.dependencies.knowledge import (
     get_vector_store,
 )
 
+def get_document_ingestion_service(
+    file_storage: FileStorage = Depends(get_file_storage),
+    parser_resolver: DocumentParserResolver = Depends(
+        get_document_parser_resolver,
+    ),
+) -> DocumentIngestionService:
+    return DocumentIngestionService(
+        file_storage=file_storage,
+        document_type_resolver=DocumentTypeResolver(),
+        parser_resolver=parser_resolver,
+    )
+
+def get_document_indexing_service(
+    ingestion_service: DocumentIngestionService = Depends(
+        get_document_ingestion_service,
+    ),
+    chunker: DocumentChunker = Depends(
+        get_document_chunker,
+    ),
+    embedding_provider: EmbeddingProvider = Depends(
+        get_embedding_provider,
+    ),
+    vector_store: VectorStore = Depends(
+        get_vector_store,
+    ),
+    document_repository: DocumentRepository = Depends(
+        get_document_repository,
+    ),
+    unit_of_work: UnitOfWork = Depends(
+        get_unit_of_work,
+    ),
+) -> DocumentIndexingService:
+
+    return DocumentIndexingService(
+        ingestion_service=ingestion_service,
+        chunker=chunker,
+        embedding_provider=embedding_provider,
+        vector_store=vector_store,
+        document_repository=document_repository,
+        unit_of_work=unit_of_work,
+    )
+
 def get_upload_document_use_case(
     document_repository: DocumentRepository = Depends(
         get_document_repository
@@ -101,6 +143,9 @@ def get_upload_document_use_case(
     unit_of_work: UnitOfWork = Depends(
         get_unit_of_work
     ),
+    document_indexing_service: DocumentIndexingService = Depends(
+        get_document_indexing_service,
+    )
 ) -> UploadDocumentUseCase:
     """
     Provides the UploadDocumentUseCase with its dependencies.
@@ -110,6 +155,7 @@ def get_upload_document_use_case(
         document_repository=document_repository,
         file_storage=file_storage,
         unit_of_work=unit_of_work,
+        document_indexing_service=document_indexing_service,
     )
 
 
