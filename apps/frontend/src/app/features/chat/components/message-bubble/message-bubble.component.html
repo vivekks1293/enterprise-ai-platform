@@ -25,6 +25,17 @@
       }
     </div>
 
+    @if (!isUser() && displayCitations().length > 0) {
+      <div class="eap-msg__citations">
+        <span class="eap-msg__citations-label">Sources</span>
+        <div class="eap-msg__citations-list">
+          @for (citation of displayCitations(); track citation.citationId) {
+            <eap-chip>{{ citation.filename }}{{ citation.pageNumber !== null ? ', p.' + citation.pageNumber : '' }}</eap-chip>
+          }
+        </div>
+      </div>
+    }
+
     @if (!isUser() && !isEmptyStreaming()) {
       <div class="eap-msg__actions">
         <button type="button" class="eap-msg__action-btn" (click)="onCopy()" aria-label="Copy message">

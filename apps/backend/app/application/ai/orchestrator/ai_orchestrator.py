@@ -1,7 +1,12 @@
 from collections.abc import AsyncIterator
 from uuid import UUID
 
-from app.application.ai.dto.prompt_context import PromptContext
+from app.application.ai.dto.ai_stream_event import (
+    AIStreamEvent,
+)
+from app.application.ai.dto.prompt_context import (
+    PromptContext,
+)
 from app.application.ai.ports.chat_provider_resolver import (
     ChatProviderResolver,
 )
@@ -10,6 +15,15 @@ from app.application.ai.ports.prompt_builder import (
 )
 from app.application.ai.retrieval.document_retrieval_service import (
     DocumentRetrievalService,
+)
+from app.application.ai.services.citation_builder import (
+    CitationBuilder,
+)
+from app.application.ai.services.prompt_logger import (
+    PromptLogger,
+)
+from app.application.ai.services.retrieval_query_builder import (
+    RetrievalQueryBuilder,
 )
 from app.domain.ai.models.chat_message import ChatMessage
 
@@ -20,10 +34,14 @@ class AIOrchestrator:
 
     Pipeline
     --------
-    1. Retrieve knowledge
-    2. Build prompt
-    3. Resolve provider
-    4. Stream response
+    1. Build retrieval query
+    2. Retrieve relevant knowledge
+    3. Build citations
+    4. Build prompt
+    5. Resolve provider
+    6. Stream response
+    7. Emit citations
+    8. Emit completion event
     """
 
     def __init__(
@@ -32,7 +50,6 @@ class AIOrchestrator:
         prompt_builder: PromptBuilder,
         chat_provider_resolver: ChatProviderResolver,
     ) -> None:
-
         self._retrieval_service = retrieval_service
         self._prompt_builder = prompt_builder
         self._chat_provider_resolver = chat_provider_resolver
@@ -40,13 +57,16 @@ class AIOrchestrator:
     async def respond(
         self,
         *,
-        conversation_id: UUID,
         owner_id: UUID,
         messages: list[ChatMessage],
-    ) -> AsyncIterator[str]:
+    ) -> AsyncIterator[AIStreamEvent]:
+        """
+        Executes the AI pipeline and emits structured
+        streaming events.
+        """
 
         # --------------------------------------------------
-        # Stage 1 - Extract user question
+        # Stage 1 - Validate conversation messages
         # --------------------------------------------------
 
         if not messages:
@@ -54,19 +74,40 @@ class AIOrchestrator:
                 "Conversation contains no messages."
             )
 
+        # --------------------------------------------------
+        # Stage 2 - Extract current user question
+        # --------------------------------------------------
+
         user_prompt = messages[-1].content
 
         # --------------------------------------------------
-        # Stage 2 - Retrieve relevant knowledge
+        # Stage 3 - Build retrieval query
+        # --------------------------------------------------
+
+        retrieval_query = RetrievalQueryBuilder.build(
+            messages=messages,
+            user_prompt=user_prompt,
+        )
+
+        # --------------------------------------------------
+        # Stage 4 - Retrieve relevant knowledge
         # --------------------------------------------------
 
         retrieval = await self._retrieval_service.retrieve(
-            query=user_prompt,
+            query=retrieval_query,
             owner_id=owner_id,
         )
 
         # --------------------------------------------------
-        # Stage 3 - Build prompt
+        # Stage 5 - Build citations
+        # --------------------------------------------------
+
+        citations = CitationBuilder.build(
+            retrieved_chunks=retrieval.chunks,
+        )
+
+        # --------------------------------------------------
+        # Stage 6 - Build LLM prompt
         # --------------------------------------------------
 
         prompt_context = PromptContext(
@@ -80,14 +121,48 @@ class AIOrchestrator:
         )
 
         # --------------------------------------------------
-        # Stage 4 - Resolve provider
+        # Stage 7 - Prompt observability
+        # --------------------------------------------------
+
+        PromptLogger.log(chat_request)
+
+        # --------------------------------------------------
+        # Stage 8 - Resolve LLM provider
         # --------------------------------------------------
 
         provider = await self._chat_provider_resolver.resolve()
 
         # --------------------------------------------------
-        # Stage 5 - Stream response
+        # Stage 9 - Stream response
         # --------------------------------------------------
 
         async for chunk in provider.stream(chat_request):
-            yield chunk.content
+
+            if chunk.is_final:
+                break
+
+            if not chunk.content:
+                continue
+
+            yield AIStreamEvent(
+                type="token",
+                content=chunk.content,
+            )
+
+        # --------------------------------------------------
+        # Stage 10 - Emit citations
+        # --------------------------------------------------
+
+        if citations:
+            yield AIStreamEvent(
+                type="citations",
+                citations=citations,
+            )
+
+        # --------------------------------------------------
+        # Stage 11 - Emit completion
+        # --------------------------------------------------
+
+        yield AIStreamEvent(
+            type="complete",
+        )

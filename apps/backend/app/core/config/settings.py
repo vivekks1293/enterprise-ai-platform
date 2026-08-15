@@ -49,6 +49,16 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
 
+    # ---------------------------------------------------------
+    # Retrieval
+    # ---------------------------------------------------------
+
+    knowledge_retrieval_top_k: int = 5
+
+    knowledge_similarity_threshold: float = 0.75
+
+    knowledge_max_context_chunks: int = 5
+
     openai_api_key: str = Field(alias="OPENAI_API_KEY")
 
     openai_chat_model: str = Field(

@@ -1,6 +1,11 @@
+import json
+
 from fastapi import APIRouter, Depends, Path, status
 from fastapi.responses import StreamingResponse
 
+from app.application.ai.dto.ai_stream_event import (
+    AIStreamEvent,
+)
 from app.application.conversation.dto.create_conversation import (
     CreateConversationRequest as CreateConversationDto,
 )
@@ -25,7 +30,6 @@ from app.application.conversation.use_cases.list_conversations import (
 from app.application.conversation.use_cases.send_prompt import (
     SendPromptUseCase,
 )
-# from app.delivery.api.dependencies.auth import get_current_user
 from app.core.dependencies.authentication import get_current_user
 from app.delivery.api.dependencies.conversation import (
     get_create_conversation_use_case,
@@ -41,6 +45,7 @@ from app.delivery.api.schemas.conversation import (
     MessageResponse,
     SendPromptRequest,
 )
+
 
 router = APIRouter(
     prefix="/conversations",
@@ -86,7 +91,7 @@ async def list_conversations(
     ),
 ):
     result = await use_case.execute(
-    ListConversationsDto(
+        ListConversationsDto(
             owner_id=current_user.id,
         )
     )
@@ -137,6 +142,59 @@ async def get_conversation(
     )
 
 
+def _serialize_ai_event(
+    event: AIStreamEvent,
+) -> str:
+    """
+    Converts an application AI stream event
+    into an SSE message.
+    """
+
+    if event.type == "token":
+        data = {
+            "content": event.content,
+        }
+
+    elif event.type == "citations":
+        data = {
+            "citations": [
+                {
+                    "citation_id": citation.citation_id,
+                    "document_id": str(citation.document_id),
+                    "chunk_id": citation.chunk_id,
+                    "filename": citation.filename,
+                    "page_number": citation.page_number,
+                    "similarity_score": citation.similarity_score,
+                }
+                for citation in (event.citations or [])
+            ],
+        }
+
+    elif event.type == "complete":
+        data = {}
+
+    else:
+        raise ValueError(
+            f"Unsupported AI stream event type: {event.type}"
+        )
+
+    return (
+        f"event: {event.type}\n"
+        f"data: {json.dumps(data)}\n\n"
+    )
+
+
+async def _stream_ai_events(
+    stream,
+):
+    """
+    Serializes application AI events into SSE messages.
+    """
+
+    async for event in stream:
+        yield _serialize_ai_event(event)
+
+
 @router.post(
     "/{conversation_id}/messages",
     response_class=StreamingResponse,
@@ -158,6 +216,10 @@ async def send_prompt(
     )
 
     return StreamingResponse(
-        stream,
-        media_type="text/plain",
+        _stream_ai_events(stream),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        },
     )

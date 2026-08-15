@@ -6,7 +6,9 @@ from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.persistence.base import Base
-
+from app.infrastructure.conversation.models.message_citation_model import (
+    MessageCitationModel,
+)
 
 class MessageModel(Base):
     """
@@ -48,4 +50,10 @@ class MessageModel(Base):
     conversation: Mapped["ConversationModel"] = relationship(
         "ConversationModel",
         back_populates="messages",
+    )
+
+    citations: Mapped[list["MessageCitationModel"]] = relationship(
+        "MessageCitationModel",
+        back_populates="message",
+        cascade="all, delete-orphan",
     )

@@ -1,7 +1,21 @@
+from uuid import UUID
+
 from langchain_chroma import Chroma
 
+from app.application.knowledge.contracts.embedding_vector import (
+    EmbeddingVector,
+)
 from app.application.knowledge.contracts.embedded_document_chunk import (
     EmbeddedDocumentChunk,
+)
+from app.application.knowledge.contracts.retrieved_chunk import (
+    RetrievedChunk,
+)
+from app.application.knowledge.contracts.vector_search_filter import (
+    VectorSearchFilter,
+)
+from app.application.knowledge.contracts.vector_search_result import (
+    VectorSearchResult,
 )
 from app.application.knowledge.ports.vector_store import (
     VectorStore,
@@ -10,28 +24,11 @@ from app.infrastructure.knowledge.vectorstore.chroma_metadata_mapper import (
     ChromaMetadataMapper,
 )
 
-from app.application.knowledge.contracts.retrieved_chunk import (
-    RetrievedChunk,
-)
-from app.application.knowledge.contracts.vector_search_result import (
-    VectorSearchResult,
-)
-from app.application.knowledge.contracts.chunk_metadata import (
-    ChunkMetadata,
-)
-from app.application.knowledge.contracts.embedding_vector import (
-    EmbeddingVector,
-)
-from uuid import UUID
-
-from app.application.knowledge.contracts.vector_search_filter import (
-    VectorSearchFilter,
-)
-
 
 class ChromaVectorStore(VectorStore):
     """
-    Stores embedded document chunks in ChromaDB.
+    Stores and retrieves embedded document chunks
+    using ChromaDB.
     """
 
     def __init__(
@@ -44,6 +41,9 @@ class ChromaVectorStore(VectorStore):
         self,
         chunks: list[EmbeddedDocumentChunk],
     ) -> None:
+        """
+        Adds embedded document chunks to ChromaDB.
+        """
 
         if not chunks:
             return
@@ -56,7 +56,8 @@ class ChromaVectorStore(VectorStore):
         for item in chunks:
 
             ids.append(
-                f"{item.chunk.metadata.document_id}_{item.chunk.metadata.chunk_index}"
+                f"{item.chunk.metadata.document_id}_"
+                f"{item.chunk.metadata.chunk_id}"
             )
 
             documents.append(
@@ -81,25 +82,28 @@ class ChromaVectorStore(VectorStore):
         )
 
     async def search(
-    self,
-    *,
-    embedding: EmbeddingVector,
-    filter: VectorSearchFilter,
-    top_k: int,
-) -> VectorSearchResult:
+        self,
+        *,
+        embedding: EmbeddingVector,
+        filter: VectorSearchFilter,
+        top_k: int,
+    ) -> VectorSearchResult:
+        """
+        Searches ChromaDB for semantically similar chunks.
+        """
 
         result = self._collection._collection.query(
-        query_embeddings=[embedding.values],
-        n_results=top_k,
-        where={
-            "owner_id": str(filter.owner_id),
-        },
-        include=[
-            "documents",
-            "metadatas",
-            "distances",
-        ],
-    )
+            query_embeddings=[embedding.values],
+            n_results=top_k,
+            where={
+                "owner_id": str(filter.owner_id),
+            },
+            include=[
+                "documents",
+                "metadatas",
+                "distances",
+            ],
+        )
 
         chunks: list[RetrievedChunk] = []
 
@@ -111,18 +115,16 @@ class ChromaVectorStore(VectorStore):
             documents,
             metadatas,
             distances,
+            strict=True,
         ):
+            chunk_metadata = ChromaMetadataMapper.from_chroma(
+                metadata,
+            )
 
             chunks.append(
                 RetrievedChunk(
                     content=document,
-                    metadata=ChunkMetadata(
-                        document_id=UUID(metadata["document_id"]),
-                        owner_id=UUID(metadata["owner_id"]),
-                        filename=metadata["filename"],
-                        chunk_index=metadata["chunk_index"],
-                        page_number=metadata.get("page_number"),
-                    ),
+                    metadata=chunk_metadata,
                     similarity_score=1 - distance,
                 )
             )

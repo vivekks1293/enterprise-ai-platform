@@ -1,7 +1,10 @@
 from collections.abc import AsyncIterator
 from datetime import datetime, timezone
-from uuid import uuid4
+from uuid import UUID, uuid4
 
+from app.application.ai.dto.ai_stream_event import (
+    AIStreamEvent,
+)
 from app.application.ai.orchestrator.ai_orchestrator import (
     AIOrchestrator,
 )
@@ -37,7 +40,6 @@ class SendPromptUseCase:
         ai_orchestrator: AIOrchestrator,
         unit_of_work: UnitOfWork,
     ) -> None:
-
         self._conversation_repository = conversation_repository
         self._message_repository = message_repository
         self._ai_orchestrator = ai_orchestrator
@@ -46,9 +48,10 @@ class SendPromptUseCase:
     async def execute(
         self,
         request: SendPromptRequest,
-    ) -> AsyncIterator[str]:
+    ) -> AsyncIterator[AIStreamEvent]:
         """
-        Executes the prompt workflow.
+        Executes the prompt workflow and streams
+        structured AI events.
         """
 
         # -----------------------------------------------------
@@ -90,25 +93,47 @@ class SendPromptUseCase:
         ]
 
         # -----------------------------------------------------
-        # Step 5 - Execute AI Runtime
+        # Step 5 - Execute AI runtime
         # -----------------------------------------------------
 
         response_parts: list[str] = []
 
-        async for token in self._ai_orchestrator.respond(
-            conversation_id=request.conversation_id,
+        async for event in self._ai_orchestrator.respond(
             owner_id=request.owner_id,
             messages=chat_messages,
         ):
-            response_parts.append(token)
+            # -------------------------------------------------
+            # Token event
+            # -------------------------------------------------
 
-            yield token
+            if event.type == "token":
+                if event.content:
+                    response_parts.append(event.content)
 
-        assistant_response = "".join(response_parts)
+                yield event
+                continue
+
+            # -------------------------------------------------
+            # Citation event
+            # -------------------------------------------------
+
+            if event.type == "citations":
+                yield event
+                continue
+
+            # -------------------------------------------------
+            # Complete event
+            # -------------------------------------------------
+
+            if event.type == "complete":
+                yield event
+                break
 
         # -----------------------------------------------------
         # Step 6 - Persist assistant response
         # -----------------------------------------------------
+
+        assistant_response = "".join(response_parts)
 
         await self._save_assistant_message(
             conversation_id=request.conversation_id,
@@ -137,7 +162,7 @@ class SendPromptUseCase:
 
     async def _save_assistant_message(
         self,
-        conversation_id,
+        conversation_id: UUID,
         response: str,
     ) -> None:
         """

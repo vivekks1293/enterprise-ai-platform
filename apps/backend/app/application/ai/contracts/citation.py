@@ -2,8 +2,11 @@ from dataclasses import dataclass
 from uuid import UUID
 
 
-@dataclass(frozen=True)
-class ChunkMetadata:
+@dataclass(slots=True, frozen=True)
+class Citation:
+    """
+    Represents one citation supporting an AI response.
+    """
 
     document_id: UUID
 
@@ -15,4 +18,4 @@ class ChunkMetadata:
 
     page_number: int | None
 
-    owner_id: UUID
+    similarity_score: float

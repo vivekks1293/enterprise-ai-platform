@@ -1,3 +1,5 @@
+import { Citation } from '@features/chat/models/citation.model';
+
 export type ChatMessageRole = 'user' | 'assistant';
 
 /**
@@ -15,4 +17,11 @@ export interface ChatMessage {
   readonly content: string;
   readonly createdAt: Date;
   readonly status: ChatMessageStatus;
+  /** Attached once the stream's `citations` event arrives — absent for
+   *  user messages, and for assistant messages whose stream hasn't
+   *  reached that event yet (or history loaded via GET conversation,
+   *  which doesn't return citations — stream-only per the current
+   *  backend contract). Citation UI itself is a future task; this
+   *  field only exists so that future UI has state to render from. */
+  readonly citations?: readonly Citation[];
 }

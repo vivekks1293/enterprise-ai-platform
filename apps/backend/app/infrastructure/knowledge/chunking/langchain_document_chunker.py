@@ -1,3 +1,5 @@
+from uuid import uuid5
+
 from langchain_text_splitters import (
     RecursiveCharacterTextSplitter,
 )
@@ -31,7 +33,6 @@ class LangChainDocumentChunker(DocumentChunker):
         chunk_size: int,
         chunk_overlap: int,
     ) -> None:
-
         self._splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
@@ -43,6 +44,10 @@ class LangChainDocumentChunker(DocumentChunker):
         document: Document,
         parsed_document: ParsedDocument,
     ) -> list[DocumentChunk]:
+        """
+        Splits a parsed document into chunks and assigns
+        deterministic metadata to each chunk.
+        """
 
         chunks: list[DocumentChunk] = []
 
@@ -51,7 +56,7 @@ class LangChainDocumentChunker(DocumentChunker):
         for section in parsed_document.sections:
 
             texts = self._splitter.split_text(
-                section.content
+                section.content,
             )
 
             page_number = section.metadata.get(
@@ -60,10 +65,22 @@ class LangChainDocumentChunker(DocumentChunker):
 
             for text in texts:
 
+                # --------------------------------------------------
+                # Generate deterministic chunk identity
+                # --------------------------------------------------
+
+                chunk_id = str(
+                    uuid5(
+                        document.id,
+                        f"chunk:{chunk_index}",
+                    )
+                )
+
                 metadata = ChunkMetadata(
                     document_id=document.id,
                     owner_id=document.owner_id,
                     filename=document.original_filename,
+                    chunk_id=chunk_id,
                     chunk_index=chunk_index,
                     page_number=page_number,
                 )

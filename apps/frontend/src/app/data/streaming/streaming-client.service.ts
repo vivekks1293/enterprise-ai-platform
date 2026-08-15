@@ -39,6 +39,18 @@ export interface StreamConnectOptions {
  * against. Existing SSE callers are unaffected; `format` defaults to
  * `'sse'`.
  *
+ * This class is deliberately event-name-agnostic: every parsed SSE
+ * frame is forwarded as a `{ kind: 'message', event, data }` value
+ * regardless of what `event:` name the server used. Interpreting
+ * specific event names (e.g. Chat's `token`/`citations`/`complete`)
+ * is the caller's job — concretely, the Repository layer, which turns
+ * these generic frames into feature-specific typed events. (An
+ * earlier version of this class special-cased an `event: done` name
+ * as an early-completion signal; that was a guess made before any
+ * real backend event vocabulary existed, and was removed once Chat's
+ * actual contract turned out to use `complete` instead — a good
+ * reminder not to bake assumed vocabulary into a generic layer.)
+ *
  * Built on `fetch` + `ReadableStream` rather than the native
  * `EventSource` API specifically because `EventSource` cannot attach
  * an `Authorization` header, which is a hard requirement for our
@@ -144,12 +156,6 @@ export class StreamingClientService {
 
         const chunk = decoder.decode(value, { stream: true });
         for (const frame of parser.feed(chunk)) {
-          if (frame.event === 'done') {
-            subscriber.next({ kind: 'done' });
-            subscriber.complete();
-            return;
-          }
-
           const data = this.parseFrameData<TPayload>(frame.data);
           subscriber.next({ kind: 'message', event: frame.event, data, id: frame.id });
         }

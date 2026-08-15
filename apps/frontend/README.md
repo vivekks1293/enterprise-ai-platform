@@ -288,9 +288,63 @@ PromptComposer → ChatFacade → ChatRepository → ChatApiService (REST) → A
   subscription, which triggers `StreamingClientService`'s `AbortController` teardown
   automatically; the in-flight assistant message is finalized with whatever partial
   content it has, per spec — no duplicate message, user message left untouched.
-- **Still mocked, unchanged from Phase 4's scope:** Citations, Sources, Inspector Panel
-  data, Tool Calls, Agent Timeline, Execution Metadata, Uploads, Markdown, Syntax
-  Highlighting.
+- **Still mocked, unchanged from Phase 4's scope:** Sources (the dedicated Right
+  Panel card, as opposed to the inline citation chips now shown per-message —
+  see below), Inspector Panel data, Tool Calls, Agent Timeline, Execution
+  Metadata, Uploads, Markdown, Syntax Highlighting.
+
+### Real SSE streaming + citations (Phase 5 follow-up)
+
+The backend's streaming response changed from raw `text/plain` chunks to real
+Server-Sent Events (`event: token|citations|complete`). This is a data-format
+change only — the append-in-place streaming pattern Phase 4 was built around is
+unchanged; only what fills it changed.
+
+- **`ChatRepository.streamPrompt()`**: `format: 'text'` → `format: 'sse'`.
+  `SseFrameParser` (built in Sprint 1B, unused until now) already handled every
+  framing edge case this needed — partial chunks, multiple frames per HTTP
+  chunk, one frame split across chunks, UTF-8 boundary safety — with zero
+  changes required.
+- **A real bug found via this change, not assumed**: `StreamingClientService`
+  had a hardcoded `event: done` early-completion check — a guess from before
+  any real backend event vocabulary existed. The actual contract uses
+  `event: complete`. Removed the special-case entirely rather than just
+  renaming it: a generic streaming client shouldn't hardcode any specific
+  event name at all — interpreting event names is the caller's job. Completion
+  now relies on the Repository/Facade recognizing `event: complete` explicitly,
+  with the natural stream-end (`reader.read()` done) as an idempotent fallback.
+- **New typed layer**: `features/chat/models/chat-stream-event.model.ts`
+  (`ChatStreamEvent`, a `token | citations | complete` union) is where "SSE
+  parsing → typed stream events" resolves in this codebase — `ChatRepository`
+  maps generic `{event, data}` frames into this via a new
+  `mapSseFrameToChatStreamEvent()` in `chat.mapper.ts`, so `ChatFacade` never
+  touches a raw SSE event name or unparsed JSON payload.
+- **`ChatMessage.citations?: readonly Citation[]`** — attached to the same
+  in-flight assistant message via the existing `state.updateMessage()` patch
+  method (no new state method needed).
+- **No test infrastructure exists in this project** (`ng test` is stubbed in
+  `package.json` but no Jasmine/Karma is installed, no `.spec.ts` files exist
+  anywhere) — noted here rather than fabricating coverage. Adding a test
+  harness is out of scope for this change and would be its own task.
+
+### Citation rendering (Phase 5 follow-up, part 2)
+
+`MessageBubbleComponent` renders `message().citations` as a "Sources" row of
+non-interactive chips (filename + page number) below the response text — no
+click-through, document viewer, or page preview yet, that's a separate, larger
+piece of work. Two judgment calls worth knowing about:
+
+- **De-duplication is a display-only concern.** Real backend responses can
+  return multiple citations for the same `(filename, page)` — distinct
+  retrieved chunks from the same page, which matters for retrieval quality but
+  reads as a visibly broken/duplicated list to a user. `MessageBubbleComponent`
+  de-dupes by `(filename, page)` for what it renders; `message().citations`
+  itself keeps every citation the backend returned, untouched, in case a
+  future feature (retrieval debugging, a citation count) needs the full list.
+- **`similarityScore` is deliberately not displayed.** Real response data
+  showed negative values (e.g. `-0.05`), which don't map cleanly onto a
+  user-facing "relevance: X%" without looking like a bug. The field stays in
+  the domain model for a future, more careful treatment of it.
 
 ## Documents / Knowledge base (Sprint 1 Phase 6)
 

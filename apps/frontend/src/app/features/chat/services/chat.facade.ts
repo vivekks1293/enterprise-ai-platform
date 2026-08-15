@@ -214,10 +214,12 @@ export class ChatFacade {
   /**
    * The exact seam Phase 4 was built around: append the user message,
    * append an empty `status: 'streaming'` assistant placeholder, then
-   * fill that same message's content in place as chunks arrive. The
-   * only thing that changed from Phase 4 is what fills it — real
-   * StreamEvent chunks via ChatRepository.streamPrompt() instead of a
-   * timer and a canned string.
+   * fill that same message's content in place as chunks arrive. What's
+   * changed since Phase 4/5: the backend now sends real SSE
+   * (`token`/`citations`/`complete` events) instead of raw text
+   * chunks, so this consumes typed `ChatStreamEvent`s from
+   * ChatRepository rather than raw `StreamEvent<string>` — the
+   * append-in-place pattern itself is unchanged.
    *
    * IDs generated here (`generateId()`) are client-local, rendering-only
    * identifiers — never sent to the backend, never treated as
@@ -250,18 +252,28 @@ export class ChatFacade {
 
     this.activeStreamSubscription = this.repository.streamPrompt(conversationId, prompt).subscribe({
       next: (event) => {
-        if (event.kind === 'message') {
-          this.state.appendToMessageContent(conversationId, assistantMessageId, event.data);
-        } else if (event.kind === 'done') {
-          this.finalizeAssistantMessage(conversationId, assistantMessageId);
-        } else if (event.kind === 'error') {
-          this.handleStreamError(conversationId, assistantMessageId, event.error);
+        switch (event.kind) {
+          case 'token':
+            this.state.appendToMessageContent(conversationId, assistantMessageId, event.content);
+            break;
+          case 'citations':
+            // Attaches to the SAME assistant message being streamed —
+            // never creates a new message. Citation UI itself is a
+            // future task; this just gets the data into state.
+            this.state.updateMessage(conversationId, assistantMessageId, { citations: event.citations });
+            break;
+          case 'complete':
+            this.finalizeAssistantMessage(conversationId, assistantMessageId);
+            break;
         }
       },
       error: (error: ApiError) => this.handleStreamError(conversationId, assistantMessageId, error),
-      // Some transports (ours included, in 'text' mode) complete via
-      // reader done rather than an explicit 'done' event — finalize
-      // covers both; it's a no-op if already finalized.
+      // Backup path: if the connection closes without an explicit
+      // `complete` event reaching us first (e.g. a future backend
+      // variant, or a network-level close), this still finalizes the
+      // message rather than leaving it stuck in 'streaming' forever.
+      // finalizeAssistantMessage() is idempotent, so this is a no-op
+      // if `complete` already fired.
       complete: () => this.finalizeAssistantMessage(conversationId, assistantMessageId)
     });
   }

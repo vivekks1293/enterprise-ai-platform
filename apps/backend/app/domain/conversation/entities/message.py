@@ -4,6 +4,8 @@ from uuid import UUID
 
 from app.domain.conversation.enums.message_role import MessageRole
 
+from app.domain.conversation.value_objects.citation import Citation
+
 
 @dataclass(slots=True)
 class Message:
@@ -20,3 +22,5 @@ class Message:
     content: str
 
     created_at: datetime
+
+    # citations: list[Citation]

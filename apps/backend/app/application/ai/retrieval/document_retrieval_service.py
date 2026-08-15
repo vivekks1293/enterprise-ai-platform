@@ -13,6 +13,11 @@ from app.application.knowledge.contracts.vector_search_result import (
     VectorSearchResult,
 )
 
+from app.core.config.settings import settings
+from app.application.ai.services.retrieval_logger import (
+    RetrievalLogger,
+)
+
 
 class DocumentRetrievalService:
     """
@@ -32,16 +37,22 @@ class DocumentRetrievalService:
         *,
         query: str,
         owner_id: UUID,
-        top_k: int = 5,
     ) -> VectorSearchResult:
         embedding = await self._embedding_provider.embed_query(
             query,
         )
 
-        return await self._vector_store.search(
+        result  = await self._vector_store.search(
             embedding=embedding,
             filter=VectorSearchFilter(
                 owner_id=owner_id,
             ),
-            top_k=top_k,
+            top_k=settings.knowledge_retrieval_top_k,
         )
+
+        RetrievalLogger.log(
+            query=query,
+            result=result,
+        )
+
+        return result

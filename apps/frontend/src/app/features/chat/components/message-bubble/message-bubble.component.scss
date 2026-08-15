@@ -89,6 +89,29 @@
   color: v.$color-text-primary;
 }
 
+.eap-msg__citations {
+  margin-top: v.$space-2;
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  flex-wrap: wrap;
+}
+
+.eap-msg__citations-label {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.eap-msg__citations-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: v.$space-1;
+}
+
 .eap-msg__actions {
   display: flex;
   gap: v.$space-1;

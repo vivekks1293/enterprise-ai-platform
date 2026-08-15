@@ -44,3 +44,29 @@ export interface CreateChatConversationRequestDto {
 export interface SendPromptRequestDto {
   readonly prompt: string;
 }
+
+/**
+ * Raw shapes carried by the three SSE event types the streaming
+ * response emits (`event: token|citations|complete`). Consumed only
+ * by chat.mapper.ts's SSE-frame mapping — never seen past the
+ * Repository layer (see chat.repository.ts / chat-stream-event.model.ts).
+ */
+export interface TokenEventDto {
+  readonly content: string;
+}
+
+export interface CitationDto {
+  readonly citation_id: number;
+  readonly document_id: string;
+  readonly chunk_id: string;
+  readonly filename: string;
+  readonly page_number: number | null;
+  readonly similarity_score: number;
+}
+
+export interface CitationsEventDto {
+  readonly citations: readonly CitationDto[];
+}
+
+/** `event: complete` carries an empty object (`{}`) — no fields to type. */
+export type CompleteEventDto = Record<string, never>;

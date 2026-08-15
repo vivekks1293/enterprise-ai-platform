@@ -1,9 +1,0 @@
-Enterprise AI Platform
-
-This document explains the knowledge ingestion architecture.
-
-Documents are uploaded into storage and metadata is persisted
-in PostgreSQL.
-
-The ingestion pipeline extracts normalized content for later
-chunking and embedding.
