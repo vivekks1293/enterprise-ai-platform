@@ -37,6 +37,7 @@ class RetrievalEvaluationRunner:
         cases: list[RetrievalEvaluationCase],
         owner_id: UUID,
         k: int,
+        retrieval_method: str = "semantic",
     ) -> RetrievalEvaluationReport:
         """
         Executes all evaluation cases and produces
@@ -55,6 +56,7 @@ class RetrievalEvaluationRunner:
                 precision_at_k=0.0,
                 recall_at_k=0.0,
                 mean_reciprocal_rank=0.0,
+                retrieval_method=retrieval_method,
                 results=[],
             )
 
@@ -66,6 +68,7 @@ class RetrievalEvaluationRunner:
                 query=case.question,
                 owner_id=owner_id,
                 top_k=k,
+                retrieval_mode=retrieval_method,
             )
 
             retrieved_chunk_ids = [
@@ -77,7 +80,7 @@ class RetrievalEvaluationRunner:
                 RetrievedEvaluationChunk(
                     rank=rank,
                     chunk_id=chunk.metadata.chunk_id,
-                    distance=chunk.distance,
+                    score=chunk.score,
                     filename=chunk.metadata.filename,
                     page_number=chunk.metadata.page_number,
                     content=chunk.content,
@@ -143,5 +146,6 @@ class RetrievalEvaluationRunner:
                 )
                 / total_cases
             ),
+            retrieval_method=retrieval_method,
             results=results,
         )

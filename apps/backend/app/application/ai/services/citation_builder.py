@@ -30,7 +30,7 @@ class CitationBuilder:
                     chunk_id=chunk.metadata.chunk_id,
                     filename=chunk.metadata.filename,
                     page_number=chunk.metadata.page_number,
-                    distance=chunk.distance,
+                    similarity_score=chunk.score,
                 )
             )
 

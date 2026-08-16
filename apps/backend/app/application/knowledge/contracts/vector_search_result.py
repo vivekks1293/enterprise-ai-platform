@@ -8,7 +8,7 @@ from app.application.knowledge.contracts.retrieved_chunk import (
 @dataclass(frozen=True)
 class VectorSearchResult:
     """
-    Result returned from semantic vector search.
+    Result returned from a retrieval store.
     """
 
     chunks: list[RetrievedChunk]

@@ -62,9 +62,13 @@ from langchain_openai import OpenAIEmbeddings
 from app.application.knowledge.ports.vector_store import (
     VectorStore,
 )
+from app.application.knowledge.ports.keyword_store import KeywordStore
 
 from app.infrastructure.knowledge.vectorstore.chroma_vector_store import (
     ChromaVectorStore,
+)
+from app.infrastructure.knowledge.keywordstore.bm25_keyword_store import (
+    BM25KeywordStore,
 )
 
 from app.application.knowledge.services.document_ingestion_service import (
@@ -174,6 +178,11 @@ def get_vector_store() -> VectorStore:
         collection=collection,
     )
 
+
+def get_keyword_store() -> KeywordStore:
+    """Provides the persisted BM25 lexical retrieval store."""
+    return BM25KeywordStore(directory=settings.knowledge_bm25_directory)
+
 def get_document_ingestion_service(
     file_storage: FileStorage = Depends(get_file_storage),
     parser_resolver: DocumentParserResolver = Depends(
@@ -200,6 +209,13 @@ def get_document_indexing_service(
     vector_store: VectorStore = Depends(
         get_vector_store,
     ),
+    keyword_store: KeywordStore = Depends(
+        get_keyword_store,
+    ),
+    document_repository: DocumentRepository = Depends(
+        get_document_repository,
+    ),
+    unit_of_work: UnitOfWork = Depends(get_unit_of_work),
 ) -> DocumentIndexingService:
 
     return DocumentIndexingService(
@@ -207,6 +223,9 @@ def get_document_indexing_service(
         chunker=chunker,
         embedding_provider=embedding_provider,
         vector_store=vector_store,
+        keyword_store=keyword_store,
+        document_repository=document_repository,
+        unit_of_work=unit_of_work,
     )
 
 def get_index_document_use_case(

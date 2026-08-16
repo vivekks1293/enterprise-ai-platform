@@ -19,9 +19,11 @@ from app.application.knowledge.ports.embedding_provider import (
 from app.application.knowledge.ports.vector_store import (
     VectorStore,
 )
+from app.application.knowledge.ports.keyword_store import KeywordStore
 from app.core.config.settings import settings
 from app.core.dependencies.knowledge import (
     get_embedding_provider,
+    get_keyword_store,
     get_vector_store,
 )
 from app.infrastructure.ai.langchain.client.langchain_chat_client import (
@@ -70,11 +72,13 @@ def get_document_retrieval_service(
     vector_store: VectorStore = Depends(
         get_vector_store,
     ),
+    keyword_store: KeywordStore = Depends(get_keyword_store),
 ) -> DocumentRetrievalService:
 
     return DocumentRetrievalService(
         embedding_provider=embedding_provider,
         vector_store=vector_store,
+        keyword_store=keyword_store,
     )
 
 

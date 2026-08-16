@@ -8,6 +8,7 @@ from app.application.knowledge.ports.embedding_provider import (
 from app.application.knowledge.ports.vector_store import (
     VectorStore,
 )
+from app.application.knowledge.ports.keyword_store import KeywordStore
 from app.application.knowledge.services.document_ingestion_service import (
     DocumentIngestionService,
 )
@@ -28,6 +29,7 @@ class DocumentIndexingService:
         chunker: DocumentChunker,
         embedding_provider: EmbeddingProvider,
         vector_store: VectorStore,
+        keyword_store: KeywordStore,
         document_repository: DocumentRepository,
         unit_of_work: UnitOfWork,
     ) -> None:
@@ -36,6 +38,7 @@ class DocumentIndexingService:
         self._chunker = chunker
         self._embedding_provider = embedding_provider
         self._vector_store = vector_store
+        self._keyword_store = keyword_store
         self._document_repository = document_repository
         self._unit_of_work = unit_of_work
 
@@ -79,6 +82,13 @@ class DocumentIndexingService:
                 document=document,
                 parsed_document=parsed_document,
             )
+
+            # ------------------------------------------
+            # Store lexical chunks first. They are the exact chunks that will
+            # subsequently be embedded and upserted to Chroma.
+            # ------------------------------------------
+
+            await self._keyword_store.add(chunks)
 
             # ------------------------------------------
             # Generate embeddings

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 class RetrievedEvaluationChunk:
     rank: int
     chunk_id: str
-    distance: float
+    score: float
     filename: str
     page_number: int | None
     content: str

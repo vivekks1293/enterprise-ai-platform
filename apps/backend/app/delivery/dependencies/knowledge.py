@@ -80,6 +80,7 @@ from app.application.knowledge.ports.embedding_provider import (
 from app.application.knowledge.ports.vector_store import (
     VectorStore,
 )
+from app.application.knowledge.ports.keyword_store import KeywordStore
 
 from app.application.knowledge.services.document_ingestion_service import (
     DocumentIngestionService,
@@ -88,6 +89,7 @@ from app.application.knowledge.services.document_ingestion_service import (
 from app.core.dependencies.knowledge import (
     get_document_chunker,
     get_embedding_provider,
+    get_keyword_store,
     get_vector_store,
 )
 
@@ -116,6 +118,7 @@ def get_document_indexing_service(
     vector_store: VectorStore = Depends(
         get_vector_store,
     ),
+    keyword_store: KeywordStore = Depends(get_keyword_store),
     document_repository: DocumentRepository = Depends(
         get_document_repository,
     ),
@@ -129,6 +132,7 @@ def get_document_indexing_service(
         chunker=chunker,
         embedding_provider=embedding_provider,
         vector_store=vector_store,
+        keyword_store=keyword_store,
         document_repository=document_repository,
         unit_of_work=unit_of_work,
     )
@@ -274,6 +278,11 @@ def get_document_indexing_service(
     vector_store: VectorStore = Depends(
         get_vector_store,
     ),
+    keyword_store: KeywordStore = Depends(get_keyword_store),
+    document_repository: DocumentRepository = Depends(
+        get_document_repository,
+    ),
+    unit_of_work: UnitOfWork = Depends(get_unit_of_work),
 ) -> DocumentIndexingService:
     """
     Provides the DocumentIndexingService.
@@ -284,6 +293,9 @@ def get_document_indexing_service(
         chunker=chunker,
         embedding_provider=embedding_provider,
         vector_store=vector_store,
+        keyword_store=keyword_store,
+        document_repository=document_repository,
+        unit_of_work=unit_of_work,
     )
 
 

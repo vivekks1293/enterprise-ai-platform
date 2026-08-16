@@ -1,4 +1,5 @@
 import asyncio
+import argparse
 import json
 from pathlib import Path
 from uuid import UUID
@@ -8,6 +9,7 @@ from app.application.ai.retrieval.document_retrieval_service import (
 )
 from app.core.dependencies.knowledge import (
     get_embedding_provider,
+    get_keyword_store,
     get_vector_store,
 )
 from app.evaluation.contracts.retrieval_evaluation_case import (
@@ -33,12 +35,6 @@ REPORT_DIRECTORY = (
     / "reports"
 )
 
-REPORT_PATH = (
-    REPORT_DIRECTORY
-    / "retrieval_evaluation_report.json"
-)
-
-
 # ============================================================
 # Evaluation configuration
 # ============================================================
@@ -47,7 +43,7 @@ EVALUATION_OWNER_ID = UUID(
     "11111111-1111-1111-1111-111111111111"
 )
 
-K = 5
+K = 20
 
 
 # ============================================================
@@ -143,7 +139,7 @@ def build_report_json(report) -> dict:
                 {
                     "rank": chunk.rank,
                     "chunk_id": chunk.chunk_id,
-                    "distance": chunk.distance,
+                    "score": chunk.score,
                     "filename": chunk.filename,
                     "page_number": chunk.page_number,
                     "content": chunk.content,
@@ -169,6 +165,7 @@ def build_report_json(report) -> dict:
         )
 
     return {
+        "retrieval_method": report.retrieval_method,
         "summary": {
             "total_cases": report.total_cases,
             "k": report.k,
@@ -194,7 +191,8 @@ def save_report(report) -> None:
 
     report_data = build_report_json(report)
 
-    REPORT_PATH.write_text(
+    report_path = REPORT_DIRECTORY / f"{report.retrieval_method}_top{report.k}.json"
+    report_path.write_text(
         json.dumps(
             report_data,
             indent=2,
@@ -208,7 +206,7 @@ def save_report(report) -> None:
         f"Evaluation report saved to:"
     )
     print(
-        REPORT_PATH
+        report_path
     )
 
 
@@ -216,7 +214,7 @@ def save_report(report) -> None:
 # Main evaluation
 # ============================================================
 
-async def main() -> None:
+async def main(retrieval_method: str = "semantic") -> None:
 
     # --------------------------------------------------------
     # Load evaluation dataset
@@ -235,10 +233,12 @@ async def main() -> None:
     embedding_provider = get_embedding_provider()
 
     vector_store = get_vector_store()
+    keyword_store = get_keyword_store()
 
     retrieval_service = DocumentRetrievalService(
         embedding_provider=embedding_provider,
         vector_store=vector_store,
+        keyword_store=keyword_store,
     )
 
     # --------------------------------------------------------
@@ -257,6 +257,7 @@ async def main() -> None:
         cases=cases,
         owner_id=EVALUATION_OWNER_ID,
         k=K,
+        retrieval_method=retrieval_method,
     )
 
     # --------------------------------------------------------
@@ -357,8 +358,8 @@ async def main() -> None:
             )
 
             print(
-                f"  distance        : "
-                f"{chunk.distance:.4f}"
+                f"  score           : "
+                f"{chunk.score:.4f}"
             )
 
             print(
@@ -381,4 +382,9 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--method", choices=("semantic", "keyword"), default="semantic"
+    )
+    arguments = parser.parse_args()
+    asyncio.run(main(arguments.method))

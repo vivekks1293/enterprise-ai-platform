@@ -27,6 +27,8 @@ class Settings(BaseSettings):
 
     knowledge_chroma_directory: str = "./data/chroma"
 
+    knowledge_bm25_directory: str = "./data/bm25"
+
     knowledge_collection_name: str = "knowledge"
 
     # ---------------------------------------------------------

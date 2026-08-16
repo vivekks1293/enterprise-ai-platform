@@ -8,6 +8,7 @@ from app.application.ai.retrieval.document_retrieval_service import (
 )
 from app.core.dependencies.knowledge import (
     get_embedding_provider,
+    get_keyword_store,
     get_vector_store,
 )
 from app.evaluation.contracts.retrieval_evaluation_case import (
@@ -28,7 +29,7 @@ EVALUATION_OWNER_ID = UUID(
     "11111111-1111-1111-1111-111111111111"
 )
 
-K = 5
+K = 20
 
 
 async def main() -> None:
@@ -59,10 +60,12 @@ async def main() -> None:
 
     embedding_provider = get_embedding_provider()
     vector_store = get_vector_store()
+    keyword_store = get_keyword_store()
 
     retrieval_service = DocumentRetrievalService(
         embedding_provider=embedding_provider,
         vector_store=vector_store,
+        keyword_store=keyword_store,
     )
 
     # --------------------------------------------------
@@ -151,8 +154,8 @@ async def main() -> None:
                 f"  Chunk ID        : {chunk.chunk_id}"
             )
             print(
-                f"  distance      : "
-                f"{chunk.distance:.4f}"
+                f"  score         : "
+                f"{chunk.score:.4f}"
             )
             print(
                 f"  Filename        : "

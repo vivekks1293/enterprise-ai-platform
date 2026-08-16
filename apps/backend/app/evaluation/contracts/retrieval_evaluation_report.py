@@ -21,4 +21,6 @@ class RetrievalEvaluationReport:
 
     mean_reciprocal_rank: float
 
+    retrieval_method: str
+
     results: list[RetrievalEvaluationResult]

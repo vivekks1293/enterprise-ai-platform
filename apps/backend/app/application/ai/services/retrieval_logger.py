@@ -35,7 +35,7 @@ class RetrievalLogger:
                 index,
                 chunk.metadata.filename,
                 chunk.metadata.chunk_index,
-                chunk.distance,
+                chunk.score,
             )
 
         logger.info("=" * 80)

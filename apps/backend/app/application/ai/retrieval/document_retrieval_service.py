@@ -6,6 +6,7 @@ from app.application.knowledge.ports.embedding_provider import (
 from app.application.knowledge.ports.vector_store import (
     VectorStore,
 )
+from app.application.knowledge.ports.keyword_store import KeywordStore
 from app.application.knowledge.contracts.vector_search_filter import (
     VectorSearchFilter,
 )
@@ -28,9 +29,11 @@ class DocumentRetrievalService:
         self,
         embedding_provider: EmbeddingProvider,
         vector_store: VectorStore,
+        keyword_store: KeywordStore,
     ) -> None:
         self._embedding_provider = embedding_provider
         self._vector_store = vector_store
+        self._keyword_store = keyword_store
 
     async def retrieve(
         self,
@@ -38,23 +41,26 @@ class DocumentRetrievalService:
         query: str,
         owner_id: UUID,
         top_k: int | None = None,
+        retrieval_mode: str = "semantic",
     ) -> VectorSearchResult:
-
-        embedding = await self._embedding_provider.embed_query(
-            query,
+        search_filter = VectorSearchFilter(owner_id=owner_id)
+        resolved_top_k = (
+            top_k
+            if top_k is not None
+            else settings.knowledge_retrieval_top_k
         )
 
-        result = await self._vector_store.search(
-            embedding=embedding,
-            filter=VectorSearchFilter(
-                owner_id=owner_id,
-            ),
-            top_k=(
-                top_k
-                if top_k is not None
-                else settings.knowledge_retrieval_top_k
-            ),
-        )
+        if retrieval_mode == "semantic":
+            embedding = await self._embedding_provider.embed_query(query)
+            result = await self._vector_store.search(
+                embedding=embedding, filter=search_filter, top_k=resolved_top_k
+            )
+        elif retrieval_mode == "keyword":
+            result = await self._keyword_store.search(
+                query=query, filter=search_filter, top_k=resolved_top_k
+            )
+        else:
+            raise ValueError("retrieval_mode must be 'semantic' or 'keyword'.")
 
         RetrievalLogger.log(
             query=query,

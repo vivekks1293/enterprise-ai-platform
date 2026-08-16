@@ -8,11 +8,13 @@ from app.application.knowledge.contracts.chunk_metadata import (
 @dataclass(frozen=True)
 class RetrievedChunk:
     """
-    Represents one chunk retrieved from the vector store.
+    Represents one chunk retrieved from a retrieval store.
     """
 
     content: str
 
     metadata: ChunkMetadata
 
-    distance: float
+    # Higher values represent stronger relevance. Chroma distances are converted
+    # to this common representation by its adapter.
+    score: float

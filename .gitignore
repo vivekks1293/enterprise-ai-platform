@@ -247,3 +247,4 @@ cypress/screenshots/
 ```
 data/knowledge/
 apps/backend/data/
+apps/backend/app/evaluation/reports/retrieval_evaluation_report.json
