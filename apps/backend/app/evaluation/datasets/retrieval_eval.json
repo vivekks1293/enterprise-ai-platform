@@ -1,0 +1,74 @@
+[
+  {
+    "id": "eval-001",
+    "question": "How does the enterprise RAG architecture handle document ingestion and retrieval?",
+    "relevant_chunk_ids": [
+      "76313112-0230-56de-995f-320053466b7a"
+    ]
+  },
+  {
+    "id": "eval-002",
+    "question": "Which LLM providers are supported by the RAG platform?",
+    "relevant_chunk_ids": [
+      "76313112-0230-56de-995f-320053466b7a"
+    ]
+  },
+  {
+    "id": "eval-003",
+    "question": "How does the platform prevent redundant vector indexing?",
+    "relevant_chunk_ids": [
+      "4e359d64-a0c7-5275-ab03-5b27d8610b3f"
+    ]
+  },
+  {
+    "id": "eval-004",
+    "question": "How is conversation history persisted in the enterprise AI platform?",
+    "relevant_chunk_ids": [
+      "76313112-0230-56de-995f-320053466b7a"
+    ]
+  },
+  {
+    "id": "eval-005",
+    "question": "What technologies are used to build the GenAI backend?",
+    "relevant_chunk_ids": [
+      "2d12b3f0-9e65-56ed-be7c-b31d82b6750f",
+      "4e359d64-a0c7-5275-ab03-5b27d8610b3f"
+    ]
+  },
+  {
+    "id": "eval-006",
+    "question": "What Angular performance optimizations were implemented?",
+    "relevant_chunk_ids": [
+      "cfa0c77e-a78d-577a-93f3-bc23a458f5f4"
+    ]
+  },
+  {
+    "id": "eval-007",
+    "question": "What tools and technologies does Harshita use for data analysis and reporting?",
+    "relevant_chunk_ids": [
+      "e2368dc5-e69c-5176-a0d5-4a6283c92962"
+    ]
+  },
+  {
+    "id": "eval-008",
+    "question": "What Power BI and Excel work has Harshita performed at WNS?",
+    "relevant_chunk_ids": [
+      "67c59d57-8f40-5d19-a643-3e6aae0e798a"
+    ]
+  },
+  {
+    "id": "eval-009",
+    "question": "How did Harshita improve data quality and reporting accuracy?",
+    "relevant_chunk_ids": [
+      "777734a0-1d63-5a3b-a4e9-289f12ee5da9"
+    ]
+  },
+  {
+    "id": "eval-010",
+    "question": "What projects has Vivek worked on as part of his work samples?",
+    "relevant_chunk_ids": [
+      "16705b43-a8b0-59c8-834f-bb8db9bf934f",
+      "d18c410e-6556-57ed-8a44-549c2b3de517"
+    ]
+  }
+]

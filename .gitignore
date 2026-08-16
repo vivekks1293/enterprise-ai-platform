@@ -246,3 +246,4 @@ cypress/screenshots/
 *.orig
 ```
 data/knowledge/
+apps/backend/data/

@@ -1,0 +1,583 @@
+{
+  "summary": {
+    "total_cases": 10,
+    "k": 5,
+    "precision_at_k": 0.16,
+    "recall_at_k": 0.65,
+    "mean_reciprocal_rank": 0.5
+  },
+  "cases": [
+    {
+      "case_id": "eval-001",
+      "question": "How does the enterprise RAG architecture handle document ingestion and retrieval?",
+      "precision_at_k": 0.2,
+      "recall_at_k": 1.0,
+      "reciprocal_rank": 0.5,
+      "relevant_chunk_ids": [
+        "76313112-0230-56de-995f-320053466b7a"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": "53bd44bf-3801-586b-a636-9bfa6b64dfdf",
+          "distance": 0.9311427474021912,
+          "filename": "NIST.AI.100-2e2023.pdf",
+          "page_number": 105,
+          "content": "to retrieving data from outside a foundation model and augmenting prompts by \nadding the relevant retrieved data in context. RAG allows fne-tuning and modif-\ncation of the internal knowledge of the model in an effcient manner and without \nneeding to retrain the entire model. First, the documents and user prompts are \nconverted into a compatible format to perform relevancy search. Typically this is \naccomplished by converting the document collection and user prompts into numer-\nical representations using embedding language models. RAG model architectures \ncompare the embeddings of user prompts within the vector of the knowledge li-\nbrary. The original user prompt is then appended with relevant context from sim-\nilar documents within the knowledge library. This augmented prompt is then sent \nto the foundation model. For RAG to work well, the augmented prompt must ft \ninto the context window of the model 3, 36, 37, 39, 44",
+          "is_relevant": false
+        },
+        {
+          "rank": 2,
+          "chunk_id": "76313112-0230-56de-995f-320053466b7a",
+          "distance": 1.118404746055603,
+          "filename": "Vivek_Resume_GA3.pdf",
+          "page_number": 1,
+          "content": "WORK EXPERIENCE  \nAssociate Consultant | Gen AI Developer  \nTata Consultancy Services(TCS) | Sept 2025 – Present  \n• Designed and implemented an enterprise Retrieval-Augmented Generation (RAG) architecture \nsupporting document ingestion, semantic chunking, embedding pipelines, vector retrieval, metadata-\naware search, and source citations. \n• Designed a pluggable LLM integration framework with adapter-based support for OpenAI, Azure OpenAI, \nAnthropic, and Gemini, enabling streaming responses and simplifying future provider integrations. \n• Built a scalable conversation platform with JWT-secured authentication, persistent conversation lifecycle \nmanagement, streaming responses, and PostgreSQL-backed message history optimized for enterprise AI \nworkloads. \n• Built reusable prompt and conversation context pipelines using LangChain, enabling consistent prompt \ngeneration, context retrieval, and chat memory management.",
+          "is_relevant": true
+        },
+        {
+          "rank": 3,
+          "chunk_id": "d0645004-5204-503a-846f-09557b93299f",
+          "distance": 1.1471619606018066,
+          "filename": "wellarchitected-framework.pdf",
+          "page_number": 95,
+          "content": "AWS Well-Architected Framework Framework\na. You can use AWS Conﬁg rules to enforce that resources have the required ownership tags.\nb. For in-depth guidance on how to build a tagging strategy for your organization, see AWS \nTagging Best Practices whitepaper.\n4. Use Amazon Q Business, a conversational assistant that uses generative AI to enhance workforce \nproductivity, answer questions, and complete tasks based on information in your enterprise \nsystems.\na. Connect Amazon Q Business to your company's data source. Amazon Q Business oﬀers \nprebuilt connectors to over 40 supported data sources, including Amazon Simple Storage \nService (Amazon S3), Microsoft SharePoint, Salesforce, and Atlassian Conﬂuence. For more \ninformation, see Amazon Q Business connectors.\n5. For other resources, platforms, and infrastructure, create documentation that identiﬁes \nownership. This should be accessible to all team members.",
+          "is_relevant": false
+        },
+        {
+          "rank": 4,
+          "chunk_id": "d8492d42-ba66-5dc9-a3cd-c9c7cd2445eb",
+          "distance": 1.1594505310058594,
+          "filename": "wellarchitected-framework.pdf",
+          "page_number": 102,
+          "content": "application or groups of applications that share common architectural practices and technologies. \nInitially, the company documents the processes and procedures as step-by-step guides in the \ndocument management system. They make the procedures discoverable using tags on the AWS \naccount that hosts the application and on speciﬁc groups of resources within the account, using \nAWS Organizations to manage their AWS accounts. Over time, AnyCompany Retail converts \nthese processes to code and deﬁnes resources using infrastructure as code (through services like \nCloudFormation or AWS Cloud Development Kit (AWS CDK) templates). The operational processes \nbecome Automation documents in AWS Systems Manager or AWS Lambda functions, which can be \ninitiated as scheduled tasks in response to events such as Amazon CloudWatch alarms or Amazon \nEventBridge events or by requests within an IT service management (ITSM) platform. All processes",
+          "is_relevant": false
+        },
+        {
+          "rank": 5,
+          "chunk_id": "ea203605-6223-57ef-a5cc-e6d6ea4bf17f",
+          "distance": 1.162593960762024,
+          "filename": "wellarchitected-framework.pdf",
+          "page_number": 97,
+          "content": "create tagging polices and capture ownership and contact information.\n• Over time, these procedures should be evolved to be runnable as code, reducing the need for \nhuman intervention.\n• For example, consider AWS Lambda functions, CloudFormation templates, or AWS Systems \nManager automation docs.\n• Perform version control in appropriate repositories.\n• Include suitable resource tagging so owners and documentation can readily be identiﬁed.\nCustomer example\nOrganization 92",
+          "is_relevant": false
+        }
+      ]
+    },
+    {
+      "case_id": "eval-002",
+      "question": "Which LLM providers are supported by the RAG platform?",
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "relevant_chunk_ids": [
+        "76313112-0230-56de-995f-320053466b7a"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": "0e1d30fc-9665-5e6d-8d32-89177bc5c9e5",
+          "distance": 1.1192513704299927,
+          "filename": "NIST.AI.100-2e2023.pdf",
+          "page_number": 51,
+          "content": "set of fxed attack queries (e.g., Repeat all sentences in our conversation) were \nsuffcient to extract more than 60% of prompts across all model and dataset pairs [348]. \nIn RAG applications (see Figure 3), the same techniques can be used to extract sensitive \ninformation provided in the LLMs context. For example, rows from a database or text \nfrom a PDF document that are intended to be summarized generically by the LLM can be \n43",
+          "is_relevant": false
+        },
+        {
+          "rank": 2,
+          "chunk_id": "53bd44bf-3801-586b-a636-9bfa6b64dfdf",
+          "distance": 1.1373138427734375,
+          "filename": "NIST.AI.100-2e2023.pdf",
+          "page_number": 105,
+          "content": "to retrieving data from outside a foundation model and augmenting prompts by \nadding the relevant retrieved data in context. RAG allows fne-tuning and modif-\ncation of the internal knowledge of the model in an effcient manner and without \nneeding to retrain the entire model. First, the documents and user prompts are \nconverted into a compatible format to perform relevancy search. Typically this is \naccomplished by converting the document collection and user prompts into numer-\nical representations using embedding language models. RAG model architectures \ncompare the embeddings of user prompts within the vector of the knowledge li-\nbrary. The original user prompt is then appended with relevant context from sim-\nilar documents within the knowledge library. This augmented prompt is then sent \nto the foundation model. For RAG to work well, the augmented prompt must ft \ninto the context window of the model 3, 36, 37, 39, 44",
+          "is_relevant": false
+        },
+        {
+          "rank": 3,
+          "chunk_id": "259a35cf-4e4a-580b-ba3b-7a2dff3a4d48",
+          "distance": 1.186622142791748,
+          "filename": "NIST.AI.100-2e2023.pdf",
+          "page_number": 52,
+          "content": "A \ndominant use case for LLMs is R ETRIEVAL AUGMENTED GENERATION , depicted in \nFigure 3. Using LLMs in retrieval tasks has blurred the data and instruction channels \nto an LLM. This allows for attacker techniques that leverage the data channel to affect \nsystem operation, similar to decades-old SQL injection attacks. However, the attacker \nneed not directly manipulate the LLM. \nINDIRECT PROMPT INJECTION attacks are enabled \nby RESOURCE CONTROL so that an attacker can indirectly (or remotely) inject system \n44",
+          "is_relevant": false
+        },
+        {
+          "rank": 4,
+          "chunk_id": "881e4e5a-44a3-5a7f-a015-721b97c4bd6d",
+          "distance": 1.1936228275299072,
+          "filename": "NIST.AI.100-2e2023.pdf",
+          "page_number": 45,
+          "content": "How a model is used during deployment is application-specifc. However, underlying many \nof the security vulnerabilities in LLMs and RAG applications is the fact that data and \ninstructions are not provided in separate channels to the LLM, which allows attackers to \nuse data channels to conduct inference-time attacks that are similar to decades-old SQL \ninjection. Acknowledging a particular emphasis on LLMs, specifcally for question-and-\nanswering and text-summarization tasks, many of the attacks in this stage are due to the \nfollowing practices that are common to applications of text-based generative models: \n1. Alignment via model instructions: LLM behaviors are aligned at inference time \nthrough instructions that are pre-pended to the model’s input and context. These in-\nstructions comprise a natural language description of the model’s application-specifc \nuse case (e.g., “You are a helpful fnancial assistant that responds gracefully and \nconcisely....”). A",
+          "is_relevant": false
+        },
+        {
+          "rank": 5,
+          "chunk_id": "7dc61f9d-401f-5852-b5d0-ecd3f81df0cc",
+          "distance": 1.2082810401916504,
+          "filename": "NIST.AI.100-2e2023.pdf",
+          "page_number": 105,
+          "content": "the model may be rapidly or continuously tested by a set of evaluators and under \nconditions other than normal operation 51 \nregression (regression) Type of supervised ML model that is trained on data including \nnumerical labels (called response variables). Types of regression algorithms in-\nclude linear regression, polynomial regression, and various non-linear regression \nmethods 8 \nreinforcement learning (reinforcement learning) Type of machine learning in which an \nagent interacts with the environment and learns to take actions which optimize a \nreward function 8 \nresource control (resource control) Capability in which the attacker has control over the \nresources consumed by a ML model, particularly for LLMs and RAG applications \n39, 44 \nRetrieval Augmented Generation (Retrieval Augmented Generation) This term refers \nto retrieving data from outside a foundation model and augmenting prompts by \nadding the relevant retrieved data in context. RAG allows fne-tuning and modif-",
+          "is_relevant": false
+        }
+      ]
+    },
+    {
+      "case_id": "eval-003",
+      "question": "How does the platform prevent redundant vector indexing?",
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "relevant_chunk_ids": [
+        "4e359d64-a0c7-5275-ab03-5b27d8610b3f"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": "cb11ea4a-c94a-5c6f-a9fd-3c4eea99228b",
+          "distance": 1.278769612312317,
+          "filename": "wellarchitected-framework.pdf",
+          "page_number": 533,
+          "content": "or Amazon Managed Streaming for Apache Kafka (MSK). In some circumstances, a message \nthat was published only once may be accidentally delivered more than once. When a publisher \ngenerates and includes idempotency tokens in messages, it requests that the processing of any \nduplicate message received doesn't result in a repeated action for the same message. Consumers \nshould keep track of each token received and ignore messages that contain duplicate tokens.\nServices and consumers should also pass the received idempotency token to any downstream \nservices that it calls. Every downstream service in the processing chain is similarly responsible for \nmaking sure that idempotency is implemented to avoid the side eﬀect of processing a message \nmore than once.\nImplementation steps\n1. Identify idempotent operations\nDetermine which operations require idempotency. These typically include POST, PUT, and \nDELETE HTTP methods and database insert, update, or delete operations. Operations that do",
+          "is_relevant": false
+        },
+        {
+          "rank": 2,
+          "chunk_id": "178cf25e-72cb-5533-81df-88aeffb7e471",
+          "distance": 1.3449091911315918,
+          "filename": "wellarchitected-framework.pdf",
+          "page_number": 737,
+          "content": "processing functions more eﬃciently.\nLevel of risk exposed if this best practice is not established: Medium\nImplementation guidance\nAccelerated computing instances provide access to hardware-based compute accelerators such as \nGPUs and FPGAs. These hardware accelerators perform certain functions like graphic processing or \ndata pattern matching more eﬃciently than CPU-based alternatives. Many accelerated workloads, \nsuch as rendering, transcoding, and machine learning, are highly variable in terms of resource \nusage. Only run this hardware for the time needed, and decommission them with automation when \nnot required to improve overall performance eﬃciency.\nImplementation steps\n• Identify which accelerated computing instances can address your requirements.\n• For machine learning workloads, take advantage of purpose-built hardware that is speciﬁc to \nyour workload, such as AWS Trainium, AWS Inferentia, and Amazon EC2 DL1. AWS Inferentia \nCompute and hardware 732",
+          "is_relevant": false
+        },
+        {
+          "rank": 3,
+          "chunk_id": "949fde0c-0823-5241-a18e-2403fa42b314",
+          "distance": 1.3485724925994873,
+          "filename": "wellarchitected-framework.pdf",
+          "page_number": 532,
+          "content": "AWS Well-Architected Framework Framework\n• You use timestamps as keys for idempotency. This can cause inaccuracies due to clock skew or \ndue to multiple clients that use the same timestamps to apply changes.\n• You store entire payloads for idempotency. In this approach, you save complete data payloads \nfor every request and overwrite it at each new request. This can degrade performance and aﬀect \nscalability.\n• You generate keys inconsistently across services. Without consistent keys, services may fail to \nrecognize duplicate requests, which results in unintended results.\nBeneﬁts of establishing this best practice:\n• Greater scalability: The system can handle retries and duplicate requests without having to \nperform additional logic or complex state management.\n• Enhanced reliability: Idempotency helps services handle multiple identical requests in a \nconsistent manner, which reduces the risk of unintended side eﬀects or duplicate records. This is",
+          "is_relevant": false
+        },
+        {
+          "rank": 4,
+          "chunk_id": "6acb89d0-1ec7-5e20-b85a-bd49b0719581",
+          "distance": 1.3524291515350342,
+          "filename": "wellarchitected-framework.pdf",
+          "page_number": 761,
+          "content": "AWS Well-Architected Framework Framework\nitself), resulting in the lowest possible latency. Clients can also continue to serve some queries \nwhen the backend datastore is unavailable, increasing the availability of the overall system.\nOne disadvantage of this approach is that when multiple clients are involved, they may store the \nsame cached data locally. This results in both duplicate storage usage and data inconsistency \nbetween those clients. One client might cache the results of a query, and one minute later another \nclient can run the same query and get a diﬀerent result.\nRemote caching\nTo solve the issue of duplicate data between clients, a fast external service, or remote cache, can \nbe used to store the queried data. Instead of checking a local data store, each client will check the \nremote cache before querying the backend datastore. This strategy allows for more consistent \nresponses between clients, better eﬃciency in stored data, and a higher volume of cached data",
+          "is_relevant": false
+        },
+        {
+          "rank": 5,
+          "chunk_id": "09330ebf-c191-503f-895d-31b7952066f1",
+          "distance": 1.3556289672851562,
+          "filename": "wellarchitected-framework.pdf",
+          "page_number": 48,
+          "content": "you can leverage the rich feature sets and fast performance of widely used open source and \ncommercially-licensed ﬁle systems.\nThe following question focuses on these considerations for performance eﬃciency.\nPERF 3:  How do you store, manage, and access data in your workload?\nThe more eﬃcient storage solution for a system varies based on the kind of access operation \n(block, ﬁle, or object), patterns of access (random or sequential), required throughput, frequency \nof access (online, oﬄine, archival), frequency of update (WORM, dynamic), and availability and \ndurability constraints. Well-architected systems use multiple storage solutions and turn on \ndiﬀerent features to improve performance and use resources eﬃciently.\nBest practices 43",
+          "is_relevant": false
+        }
+      ]
+    },
+    {
+      "case_id": "eval-004",
+      "question": "How is conversation history persisted in the enterprise AI platform?",
+      "precision_at_k": 0.2,
+      "recall_at_k": 1.0,
+      "reciprocal_rank": 1.0,
+      "relevant_chunk_ids": [
+        "76313112-0230-56de-995f-320053466b7a"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": "76313112-0230-56de-995f-320053466b7a",
+          "distance": 1.033080816268921,
+          "filename": "Vivek_Resume_GA3.pdf",
+          "page_number": 1,
+          "content": "WORK EXPERIENCE  \nAssociate Consultant | Gen AI Developer  \nTata Consultancy Services(TCS) | Sept 2025 – Present  \n• Designed and implemented an enterprise Retrieval-Augmented Generation (RAG) architecture \nsupporting document ingestion, semantic chunking, embedding pipelines, vector retrieval, metadata-\naware search, and source citations. \n• Designed a pluggable LLM integration framework with adapter-based support for OpenAI, Azure OpenAI, \nAnthropic, and Gemini, enabling streaming responses and simplifying future provider integrations. \n• Built a scalable conversation platform with JWT-secured authentication, persistent conversation lifecycle \nmanagement, streaming responses, and PostgreSQL-backed message history optimized for enterprise AI \nworkloads. \n• Built reusable prompt and conversation context pipelines using LangChain, enabling consistent prompt \ngeneration, context retrieval, and chat memory management.",
+          "is_relevant": true
+        },
+        {
+          "rank": 2,
+          "chunk_id": "24e4d209-e613-5a2a-955f-bea7fae098f3",
+          "distance": 1.1180198192596436,
+          "filename": "NIST.AI.100-2e2023.pdf",
+          "page_number": 51,
+          "content": "ods [132]. Unlike PredAI models, in which carefully crafted tools like Text Revealer are \ncreated to reconstruct text from transformer-based text classifers [343], GenAI models \ncan simply be asked to repeat private information that exists in the context as part of the \nconversation. Results show that information like email addresses can be revealed at rates \nexceeding 8%. However, their responses may wrongly assign the owner of the informa-\ntion. In general, extraction attacks are more successful when the model is seeded with \nmore specifc and complete information — the more the attacker knows, the more they \ncan extract. Intuitively, larger models with more capacity are more susceptible to exact \nreconstruction [45]. \nPrompt and context stealing. Prompts are vital to align LLMs to a specifc use case and \nare a key ingredient to their utility in following human instructions. Well-crafted prompts",
+          "is_relevant": false
+        },
+        {
+          "rank": 3,
+          "chunk_id": "0497645c-2261-55b5-b7dd-3c7d76cd834e",
+          "distance": 1.1244853734970093,
+          "filename": "Cover.pdf",
+          "page_number": 1,
+          "content": "management, streaming AI responses, and a pluggable multi-LLM architecture \nsupporting providers such as OpenAI, Azure OpenAI, Anthropic, and Gemini. I have also \nimplemented metadata-aware retrieval, content deduplication, and enterprise-grade \nauthentication to build scalable AI platforms. Alongside these AI initiatives, I continue to \nmaintain and optimize Angular-based enterprise applications, ensuring production \nreliability and performance. \nBefore moving into AI, I spent several years at PwC leading the development of \nenterprise Angular applications and reusable component libraries. I designed scalable \nfrontend architectures, developed interactive financial dashboards, improved \napplication performance, and modernized multiple enterprise applications through \nAngular migrations and performance optimization. This experience has given me a \nstrong understanding of enterprise software engineering, clean architecture, and cross-\nfunctional collaboration.",
+          "is_relevant": false
+        },
+        {
+          "rank": 4,
+          "chunk_id": "5a965a51-a4ee-5076-ac79-55f42eab9587",
+          "distance": 1.1337445974349976,
+          "filename": "NIST.AI.100-2e2023.pdf",
+          "page_number": 54,
+          "content": "From the beginning, LLMs raised concerns about privacy. Italy was early to ban the use of \nChatGPT due to these very concerns, and there have been many reported cases of chatbots \nleaking sensitive information or chat histories [87, 197]. Attacker goals are divided into \ntwo key categories: \n1. Information gathering. Specifc attacks can heighten these risks. For example, human-\nin-the-loop indirect prompting can be used to extract user data (e.g., personal infor -\nmation, credentials) or leak their chat histories by interacting in chat sessions and \npersuading users to divulge information or through side channels [122]. An attack \nexample that does not involve a human-in-the-loop is an attack against a personal as-\nsistant that can access a user’s data (e.g., real emails), which similarly causes privacy \nconcerns [122]. \n2. Unauthorized disclosure. Models are commonly integrated into system infrastruc-",
+          "is_relevant": false
+        },
+        {
+          "rank": 5,
+          "chunk_id": "515fd287-fbaf-5bc6-a01f-b6f0cca8eab3",
+          "distance": 1.1369472742080688,
+          "filename": "AI-RMF-1stdraft.pdf",
+          "page_number": 18,
+          "content": "1 \n \nContext is established and \nunderstood. \nIntended purpose, setting in which the AI system will be deployed, \nthe specific set of users along with their expectations, and impacts \nof system use are understood and documented as appropriate. \nThe business purpose or context of use has been clearly defined or \n– in the case of assessing existing AI systems – re-evaluated. \nThe organization’s mission and relevant goals for the AI \ntechnology are understood.  \nStakeholders are defined, a plan for continuous \nengagement/communication is developed, and outreach is \nconducted.",
+          "is_relevant": false
+        }
+      ]
+    },
+    {
+      "case_id": "eval-005",
+      "question": "What technologies are used to build the GenAI backend?",
+      "precision_at_k": 0.2,
+      "recall_at_k": 0.5,
+      "reciprocal_rank": 1.0,
+      "relevant_chunk_ids": [
+        "2d12b3f0-9e65-56ed-be7c-b31d82b6750f",
+        "4e359d64-a0c7-5275-ab03-5b27d8610b3f"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": "2d12b3f0-9e65-56ed-be7c-b31d82b6750f",
+          "distance": 0.788483738899231,
+          "filename": "Vivek_Resume_GA3.pdf",
+          "page_number": 1,
+          "content": "teams, and deliver scalable software from user interface to AI backend services. \nCore Skills  \n• AI & GenAI Development (Learning & Building): Python, FastAPI, Generative AI, LLM API Integration \n(OpenAI, Gemini), LangChain, Prompt Engineering, Embeddings, Vector Search, FAISS, \n• Frontend: Angular (2–16), TypeScript, JavaScript, HTML5, CSS3, Bootstrap \n• Frontend Architecture: Component Architecture, RxJS, Angular Signals, Lazy Loading, Performance             \n    Optimization  \n• Visualization & UI Libraries: D3.js, Kendo UI, Phaser2, Phaser3, PixiJs  \n• Tools & Platform: Git, GitHub, Azure Devops, Agile/Scrum  \n• Development Practices:  Agile & Scrum Methodologies, Clean & Scalable Code Practices, TDD  \n   CI/CD, UI/UX, Data Structure and Algorithms, System Design, Object Oriented Programming(OPPs)  \nWORK EXPERIENCE  \nAssociate Consultant | Gen AI Developer  \nTata Consultancy Services(TCS) | Sept 2025 – Present",
+          "is_relevant": true
+        },
+        {
+          "rank": 2,
+          "chunk_id": "9d32863a-195d-5a0e-9c99-1a3d07e44b7e",
+          "distance": 0.925902247428894,
+          "filename": "NIST.AI.100-2e2023.pdf",
+          "page_number": 44,
+          "content": "Training Data\nAttacks\nPrompt Injection\nData Extraction\nFigure 2. Taxonomy of attacks on Generative AI systems \nAn attack can be further categorized by the learning stage to which it applies and, sub-\nsequently, by the attacker’s knowledge and access. These are reviewed in the following \nsections. Where possible, the discussion broadly applies to GenAI with some specifc \nareas that apply to LLMs (e.g., R\nETRIEVAL AUGMENTED GENERATION [RAG], which \ndominates many of the deployment stage attacks described below). \n3.1.1. GenAI Stages of Learning \nDue \nto the size of the models and training sets, predominant patterns in GenAI model \ndevelopment have departed from historical processes in which the entire process of data \ncollection, labeling, model training, model validation, and model deployment are accom-\nplished in a single pipeline by a single organization. Instead, foundation models are created \nduring a pre-training stage that makes heavy use of unsupervised learning. The foundation",
+          "is_relevant": false
+        },
+        {
+          "rank": 3,
+          "chunk_id": "1d16499d-2032-57b4-b03c-bcf4c2bb7cfb",
+          "distance": 0.9360342025756836,
+          "filename": "NIST.AI.100-2e2023.pdf",
+          "page_number": 47,
+          "content": "NIST AI 100-2e2023 \nJanuary 2024 \n3.1.3. Attacker Capabilities \nNo\nvel attacker capabilities that enable GenAI attacker objectives include: \n• TRAINING DATA CONTROL : The attacker might take control of a subset of the train-\ning data by inserting or modifying training samples. This capability is used in data \npoisoning attacks. \n• QUERY ACCESS : Many GenAI models and their applications (e.g., RETRIEVAL \nAUGMENTED GENERATION ) are deployed as cloud-hosted services with access con-\ntrolled through API keys. In this case, the attacker can submit queries to the model \nto receive an output. In GenAI, the purpose of submitting attacker-tuned inputs is \nto elicit a specifc behavior from the model. This capability is used for \nPROMPT \nINJECTION , PROMPT EXTRACTION , and model stealing attacks. \n• SOURCE CODE CONTROL : The attacker might modify the source code of the ML al-\ngorithm, such as the random number generator or any third-party libraries, which are",
+          "is_relevant": false
+        },
+        {
+          "rank": 4,
+          "chunk_id": "618155bc-aa4c-5a15-b963-2bf5c08922a5",
+          "distance": 0.9374748468399048,
+          "filename": "NIST.AI.100-2e2023.pdf",
+          "page_number": 51,
+          "content": "NIST AI 100-2e2023 \nJanuary 2024 \n3.3.1. Data Extraction \nGenAI \nmodels are trained on data that may include proprietary or sensitive information. \nGenAI applications may also be instrumented with carefully crafted prompts or — as with \nRAG — be supplied with sensitive information in their context for summarization or other \ntask completion. Attacker techniques for extracting this information are the subject of \nongoing research for both LLMs [174, 348] and text-to-image models [266]. \nLeaking sensitive information. Carlini et al. [48] were the frst to practically demonstrate \ndata extraction attacks in generative language models. By inserting synthetic canaries in \nthe training data, they developed a methodology for extracting the canaries and introduced \na metric called exposure to measure memorization. Subsequent work demonstrated the risk \nof data extraction in large language models based on transformers, such as GPT-2 [51], by",
+          "is_relevant": false
+        },
+        {
+          "rank": 5,
+          "chunk_id": "0aa33abf-5aef-5d20-8d6a-9e382f9188c4",
+          "distance": 0.959367036819458,
+          "filename": "NIST.AI.100-2e2023.pdf",
+          "page_number": 45,
+          "content": "NIST AI 100-2e2023 \nJanuary 2024 \nmodel encodes patterns (e.g., in text, images, etc.) that are useful for downstream tasks. \nThe foundation models themselves are then the basis for creating task-specifc applications \nvia fne-tuning. In many cases, application developers begin with a foundation model devel-\noped by a third party and fne-tune it for their specifc application. Attacks that correspond \nto the stages of GenAI application development are described in more detail below. \nTraining-time attacks. The \nTRAINING STAGE for GenAI often consists of two distinct \nstages: foundation model PRE -TRAINING and model FINE -TUNING . This pattern exists \nfor generative image models, text models, audio models, and multimodal models, among \nothers. Since foundation models are most effective when trained on large datasets, it has \nbecome common to scrape data from a wide range of public sources. This makes founda-\ntion models especially susceptible to",
+          "is_relevant": false
+        }
+      ]
+    },
+    {
+      "case_id": "eval-006",
+      "question": "What Angular performance optimizations were implemented?",
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0,
+      "relevant_chunk_ids": [
+        "cfa0c77e-a78d-577a-93f3-bc23a458f5f4"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": "6565bf39-eec8-5629-9ceb-a70240fcc19a",
+          "distance": 1.1885879039764404,
+          "filename": "wellarchitected-framework.pdf",
+          "page_number": 956,
+          "content": "AWS Well-Architected Framework Framework\nSUS03-BP03 Optimize areas of code that consume the most time or resources\nOptimize your code that runs within diﬀerent components of your architecture to minimize \nresource usage while maximizing performance.\nCommon anti-patterns:\n• You ignore optimizing your code for resource usage.\n• You usually respond to performance issues by increasing the resources.\n• Your code review and development process does not track performance changes.\nBeneﬁts of establishing this best practice: Using eﬃcient code minimizes resource usage and \nimproves performance.\nLevel of risk exposed if this best practice is not established: Medium\nImplementation guidance\nIt is crucial to examine every functional area, including the code for a cloud architected application, \nto optimize its resource usage and performance. Continually monitor your workload’s performance \nin build environments and production and identify opportunities to improve code snippets that",
+          "is_relevant": false
+        },
+        {
+          "rank": 2,
+          "chunk_id": "1cefbb98-8b87-5fbf-b9cc-42b9c14a3911",
+          "distance": 1.2087677717208862,
+          "filename": "wellarchitected-framework.pdf",
+          "page_number": 714,
+          "content": "AWS Well-Architected Framework Framework\n• Serverless Optimization Workshop (Performance and Cost)\n• Scaling cost eﬀective architectures\nPERF01-BP04 Evaluate how trade-oﬀs impact customers and architecture eﬃciency\nWhen evaluating performance-related improvements, determine which choices impact your \ncustomers and workload eﬃciency. For example, if using a key-value data store increases system \nperformance, it is important to evaluate how the eventually consistent nature of this change will \nimpact customers.\nCommon anti-patterns:\n• You assume that all performance gains should be implemented, even if there are tradeoﬀs for \nimplementation.\n• You only evaluate changes to workloads when a performance issue has reached a critical point.\nBeneﬁts of establishing this best practice: When you are evaluating potential performance-\nrelated improvements, you must decide if the tradeoﬀs for the changes are acceptable with",
+          "is_relevant": false
+        },
+        {
+          "rank": 3,
+          "chunk_id": "dc95b3de-e1cf-5cf9-bd15-b160ac3256ce",
+          "distance": 1.246459722518921,
+          "filename": "wellarchitected-framework.pdf",
+          "page_number": 50,
+          "content": "Instances — they can be cost-eﬀective ways to generate the load.\n• Performance visibility: Key metrics should be visible to your team, especially metrics against \neach build version. This allows you to see any signiﬁcant positive or negative trend over time. \nYou should also display metrics on the number of errors or exceptions to make sure you are \ntesting a working system.\n• Visualization: Use visualization techniques that make it clear where performance issues, hot \nspots, wait states, or low utilization is occurring. Overlay performance metrics over architecture \ndiagrams — call graphs or code can help identify issues quickly.\n• Regular review process: Architectures performing poorly is usually the result of a non-existent \nor broken performance review process. If your architecture is performing poorly, implementing a \nperformance review process allows you to drive iterative improvement.\n• Continual optimization: Adopt a culture to continually optimize the performance eﬃciency of",
+          "is_relevant": false
+        },
+        {
+          "rank": 4,
+          "chunk_id": "c09af5ba-5ee8-579b-b123-c85108cfb4be",
+          "distance": 1.2585809230804443,
+          "filename": "wellarchitected-framework.pdf",
+          "page_number": 957,
+          "content": "AWS Well-Architected Framework Framework\n• Use a code proﬁler: Use a code proﬁler to identify the areas of code that use the most time or \nresources as targets for optimization.\n• Reducing your organization's carbon footprint with Amazon CodeGuru Proﬁler\n• Understanding memory usage in your Java application with Amazon CodeGuru Proﬁler\n• Improving customer experience and reducing cost with Amazon CodeGuru Proﬁler\n• Monitor and optimize: Use continuous monitoring resources to identify components with high \nresource requirements or suboptimal conﬁguration.\n• Replace computationally intensive algorithms with simpler and more eﬃcient version that \nproduce the same result.\n• Remove unnecessary code such as sorting and formatting.\n• Use code refactoring or transformation: Explore the possibility of Amazon Q code \ntransformation for application maintenance and upgrades.\n• Upgrade language versions with Amazon Q Code Transformation",
+          "is_relevant": false
+        },
+        {
+          "rank": 5,
+          "chunk_id": "83a98be5-941f-5923-b81e-8cc04fdefff5",
+          "distance": 1.2597051858901978,
+          "filename": "wellarchitected-framework.pdf",
+          "page_number": 758,
+          "content": "Data optimization and query tuning are critical aspects of performance eﬃciency in a data store, \nas they impact the performance and responsiveness of the entire cloud workload. Unoptimized \nqueries can result in greater resource usage and bottlenecks, which reduce the overall eﬃciency of \na data store.\nData optimization includes several techniques to ensure eﬃcient data storage and access. This also \nhelp to improve the query performance in a data store. Key strategies include data partitioning, \ndata compression, and data denormalization, which help data to be optimized for both storage and \naccess.\nImplementation steps\n• Understand and analyze the critical data queries which are performed in your data store.\n• Identify the slow-running queries in your data store and use query plans to understand their \ncurrent state.\n• Analyzing the query plan in Amazon Redshift\n• Using EXPLAIN and EXPLAIN ANALYZE in Athena\nData management 753",
+          "is_relevant": false
+        }
+      ]
+    },
+    {
+      "case_id": "eval-007",
+      "question": "What tools and technologies does Harshita use for data analysis and reporting?",
+      "precision_at_k": 0.2,
+      "recall_at_k": 1.0,
+      "reciprocal_rank": 1.0,
+      "relevant_chunk_ids": [
+        "e2368dc5-e69c-5176-a0d5-4a6283c92962"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": "e2368dc5-e69c-5176-a0d5-4a6283c92962",
+          "distance": 0.6348037123680115,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 1,
+          "content": "HARSHITA SINGH\nIndia | +91-9034356901 | hssaini134@gmail.com | https://www.linkedin.com/in/harshita-saini-b17b81189\nPROFESSIONAL SUMMARY\nData Analyst with 3 years of experience in building dashboards, automating reports, and delivering business\ninsights using Advanced Excel and Power BI. Skilled in analyzing large datasets, tracking KPIs, and creating data\nvisualizations to support decision-making. Experienced in developing interactive dashboards, improving reporting\nefficiency, and collaborating with stakeholders to translate business requirements into actionable insights.\nCore Skills\n Data Analysis & Reporting: Data Analysis, KPI Tracking, Business Reporting, Data Interpretation, Trend\nAnalysis.\n Visualization & BI Tools: Power BI, Microsoft Power BI, Dashboard Development, Data Visualizationn\n Data Handling & Processing: Data Cleaning, Data Transformation, Power Query, Data Validation\n Excel & Report: Advanced Excel, Pivot Tables, Lookup Functions, Report Automation",
+          "is_relevant": true
+        },
+        {
+          "rank": 2,
+          "chunk_id": "b2f1172e-e47f-57d1-9953-8334fbf0524f",
+          "distance": 0.9708942174911499,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 2,
+          "content": "Business intelligence tools like Microsoft Power BI, Advance Excel, and SQL. Done projects on Microsoft\nPower BI. In the project created dashboards for the ‘Student spend’ data provided by iNeuron.ai. Which\nexplains the complete information about the dataset through visuals.\nEDUCATION\n Master’s in Statistics (2018-2020) | Kurukshetra university\n BSc - Statistics/Math(2016 - 2017) | Mukund Lal National college",
+          "is_relevant": false
+        },
+        {
+          "rank": 3,
+          "chunk_id": "9059fef9-16fd-5569-88f1-d4d18b1b4c66",
+          "distance": 0.9803566336631775,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 1,
+          "content": " Developed structured datasets and reports to support business analysis and decision-making.\n Created dashboards, charts, and visual reports to present key metrics and performance trends.\n Generated insights and prepared presentations to communicate data findings and support business\nstrategies.\n Worked with stakeholders to understand data requirements and deliver actionable insights for improving\nbusiness performance.\n Utilized Excel-based tools and analytical techniques to organize, analyze, and interpret complex datasets.\n Performed analytical modeling using regression techniques and scenario simulations to derive insights and\nsupport business decision-making.\n Technologies: -Advanced Excel, Data Visualization, PowerPoint, Power BI\nBusiness Analyst | Intern\nBlockcube Technology | Dec 2021 – Feb 2022\n Assisted in preparing business documents including FRD and BRD based on client requirements..",
+          "is_relevant": false
+        },
+        {
+          "rank": 4,
+          "chunk_id": "777734a0-1d63-5a3b-a4e9-289f12ee5da9",
+          "distance": 1.0558252334594727,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 1,
+          "content": " Collaborated with cross-functional teams to understand reporting requirements and translate business\nneeds into actionable dashboards.\n Improved data quality and reporting accuracy through validation checks and data cleansing processes..\n Supported stakeholders with ad-hoc data analysis and reporting requests to aid business\ndecisions.\n Technologies: - Power BI, Advanced Excel, SQL/MySQL, Power Query, Data Visualization\nAssociate Consultant\nAnalytic Edge | Apr 2022 – Aug 2023\n Analyzed large sales and business datasets from multiple clients to identify trends, patterns, and\nperformance insights.\n Cleaned and processed raw data using Advanced Excel (SUMIF, COUNTIF, VLOOKUP, INDEX-MATCH, Pivot\nTables) to ensure data accuracy and usability.\n Developed structured datasets and reports to support business analysis and decision-making.\n Created dashboards, charts, and visual reports to present key metrics and performance trends.",
+          "is_relevant": false
+        },
+        {
+          "rank": 5,
+          "chunk_id": "67c59d57-8f40-5d19-a643-3e6aae0e798a",
+          "distance": 1.0788429975509644,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 1,
+          "content": " Data Handling & Processing: Data Cleaning, Data Transformation, Power Query, Data Validation\n Excel & Report: Advanced Excel, Pivot Tables, Lookup Functions, Report Automation\n Business & Stakeholder Skills: Requirement Gathering, Stakeholder Communication, Business Insights\nWORK EXPERIENCE\nSenior Analyst\nWNS Global Service | Dec 2024 – Present\n Developed and maintained Power BI dashboards to track business performance metrics and key KPIs,\nenabling data-driven decision making.\n Analyzed large datasets to identify trends, patterns, and performance insights for business stakeholders.\n Automated recurring reports using Advanced Excel (pivot tables, formulas, data transformation), reducing\nmanual effort and improving efficiency.\n Prepared weekly and monthly performance reports, ensuring accurate and timely delivery of insights.\n Collaborated with cross-functional teams to understand reporting requirements and translate business\nneeds into actionable dashboards.",
+          "is_relevant": false
+        }
+      ]
+    },
+    {
+      "case_id": "eval-008",
+      "question": "What Power BI and Excel work has Harshita performed at WNS?",
+      "precision_at_k": 0.2,
+      "recall_at_k": 1.0,
+      "reciprocal_rank": 0.5,
+      "relevant_chunk_ids": [
+        "67c59d57-8f40-5d19-a643-3e6aae0e798a"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": "e2368dc5-e69c-5176-a0d5-4a6283c92962",
+          "distance": 0.6506940126419067,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 1,
+          "content": "HARSHITA SINGH\nIndia | +91-9034356901 | hssaini134@gmail.com | https://www.linkedin.com/in/harshita-saini-b17b81189\nPROFESSIONAL SUMMARY\nData Analyst with 3 years of experience in building dashboards, automating reports, and delivering business\ninsights using Advanced Excel and Power BI. Skilled in analyzing large datasets, tracking KPIs, and creating data\nvisualizations to support decision-making. Experienced in developing interactive dashboards, improving reporting\nefficiency, and collaborating with stakeholders to translate business requirements into actionable insights.\nCore Skills\n Data Analysis & Reporting: Data Analysis, KPI Tracking, Business Reporting, Data Interpretation, Trend\nAnalysis.\n Visualization & BI Tools: Power BI, Microsoft Power BI, Dashboard Development, Data Visualizationn\n Data Handling & Processing: Data Cleaning, Data Transformation, Power Query, Data Validation\n Excel & Report: Advanced Excel, Pivot Tables, Lookup Functions, Report Automation",
+          "is_relevant": false
+        },
+        {
+          "rank": 2,
+          "chunk_id": "67c59d57-8f40-5d19-a643-3e6aae0e798a",
+          "distance": 0.6801357269287109,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 1,
+          "content": " Data Handling & Processing: Data Cleaning, Data Transformation, Power Query, Data Validation\n Excel & Report: Advanced Excel, Pivot Tables, Lookup Functions, Report Automation\n Business & Stakeholder Skills: Requirement Gathering, Stakeholder Communication, Business Insights\nWORK EXPERIENCE\nSenior Analyst\nWNS Global Service | Dec 2024 – Present\n Developed and maintained Power BI dashboards to track business performance metrics and key KPIs,\nenabling data-driven decision making.\n Analyzed large datasets to identify trends, patterns, and performance insights for business stakeholders.\n Automated recurring reports using Advanced Excel (pivot tables, formulas, data transformation), reducing\nmanual effort and improving efficiency.\n Prepared weekly and monthly performance reports, ensuring accurate and timely delivery of insights.\n Collaborated with cross-functional teams to understand reporting requirements and translate business\nneeds into actionable dashboards.",
+          "is_relevant": true
+        },
+        {
+          "rank": 3,
+          "chunk_id": "b2f1172e-e47f-57d1-9953-8334fbf0524f",
+          "distance": 0.8929502964019775,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 2,
+          "content": "Business intelligence tools like Microsoft Power BI, Advance Excel, and SQL. Done projects on Microsoft\nPower BI. In the project created dashboards for the ‘Student spend’ data provided by iNeuron.ai. Which\nexplains the complete information about the dataset through visuals.\nEDUCATION\n Master’s in Statistics (2018-2020) | Kurukshetra university\n BSc - Statistics/Math(2016 - 2017) | Mukund Lal National college",
+          "is_relevant": false
+        },
+        {
+          "rank": 4,
+          "chunk_id": "651d647a-2245-5c37-ac4e-895f489aca60",
+          "distance": 0.901792049407959,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 2,
+          "content": " Created data visualizations using Excel (pivot tables, charts, formulas) to organize and present data\neffectively.\nSubject Matter Expert\nVaidik-Edu-Services | Jul 2019 – Mar 2020\n Solved statistical and quantitative problems for international clients, ensuring accuracy and clarity in\nsolutions.\n Performed data analysis on small and large datasets using Excel and Google Sheets.\n Utilized spreadsheets and presentation tools to organize, analyze, and communicate data effectively.\nCERTIFICATIONS:\n Workshop at the National Institute of Medical Statistics, Delhi [June 2019]: The workshop guides\ndifferent statistical studies in medical research. Hands-on experience is provided R, MS-Excel, and SPSS\nusing National family health survey (NFHS) data.\n Learn Business Analytics at iNeuron.ai [Aug 2021]: Gained basic to advance level knowledge in the\nBusiness intelligence tools like Microsoft Power BI, Advance Excel, and SQL. Done projects on Microsoft",
+          "is_relevant": false
+        },
+        {
+          "rank": 5,
+          "chunk_id": "777734a0-1d63-5a3b-a4e9-289f12ee5da9",
+          "distance": 0.9368056058883667,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 1,
+          "content": " Collaborated with cross-functional teams to understand reporting requirements and translate business\nneeds into actionable dashboards.\n Improved data quality and reporting accuracy through validation checks and data cleansing processes..\n Supported stakeholders with ad-hoc data analysis and reporting requests to aid business\ndecisions.\n Technologies: - Power BI, Advanced Excel, SQL/MySQL, Power Query, Data Visualization\nAssociate Consultant\nAnalytic Edge | Apr 2022 – Aug 2023\n Analyzed large sales and business datasets from multiple clients to identify trends, patterns, and\nperformance insights.\n Cleaned and processed raw data using Advanced Excel (SUMIF, COUNTIF, VLOOKUP, INDEX-MATCH, Pivot\nTables) to ensure data accuracy and usability.\n Developed structured datasets and reports to support business analysis and decision-making.\n Created dashboards, charts, and visual reports to present key metrics and performance trends.",
+          "is_relevant": false
+        }
+      ]
+    },
+    {
+      "case_id": "eval-009",
+      "question": "How did Harshita improve data quality and reporting accuracy?",
+      "precision_at_k": 0.2,
+      "recall_at_k": 1.0,
+      "reciprocal_rank": 0.5,
+      "relevant_chunk_ids": [
+        "777734a0-1d63-5a3b-a4e9-289f12ee5da9"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": "e2368dc5-e69c-5176-a0d5-4a6283c92962",
+          "distance": 0.7951536774635315,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 1,
+          "content": "HARSHITA SINGH\nIndia | +91-9034356901 | hssaini134@gmail.com | https://www.linkedin.com/in/harshita-saini-b17b81189\nPROFESSIONAL SUMMARY\nData Analyst with 3 years of experience in building dashboards, automating reports, and delivering business\ninsights using Advanced Excel and Power BI. Skilled in analyzing large datasets, tracking KPIs, and creating data\nvisualizations to support decision-making. Experienced in developing interactive dashboards, improving reporting\nefficiency, and collaborating with stakeholders to translate business requirements into actionable insights.\nCore Skills\n Data Analysis & Reporting: Data Analysis, KPI Tracking, Business Reporting, Data Interpretation, Trend\nAnalysis.\n Visualization & BI Tools: Power BI, Microsoft Power BI, Dashboard Development, Data Visualizationn\n Data Handling & Processing: Data Cleaning, Data Transformation, Power Query, Data Validation\n Excel & Report: Advanced Excel, Pivot Tables, Lookup Functions, Report Automation",
+          "is_relevant": false
+        },
+        {
+          "rank": 2,
+          "chunk_id": "777734a0-1d63-5a3b-a4e9-289f12ee5da9",
+          "distance": 1.0797653198242188,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 1,
+          "content": " Collaborated with cross-functional teams to understand reporting requirements and translate business\nneeds into actionable dashboards.\n Improved data quality and reporting accuracy through validation checks and data cleansing processes..\n Supported stakeholders with ad-hoc data analysis and reporting requests to aid business\ndecisions.\n Technologies: - Power BI, Advanced Excel, SQL/MySQL, Power Query, Data Visualization\nAssociate Consultant\nAnalytic Edge | Apr 2022 – Aug 2023\n Analyzed large sales and business datasets from multiple clients to identify trends, patterns, and\nperformance insights.\n Cleaned and processed raw data using Advanced Excel (SUMIF, COUNTIF, VLOOKUP, INDEX-MATCH, Pivot\nTables) to ensure data accuracy and usability.\n Developed structured datasets and reports to support business analysis and decision-making.\n Created dashboards, charts, and visual reports to present key metrics and performance trends.",
+          "is_relevant": true
+        },
+        {
+          "rank": 3,
+          "chunk_id": "9059fef9-16fd-5569-88f1-d4d18b1b4c66",
+          "distance": 1.1169846057891846,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 1,
+          "content": " Developed structured datasets and reports to support business analysis and decision-making.\n Created dashboards, charts, and visual reports to present key metrics and performance trends.\n Generated insights and prepared presentations to communicate data findings and support business\nstrategies.\n Worked with stakeholders to understand data requirements and deliver actionable insights for improving\nbusiness performance.\n Utilized Excel-based tools and analytical techniques to organize, analyze, and interpret complex datasets.\n Performed analytical modeling using regression techniques and scenario simulations to derive insights and\nsupport business decision-making.\n Technologies: -Advanced Excel, Data Visualization, PowerPoint, Power BI\nBusiness Analyst | Intern\nBlockcube Technology | Dec 2021 – Feb 2022\n Assisted in preparing business documents including FRD and BRD based on client requirements..",
+          "is_relevant": false
+        },
+        {
+          "rank": 4,
+          "chunk_id": "67c59d57-8f40-5d19-a643-3e6aae0e798a",
+          "distance": 1.1310895681381226,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 1,
+          "content": " Data Handling & Processing: Data Cleaning, Data Transformation, Power Query, Data Validation\n Excel & Report: Advanced Excel, Pivot Tables, Lookup Functions, Report Automation\n Business & Stakeholder Skills: Requirement Gathering, Stakeholder Communication, Business Insights\nWORK EXPERIENCE\nSenior Analyst\nWNS Global Service | Dec 2024 – Present\n Developed and maintained Power BI dashboards to track business performance metrics and key KPIs,\nenabling data-driven decision making.\n Analyzed large datasets to identify trends, patterns, and performance insights for business stakeholders.\n Automated recurring reports using Advanced Excel (pivot tables, formulas, data transformation), reducing\nmanual effort and improving efficiency.\n Prepared weekly and monthly performance reports, ensuring accurate and timely delivery of insights.\n Collaborated with cross-functional teams to understand reporting requirements and translate business\nneeds into actionable dashboards.",
+          "is_relevant": false
+        },
+        {
+          "rank": 5,
+          "chunk_id": "651d647a-2245-5c37-ac4e-895f489aca60",
+          "distance": 1.1467963457107544,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 2,
+          "content": " Created data visualizations using Excel (pivot tables, charts, formulas) to organize and present data\neffectively.\nSubject Matter Expert\nVaidik-Edu-Services | Jul 2019 – Mar 2020\n Solved statistical and quantitative problems for international clients, ensuring accuracy and clarity in\nsolutions.\n Performed data analysis on small and large datasets using Excel and Google Sheets.\n Utilized spreadsheets and presentation tools to organize, analyze, and communicate data effectively.\nCERTIFICATIONS:\n Workshop at the National Institute of Medical Statistics, Delhi [June 2019]: The workshop guides\ndifferent statistical studies in medical research. Hands-on experience is provided R, MS-Excel, and SPSS\nusing National family health survey (NFHS) data.\n Learn Business Analytics at iNeuron.ai [Aug 2021]: Gained basic to advance level knowledge in the\nBusiness intelligence tools like Microsoft Power BI, Advance Excel, and SQL. Done projects on Microsoft",
+          "is_relevant": false
+        }
+      ]
+    },
+    {
+      "case_id": "eval-010",
+      "question": "What projects has Vivek worked on as part of his work samples?",
+      "precision_at_k": 0.4,
+      "recall_at_k": 1.0,
+      "reciprocal_rank": 0.5,
+      "relevant_chunk_ids": [
+        "16705b43-a8b0-59c8-834f-bb8db9bf934f",
+        "d18c410e-6556-57ed-8a44-549c2b3de517"
+      ],
+      "retrieved_chunks": [
+        {
+          "rank": 1,
+          "chunk_id": "4c779ff1-4046-5061-97f3-5d03970cd6bb",
+          "distance": 0.8755532503128052,
+          "filename": "Vivek_Resume_GA3.pdf",
+          "page_number": 1,
+          "content": "VIVEK KUMAR SINGH  \nIndia | +91-8904461742 | vivekks9392@yahoo.com | https://www.linkedin.com/in/vivekks1293 | https://github.com/vivekks1293  \n \nPROFESSIONAL SUMMARY  \nSenior Software Engineer with 8+ years of experience designing scalable enterprise applications across frontend \nand AI domains. Extensive expertise in Angular, TypeScript, frontend architecture, performance optimization, and \nreusable component design, comb ined with hands -on experience building production -ready Generative AI \nsolutions using Python, FastAPI, LangChain, OpenAI APIs, Retrieval-Augmented Generation (RAG), semantic search, \nand conversational AI. Proven ability to design maintainable architectures , collaborate across cross -functional \nteams, and deliver scalable software from user interface to AI backend services. \nCore Skills  \n• AI & GenAI Development (Learning & Building): Python, FastAPI, Generative AI, LLM API Integration",
+          "is_relevant": false
+        },
+        {
+          "rank": 2,
+          "chunk_id": "d18c410e-6556-57ed-8a44-549c2b3de517",
+          "distance": 1.0090582370758057,
+          "filename": "Vivek_Resume_GA3.pdf",
+          "page_number": 2,
+          "content": "analysis and job-fit scoring.  \n• Project: Giggly UI| Jan 2025: Developed Giggly UI, a modern Angular-based UI component library \ndesigned to provide a playful yet professional user experience. It includes customization, responsive \ncomponents such as buttons, drop-downs, and form elements, ensuring seamless integration with Angular \nforms. Deployed the project using Firebase for accessibility and scalability.  Link: \nhttps://mygigglyui.web.app/.  \nCERTIFICATIONS  \n• Gen AI & Agentic AI for Developers- IIT Patna(Feb 2026 - Ongoing)  \n• UI Design Specialization - California School of Arts (Aug 2023)  \nEDUCATION  \n• Executive MBA(2026) |  Indian Institute of Management Amritsar(IIM)  \n• Bachelor of Computer Science and Engineering (2016) | Visvesvaraya Technological University  \nCO-CURRICULAR ACTIVITIES/ACHIEVEMENT  \n• All India ranked 328 in Coding-Ninjas hackathon.  \n• Winner of KVS state-level chess tournament.  \n• Represented college at the state level in chess for three years.",
+          "is_relevant": true
+        },
+        {
+          "rank": 3,
+          "chunk_id": "16705b43-a8b0-59c8-834f-bb8db9bf934f",
+          "distance": 1.0138558149337769,
+          "filename": "Vivek_Resume_GA3.pdf",
+          "page_number": 2,
+          "content": "Tech Mahindra Ltd | Feb 2017 – Dec 2019  \n• Requirement understanding, application design, development and unit testing.  \n• Coordinate with the Product Owner and Development team.  \n• Facilitate different agile ceremonies encouraging and demanding self-organization from the development \nteam, unit testing, code reviews and technical help to the team.  \n• Keeping Application Lifecycle Management (ALM) updated and following scrum practices, ensuring all \nSprint activities are time boxed.  \n• Technologies: Java, Angular2, Bootstrap, Scrum, Agile Methodology.  \nWORK SAMPLE(S):  \n• Project: RoleFit | 2026 (In Progress): AI-powered resume tailoring platform built with Angular 18 \n(frontend) and Python FastAPI (backend), integrating OpenAI and Gemini APIs for intelligent resume \nanalysis and job-fit scoring.  \n• Project: Giggly UI| Jan 2025: Developed Giggly UI, a modern Angular-based UI component library",
+          "is_relevant": true
+        },
+        {
+          "rank": 4,
+          "chunk_id": "651d647a-2245-5c37-ac4e-895f489aca60",
+          "distance": 1.0494205951690674,
+          "filename": "Harshita-Resume.pdf",
+          "page_number": 2,
+          "content": " Created data visualizations using Excel (pivot tables, charts, formulas) to organize and present data\neffectively.\nSubject Matter Expert\nVaidik-Edu-Services | Jul 2019 – Mar 2020\n Solved statistical and quantitative problems for international clients, ensuring accuracy and clarity in\nsolutions.\n Performed data analysis on small and large datasets using Excel and Google Sheets.\n Utilized spreadsheets and presentation tools to organize, analyze, and communicate data effectively.\nCERTIFICATIONS:\n Workshop at the National Institute of Medical Statistics, Delhi [June 2019]: The workshop guides\ndifferent statistical studies in medical research. Hands-on experience is provided R, MS-Excel, and SPSS\nusing National family health survey (NFHS) data.\n Learn Business Analytics at iNeuron.ai [Aug 2021]: Gained basic to advance level knowledge in the\nBusiness intelligence tools like Microsoft Power BI, Advance Excel, and SQL. Done projects on Microsoft",
+          "is_relevant": false
+        },
+        {
+          "rank": 5,
+          "chunk_id": "3c4f90cb-c7da-5cd6-b233-604231134b8e",
+          "distance": 1.0687566995620728,
+          "filename": "Cover.pdf",
+          "page_number": 2,
+          "content": "I would welcome the opportunity to discuss how my background in enterprise software \ndevelopment and Generative AI can contribute to your team. Thank you for your time \nand consideration. I look forward to hearing from you. \nSincerely, \nVivek Kumar Singh",
+          "is_relevant": false
+        }
+      ]
+    }
+  ]
+}

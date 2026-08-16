@@ -37,17 +37,23 @@ class DocumentRetrievalService:
         *,
         query: str,
         owner_id: UUID,
+        top_k: int | None = None,
     ) -> VectorSearchResult:
+
         embedding = await self._embedding_provider.embed_query(
             query,
         )
 
-        result  = await self._vector_store.search(
+        result = await self._vector_store.search(
             embedding=embedding,
             filter=VectorSearchFilter(
                 owner_id=owner_id,
             ),
-            top_k=settings.knowledge_retrieval_top_k,
+            top_k=(
+                top_k
+                if top_k is not None
+                else settings.knowledge_retrieval_top_k
+            ),
         )
 
         RetrievalLogger.log(

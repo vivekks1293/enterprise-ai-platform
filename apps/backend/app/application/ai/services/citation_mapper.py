@@ -25,7 +25,7 @@ class CitationMapper:
                     chunk_id=chunk.metadata.chunk_id,
                     chunk_index=chunk.metadata.chunk_index,
                     page_number=chunk.metadata.page_number,
-                    similarity_score=chunk.similarity_score,
+                    distance=chunk.distance,
                 )
             )
 

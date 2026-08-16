@@ -125,7 +125,7 @@ class ChromaVectorStore(VectorStore):
                 RetrievedChunk(
                     content=document,
                     metadata=chunk_metadata,
-                    similarity_score=1 - distance,
+                    distance= distance,
                 )
             )
 

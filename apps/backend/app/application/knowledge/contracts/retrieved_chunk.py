@@ -15,4 +15,4 @@ class RetrievedChunk:
 
     metadata: ChunkMetadata
 
-    similarity_score: float
+    distance: float
