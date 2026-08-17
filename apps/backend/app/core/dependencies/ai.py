@@ -20,6 +20,7 @@ from app.application.knowledge.ports.vector_store import (
     VectorStore,
 )
 from app.application.knowledge.ports.keyword_store import KeywordStore
+from app.application.knowledge.ports.reranker import Reranker
 from app.core.config.settings import settings
 from app.core.dependencies.knowledge import (
     get_embedding_provider,
@@ -34,6 +35,9 @@ from app.infrastructure.ai.providers.openai.openai_chat_provider import (
 )
 from app.infrastructure.ai.resolver.default_chat_provider_resolver import (
     DefaultChatProviderResolver,
+)
+from app.infrastructure.knowledge.rerank.cross_encoder_reranker import (
+    CrossEncoderReranker,
 )
 
 
@@ -79,6 +83,7 @@ def get_document_retrieval_service(
         embedding_provider=embedding_provider,
         vector_store=vector_store,
         keyword_store=keyword_store,
+        reranker=CrossEncoderReranker(),
     )
 
 

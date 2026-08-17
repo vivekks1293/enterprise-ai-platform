@@ -1,0 +1,22 @@
+{
+  "baseline": {
+    "total_cases": 10,
+    "k": 20,
+    "precision_at_k": 0.05500000000000001,
+    "recall_at_k": 0.95,
+    "mean_reciprocal_rank": 0.4864285714285714
+  },
+  "hybrid_plus_rerank": {
+    "total_cases": 10,
+    "k": 20,
+    "precision_at_k": 0.05500000000000001,
+    "recall_at_k": 0.95,
+    "mean_reciprocal_rank": 0.27873737373737373
+  },
+  "improvement": {
+    "precision_at_k_delta": 0.0,
+    "recall_at_k_delta": 0.0,
+    "mean_reciprocal_rank_delta": -0.20769119769119765
+  },
+  "rerank_model": "cross-encoder/stsb-roberta-base"
+}

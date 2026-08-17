@@ -384,7 +384,9 @@ async def main(retrieval_method: str = "semantic") -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--method", choices=("semantic", "keyword"), default="semantic"
+        "--method",
+        choices=("semantic", "keyword", "hybrid"),
+        default="semantic",
     )
     arguments = parser.parse_args()
     asyncio.run(main(arguments.method))

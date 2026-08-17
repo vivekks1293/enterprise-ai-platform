@@ -57,6 +57,18 @@ class Settings(BaseSettings):
 
     knowledge_retrieval_top_k: int = 5
 
+    # Hybrid retrieval uses rank fusion, so this is the number of candidates
+    # independently requested from Chroma and BM25 before final Top-K fusion.
+    knowledge_hybrid_candidate_k: int = 50
+
+    knowledge_hybrid_rrf_rank_constant: int = 60
+
+    knowledge_rerank_enabled: bool = True
+
+    knowledge_rerank_top_k: int = 20
+
+    knowledge_rerank_model: str = "cross-encoder/stsb-roberta-base"
+
     knowledge_similarity_threshold: float = 0.75
 
     knowledge_max_context_chunks: int = 5

@@ -21,8 +21,10 @@ dependencies = [
     "rank-bm25>=0.2.2",
     "python-docx>=1.2.0",
     "python-multipart>=0.0.32",
+    "sentence-transformers>=5.3.1",
     "sqlalchemy>=2.0.51",
     "structlog>=26.1.0",
+    "torch>=2.7.1",
     "uvicorn>=0.50.2",
 ]
 
