@@ -5,7 +5,7 @@ from app.core.lifespan import lifespan
 from app.core.logging.logger import configure_logging
 from app.delivery.api import register_routers
 from app.core.exceptions import register_exception_handlers
-from app.core.middleware import register_cors
+from app.core.middleware import RequestCorrelationMiddleware, register_cors
 
 
 
@@ -22,6 +22,7 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    app.add_middleware(RequestCorrelationMiddleware)
     register_cors(app)
     register_exception_handlers(app)
     register_routers(app)

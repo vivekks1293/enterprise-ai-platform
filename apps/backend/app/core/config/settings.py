@@ -73,6 +73,10 @@ class Settings(BaseSettings):
 
     knowledge_max_context_chunks: int = 5
 
+    # Approximate input-context budget. Context assembly estimates tokens as
+    # four thirds of whitespace-delimited words; it is not model tokenization.
+    knowledge_context_max_tokens: int = 4_000
+
     openai_api_key: str = Field(alias="OPENAI_API_KEY")
 
     openai_chat_model: str = Field(

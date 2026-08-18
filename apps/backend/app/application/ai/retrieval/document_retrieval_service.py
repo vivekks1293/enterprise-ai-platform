@@ -1,4 +1,5 @@
 from uuid import UUID
+from time import perf_counter
 
 from app.application.knowledge.ports.embedding_provider import (
     EmbeddingProvider,
@@ -47,6 +48,7 @@ class DocumentRetrievalService:
         top_k: int | None = None,
         retrieval_mode: str = "semantic",
     ) -> VectorSearchResult:
+        started_at = perf_counter()
         search_filter = VectorSearchFilter(owner_id=owner_id)
         resolved_top_k = (
             top_k
@@ -90,6 +92,8 @@ class DocumentRetrievalService:
                 "retrieval_mode must be 'semantic', 'keyword', or 'hybrid'."
             )
 
+        candidate_count = len(result.chunks)
+
         if self._reranker is not None and settings.knowledge_rerank_enabled:
             rerank_top_k = min(len(result.chunks), settings.knowledge_rerank_top_k)
             if rerank_top_k > 0:
@@ -102,6 +106,10 @@ class DocumentRetrievalService:
         RetrievalLogger.log(
             query=query,
             result=result,
+            retrieval_mode=retrieval_mode,
+            candidate_count=candidate_count,
+            top_k=resolved_top_k,
+            duration_ms=round((perf_counter() - started_at) * 1000, 2),
         )
 
         return result

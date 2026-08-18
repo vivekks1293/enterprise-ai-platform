@@ -13,6 +13,9 @@ from app.application.ai.retrieval.document_retrieval_service import (
 from app.application.ai.services.default_prompt_builder import (
     DefaultPromptBuilder,
 )
+from app.application.ai.services.context_assembler import (
+    ContextAssembler,
+)
 from app.application.knowledge.ports.embedding_provider import (
     EmbeddingProvider,
 )
@@ -69,6 +72,13 @@ def get_prompt_builder() -> PromptBuilder:
     return DefaultPromptBuilder()
 
 
+def get_context_assembler() -> ContextAssembler:
+
+    return ContextAssembler(
+        max_tokens=settings.knowledge_context_max_tokens,
+    )
+
+
 def get_document_retrieval_service(
     embedding_provider: EmbeddingProvider = Depends(
         get_embedding_provider,
@@ -91,6 +101,9 @@ def get_ai_orchestrator(
     retrieval_service: DocumentRetrievalService = Depends(
         get_document_retrieval_service,
     ),
+    context_assembler: ContextAssembler = Depends(
+        get_context_assembler,
+    ),
     prompt_builder: PromptBuilder = Depends(
         get_prompt_builder,
     ),
@@ -101,6 +114,7 @@ def get_ai_orchestrator(
 
     return AIOrchestrator(
         retrieval_service=retrieval_service,
+        context_assembler=context_assembler,
         prompt_builder=prompt_builder,
         chat_provider_resolver=chat_provider_resolver,
     )
