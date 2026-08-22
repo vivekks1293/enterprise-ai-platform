@@ -15,6 +15,16 @@ class Settings(BaseSettings):
 
     database_max_overflow: int = 20
 
+    otel_sampling_ratio: float = 1.0
+
+    otel_console_exporter: bool = False
+
+    langfuse_enabled: bool = False
+    langfuse_public_key: str | None = None
+    langfuse_secret_key: str | None = None
+    langfuse_base_url: str | None = None
+    langfuse_capture_content: bool = False
+
     knowledge_chunk_size: int = 1000
 
     knowledge_chunk_overlap: int = 200

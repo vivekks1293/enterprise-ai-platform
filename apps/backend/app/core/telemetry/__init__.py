@@ -1,0 +1,1 @@
+"""OpenTelemetry configuration for the application."""

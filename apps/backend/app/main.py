@@ -3,6 +3,8 @@ from fastapi import FastAPI
 from app.core.config.settings import settings
 from app.core.lifespan import lifespan
 from app.core.logging.logger import configure_logging
+from app.core.telemetry.opentelemetry import configure_opentelemetry
+from app.core.observability.langfuse import configure_langfuse
 from app.delivery.api import register_routers
 from app.core.exceptions import register_exception_handlers
 from app.core.middleware import RequestCorrelationMiddleware, register_cors
@@ -11,6 +13,8 @@ from app.core.middleware import RequestCorrelationMiddleware, register_cors
 
 def create_app() -> FastAPI:
     configure_logging()
+    configure_opentelemetry()
+    configure_langfuse()
 
     app = FastAPI(
         title=settings.app_name,
@@ -23,6 +27,9 @@ def create_app() -> FastAPI:
     )
 
     app.add_middleware(RequestCorrelationMiddleware)
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+    FastAPIInstrumentor.instrument_app(app)
     register_cors(app)
     register_exception_handlers(app)
     register_routers(app)

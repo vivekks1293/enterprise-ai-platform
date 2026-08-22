@@ -1,4 +1,5 @@
 import asyncio
+from contextlib import contextmanager
 from collections.abc import AsyncIterator
 from uuid import UUID
 
@@ -14,6 +15,7 @@ from app.domain.ai.models.chat_chunk import ChatChunk
 from app.domain.ai.models.chat_message import ChatMessage
 from app.domain.ai.models.chat_request import ChatRequest
 from app.domain.conversation.enums.message_role import MessageRole
+from app.infrastructure.observability.langfuse_observer import LangfuseObserver
 
 
 DOCUMENT_ID = UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
@@ -65,6 +67,25 @@ class StubProviderResolver:
         return self._provider
 
 
+class RecordingGeneration:
+    def __init__(self) -> None:
+        self.updates: list[dict] = []
+
+    def update(self, **kwargs) -> None:
+        self.updates.append(kwargs)
+
+
+class RecordingLangfuseClient:
+    def __init__(self) -> None:
+        self.generation = RecordingGeneration()
+        self.arguments: dict = {}
+
+    @contextmanager
+    def start_as_current_observation(self, **kwargs):
+        self.arguments = kwargs
+        yield self.generation
+
+
 def retrieved_chunk() -> RetrievedChunk:
     return RetrievedChunk(
         content="Approvals take five business days.",
@@ -100,7 +121,10 @@ async def collect_events(
     ]
 
 
-def create_orchestrator(chunks: list[RetrievedChunk]):
+def create_orchestrator(
+    chunks: list[RetrievedChunk],
+    langfuse: LangfuseObserver | None = None,
+):
     retrieval_service = StubRetrievalService(chunks)
     prompt_builder = StubPromptBuilder()
     provider = StubProvider()
@@ -111,6 +135,7 @@ def create_orchestrator(chunks: list[RetrievedChunk]):
             context_assembler=ContextAssembler(max_tokens=100),
             prompt_builder=prompt_builder,
             chat_provider_resolver=resolver,
+            langfuse=langfuse,
         ),
         prompt_builder,
         provider,
@@ -200,3 +225,34 @@ def test_streamed_response_publishes_completed_generation_evaluation_record():
     assert [citation.chunk_id for citation in records[0].citations] == [
         "approval-period"
     ]
+
+
+def test_langfuse_generation_observes_streamed_generation_safely():
+    client = RecordingLangfuseClient()
+    observer = LangfuseObserver(
+        client=client,
+        enabled=True,
+        capture_content=False,
+    )
+    orchestrator, _, _, _ = create_orchestrator(
+        [retrieved_chunk()],
+        langfuse=observer,
+    )
+
+    events = asyncio.run(
+        collect_events(orchestrator, "How long do approvals take?")
+    )
+
+    assert [event.type for event in events] == [
+        "token",
+        "token",
+        "citations",
+        "complete",
+    ]
+    assert client.arguments["name"] == "rag.llm_generation"
+    assert client.arguments["as_type"] == "generation"
+    assert client.arguments["model"] == "gpt-4.1-mini"
+    assert client.arguments["input"] is None
+    assert client.generation.updates[0]["output"] is None
+    assert client.generation.updates[0]["metadata"]["outcome"] == "success"
+    assert client.generation.updates[0]["metadata"]["citation_event_present"] is True

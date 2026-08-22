@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app.core.logging.logger import logger
 from app.infrastructure.persistence.health import is_database_ready
+from app.core.observability.langfuse import get_langfuse_observer
 
 
 @asynccontextmanager
@@ -19,5 +20,7 @@ async def lifespan(app: FastAPI):
         logger.error("Unable to connect to PostgreSQL.")
 
     yield
+
+    await get_langfuse_observer().shutdown()
 
     logger.info("Application shutting down...")

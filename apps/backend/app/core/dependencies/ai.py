@@ -30,6 +30,10 @@ from app.core.dependencies.knowledge import (
     get_keyword_store,
     get_vector_store,
 )
+from app.core.dependencies.metrics import get_metrics_recorder
+from app.application.common.ports.metrics_recorder import MetricsRecorder
+from app.core.observability.langfuse import get_langfuse_observer
+from app.infrastructure.observability.langfuse_observer import LangfuseObserver
 from app.infrastructure.ai.langchain.client.langchain_chat_client import (
     LangChainChatClient,
 )
@@ -76,6 +80,7 @@ def get_context_assembler() -> ContextAssembler:
 
     return ContextAssembler(
         max_tokens=settings.knowledge_context_max_tokens,
+        metrics=get_metrics_recorder(),
     )
 
 
@@ -87,6 +92,7 @@ def get_document_retrieval_service(
         get_vector_store,
     ),
     keyword_store: KeywordStore = Depends(get_keyword_store),
+    metrics: MetricsRecorder = Depends(get_metrics_recorder),
 ) -> DocumentRetrievalService:
 
     return DocumentRetrievalService(
@@ -94,6 +100,7 @@ def get_document_retrieval_service(
         vector_store=vector_store,
         keyword_store=keyword_store,
         reranker=CrossEncoderReranker(),
+        metrics=metrics,
     )
 
 
@@ -110,6 +117,8 @@ def get_ai_orchestrator(
     chat_provider_resolver: ChatProviderResolver = Depends(
         get_chat_provider_resolver,
     ),
+    metrics: MetricsRecorder = Depends(get_metrics_recorder),
+    langfuse: LangfuseObserver = Depends(get_langfuse_observer),
 ) -> AIOrchestrator:
 
     return AIOrchestrator(
@@ -117,4 +126,6 @@ def get_ai_orchestrator(
         context_assembler=context_assembler,
         prompt_builder=prompt_builder,
         chat_provider_resolver=chat_provider_resolver,
+        metrics=metrics,
+        langfuse=langfuse,
     )

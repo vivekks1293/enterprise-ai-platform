@@ -26,6 +26,10 @@ dependencies = [
     "structlog>=26.1.0",
     "torch>=2.7.1",
     "uvicorn>=0.50.2",
+    "opentelemetry-api==1.44.0",
+    "opentelemetry-sdk==1.44.0",
+    "opentelemetry-instrumentation-fastapi>=0.65b0",
+    "langfuse>=4.0.0",
 ]
 
 [dependency-groups]
