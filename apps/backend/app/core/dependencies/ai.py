@@ -55,6 +55,7 @@ def get_chat_provider() -> ChatProvider:
         model=settings.openai_chat_model,
         temperature=settings.openai_temperature,
         max_tokens=settings.openai_max_tokens,
+        stream_usage=True,
     )
 
     chat_client = LangChainChatClient(chat_model)

@@ -16,6 +16,10 @@ from app.domain.knowledge.repositories.document_repository import (
 from app.application.knowledge.services.document_indexing_service import (
     DocumentIndexingService,
 )
+from app.application.knowledge.services.document_type_resolver import (
+    DocumentTypeResolver,
+)
+from app.core.config.settings import settings
 
 class UploadDocumentUseCase:
     """
@@ -90,10 +94,6 @@ class UploadDocumentUseCase:
             document,
         )
 
-        await self._document_indexing_service.index(
-            document,
-        )
-
 
         return UploadDocumentResponse(
             id=document.id,
@@ -115,8 +115,19 @@ class UploadDocumentUseCase:
         if request.size_bytes <= 0:
             raise ValueError("Document size must be greater than zero.")
 
+        if request.size_bytes > settings.knowledge_upload_max_size_bytes:
+            raise ValueError(
+                "Document exceeds the maximum allowed upload size of "
+                f"{settings.knowledge_upload_max_size_bytes} bytes."
+            )
+
         if not request.content_type.strip():
             raise ValueError("Document content type cannot be empty.")
+
+        try:
+            DocumentTypeResolver().resolve(request.filename)
+        except ValueError as exc:
+            raise ValueError(f"Unsupported document type: {exc}") from exc
 
     @staticmethod
     def _build_storage_key(

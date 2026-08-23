@@ -51,6 +51,9 @@ def configure_langfuse() -> LangfuseObserver:
             environment=settings.environment,
             tracing_enabled=True,
             tracer_provider=trace.get_tracer_provider(),
+            additional_headers={
+                "x-langfuse-ingestion-version": "4",
+            },
         )
         _observer = LangfuseObserver(
             client=client,

@@ -38,6 +38,7 @@ from app.application.common.ports.metrics_recorder import (
 )
 from app.domain.ai.models.citation import Citation
 from app.domain.ai.models.chat_message import ChatMessage
+from app.domain.ai.models.chat_usage import ChatUsage
 from app.core.config.settings import settings
 from app.core.logging.logger import log_event
 from app.infrastructure.observability.langfuse_observer import (
@@ -335,6 +336,7 @@ class AIOrchestrator:
             generation_started_at = perf_counter()
             first_token_at: float | None = None
             token_event_count = 0
+            usage: ChatUsage | None = None
 
             with tracer.start_as_current_span("rag.llm_generation") as llm_span:
                 llm_span.set_attributes(
@@ -362,11 +364,14 @@ class AIOrchestrator:
                         async for chunk in provider.stream(chat_request):
 
                             if chunk.is_final:
+                                usage = chunk.usage or usage
                                 break
 
                             if not chunk.content:
+                                usage = chunk.usage or usage
                                 continue
 
+                            usage = chunk.usage or usage
                             if first_token_at is None:
                                 first_token_at = perf_counter()
                                 self._metrics.observe(
@@ -399,6 +404,7 @@ class AIOrchestrator:
                                 "token_event_count": token_event_count,
                                 "outcome": "failure",
                             },
+                            usage_details=self._langfuse_usage_details(usage),
                             level="ERROR",
                             status_message=type(exc).__name__,
                         )
@@ -458,6 +464,7 @@ class AIOrchestrator:
                         "citation_event_present": bool(citations),
                         "outcome": "success",
                     },
+                    usage_details=self._langfuse_usage_details(usage),
                 )
 
                 if citations:
@@ -480,6 +487,9 @@ class AIOrchestrator:
                     ),
                     total_generation_duration_ms=generation_duration_ms,
                     token_event_count=token_event_count,
+                    input_tokens=(usage.prompt_tokens if usage else None),
+                    output_tokens=(usage.completion_tokens if usage else None),
+                    total_tokens=(usage.total_tokens if usage else None),
                     citation_event_present=bool(citations),
                     completion_status="completed",
                 )
@@ -594,6 +604,25 @@ class AIOrchestrator:
             "provider": type(provider).__name__,
             "model": settings.openai_chat_model,
         }
+
+    @staticmethod
+    def _langfuse_usage_details(
+        usage: ChatUsage | None,
+    ) -> dict[str, int] | None:
+        if usage is None:
+            return None
+
+        values = {
+            "input": usage.prompt_tokens,
+            "output": usage.completion_tokens,
+            "total": usage.total_tokens,
+        }
+        available_values = {
+            key: value
+            for key, value in values.items()
+            if value is not None
+        }
+        return available_values or None
 
     @staticmethod
     async def _publish_evaluation_record(

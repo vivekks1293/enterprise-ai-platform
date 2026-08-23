@@ -14,6 +14,7 @@ from app.application.knowledge.contracts.vector_search_result import (
 from app.domain.ai.models.chat_chunk import ChatChunk
 from app.domain.ai.models.chat_message import ChatMessage
 from app.domain.ai.models.chat_request import ChatRequest
+from app.domain.ai.models.chat_usage import ChatUsage
 from app.domain.conversation.enums.message_role import MessageRole
 from app.infrastructure.observability.langfuse_observer import LangfuseObserver
 
@@ -54,7 +55,15 @@ class StubProvider:
         self.requests.append(request)
         yield ChatChunk(content="Grounded ")
         yield ChatChunk(content="answer")
-        yield ChatChunk(content="", is_final=True)
+        yield ChatChunk(
+            content="",
+            is_final=True,
+            usage=ChatUsage(
+                prompt_tokens=12,
+                completion_tokens=4,
+                total_tokens=16,
+            ),
+        )
 
 
 class StubProviderResolver:
@@ -256,3 +265,8 @@ def test_langfuse_generation_observes_streamed_generation_safely():
     assert client.generation.updates[0]["output"] is None
     assert client.generation.updates[0]["metadata"]["outcome"] == "success"
     assert client.generation.updates[0]["metadata"]["citation_event_present"] is True
+    assert client.generation.updates[0]["usage_details"] == {
+        "input": 12,
+        "output": 4,
+        "total": 16,
+    }

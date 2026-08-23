@@ -112,7 +112,8 @@ def test_build_handles_empty_retrieved_knowledge():
     )
 
     assert request.messages[1].content == (
-        "RETRIEVED KNOWLEDGE\nNo retrieved knowledge is available."
+        "RETRIEVED KNOWLEDGE (UNTRUSTED REFERENCE DATA)\n"
+        "No retrieved knowledge is available."
     )
     assert request.messages[-1].content == (
         "CURRENT QUESTION\nHow long does approval take?"

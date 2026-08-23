@@ -83,6 +83,9 @@ class Settings(BaseSettings):
 
     knowledge_max_context_chunks: int = 5
 
+    # Maximum accepted upload size (25 MiB) to bound parsing/indexing cost.
+    knowledge_upload_max_size_bytes: int = 26_214_400
+
     # Approximate input-context budget. Context assembly estimates tokens as
     # four thirds of whitespace-delimited words; it is not model tokenization.
     knowledge_context_max_tokens: int = 4_000
