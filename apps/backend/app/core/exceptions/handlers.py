@@ -106,3 +106,22 @@ def register_exception_handlers(
             status_code=status.HTTP_404_NOT_FOUND,
             content=response.model_dump(mode="json"),
         )
+
+    @app.exception_handler(Exception)
+    async def generic_exception_handler(
+        request: Request,
+        exc: Exception,
+    ):
+        logger.exception(
+            "Unhandled exception in request",
+            extra={
+                "http_method": request.method,
+                "request_path": request.url.path,
+                "exception_type": type(exc).__name__,
+                "exception_message": str(exc),
+            },
+        )
+        return _error_response(
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            "Internal server error.",
+        )
