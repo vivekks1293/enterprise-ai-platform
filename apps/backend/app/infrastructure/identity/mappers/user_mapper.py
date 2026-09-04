@@ -15,6 +15,8 @@ def to_domain(model: UserModel) -> User:
         name=model.name,
         is_active=model.is_active,
         created_at=model.created_at,
+        role_type=model.role_type,
+        role_type_name=model.role_type_name,
     )
 
 
@@ -29,4 +31,6 @@ def to_model(entity: User) -> UserModel:
         name=entity.name,
         is_active=entity.is_active,
         created_at=entity.created_at,
+        role_type=entity.role_type,
+        role_type_name=entity.role_type_name,
     )

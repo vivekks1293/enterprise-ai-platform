@@ -1,11 +1,18 @@
 from fastapi import APIRouter, Depends, Response, status
 
 from app.application.identity.dto.login_request import LoginRequest
+from app.application.identity.dto.create_user import CreateUserRequest
 from app.core.dependencies.identity import get_login_use_case
+from app.core.dependencies.identity import get_create_user_use_case
 from app.core.dependencies.identity import get_logout_use_case
 from app.application.identity.use_cases.login import LoginUseCase
+from app.application.identity.use_cases.create_user import CreateUserUseCase
 from app.delivery.api.schemas.identity.login_request import LoginRequestSchema
 from app.delivery.api.schemas.identity.login_response import LoginResponseSchema
+from app.delivery.api.schemas.identity.create_user import (
+    CreateUserRequestSchema,
+    CreateUserResponseSchema,
+)
 from app.domain.identity.value_objects.email import Email
 
 
@@ -30,6 +37,34 @@ router = APIRouter(
     prefix="/identity",
     tags=["Identity"],
 )
+
+
+@router.post(
+    "/users",
+    response_model=CreateUserResponseSchema,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create an application user",
+)
+async def create_user(
+    request: CreateUserRequestSchema,
+    use_case: CreateUserUseCase = Depends(get_create_user_use_case),
+) -> CreateUserResponseSchema:
+    response = await use_case.execute(
+        CreateUserRequest(
+            email=Email(request.username),
+            password=request.password,
+            role_type=request.role_type,
+            role_type_name=request.role_type_name,
+        )
+    )
+
+    return CreateUserResponseSchema(
+        id=str(response.id),
+        username=response.email,
+        name=response.name,
+        roleType=response.role_type,
+        roleTypeName=response.role_type_name,
+    )
 
 
 @router.post(

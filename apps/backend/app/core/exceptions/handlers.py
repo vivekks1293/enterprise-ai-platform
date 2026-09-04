@@ -8,6 +8,7 @@ from app.application.identity.exceptions import (
     InvalidTokenError,
     InactiveUserError,
     UserNotFoundError,
+    UserAlreadyExistsError,
 )
 
 from app.delivery.api.schemas.common import ErrorResponse
@@ -89,6 +90,17 @@ def register_exception_handlers(
         return _error_response(
             status.HTTP_404_NOT_FOUND,
             "User not found.",
+        )
+
+    @app.exception_handler(UserAlreadyExistsError)
+    async def user_already_exists_handler(
+        request: Request,
+        exc: UserAlreadyExistsError,
+    ):
+        _log_application_exception(exc, "user_already_exists")
+        return _error_response(
+            status.HTTP_409_CONFLICT,
+            "A user with that username already exists.",
         )
     
     @app.exception_handler(ConversationNotFoundError)

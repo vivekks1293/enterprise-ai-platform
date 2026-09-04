@@ -25,3 +25,7 @@ class UserNotFoundError(IdentityError):
     """
     Raised when an authentication token is invalid or expired.
     """
+
+
+class UserAlreadyExistsError(IdentityError):
+    """Raised when a user with the same email already exists."""

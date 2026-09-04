@@ -1,8 +1,14 @@
 from dataclasses import dataclass
 from datetime import datetime
+from enum import IntEnum
 from uuid import UUID
 
 from app.domain.identity.value_objects.email import Email
+
+
+class RoleType(IntEnum):
+    ADMIN = 0
+    USER = 1
 
 
 @dataclass(slots=True)
@@ -20,3 +26,5 @@ class User:
     name: str
     is_active: bool
     created_at: datetime
+    role_type: RoleType
+    role_type_name: str
