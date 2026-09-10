@@ -14,6 +14,7 @@ import { RelativeTimePipe } from '@shared/pipes/relative-time.pipe';
 import { FileSizePipe } from '@shared/pipes/file-size.pipe';
 import { MimeTypeLabelPipe } from '@shared/pipes/mime-type-label.pipe';
 import { UiVariant } from '@shared/types/ui.types';
+import { NotificationService } from '@core/services/notification.service';
 
 /**
  * The only component in the Documents feature that injects
@@ -43,7 +44,10 @@ import { UiVariant } from '@shared/types/ui.types';
   styleUrl: './documents.page.scss'
 })
 export class DocumentsPageComponent implements OnInit {
+  private static readonly MAX_DOCUMENT_SIZE_BYTES = 5 * 1024 * 1024;
+
   protected readonly facade = inject(KnowledgeFacade);
+  private readonly notificationService = inject(NotificationService);
 
   @ViewChild('fileInput') private readonly fileInput?: ElementRef<HTMLInputElement>;
 
@@ -51,6 +55,9 @@ export class DocumentsPageComponent implements OnInit {
    *  open) — not Facade state, same reasoning as LoginPage's
    *  `passwordVisible` signal staying component-local. */
   protected readonly pendingDelete = signal<KnowledgeDocument | null>(null);
+  protected readonly uploadDialogOpen = signal(false);
+  protected readonly selectedFile = signal<File | null>(null);
+  protected readonly uploadValidationMessage = signal<string | null>(null);
 
   public ngOnInit(): void {
     this.facade.loadDocuments();
@@ -60,14 +67,48 @@ export class DocumentsPageComponent implements OnInit {
     this.fileInput?.nativeElement.click();
   }
 
+  protected openUploadDialog(): void {
+    this.selectedFile.set(null);
+    this.uploadValidationMessage.set(null);
+    this.uploadDialogOpen.set(true);
+  }
+
+  protected closeUploadDialog(): void {
+    this.uploadDialogOpen.set(false);
+    this.selectedFile.set(null);
+    this.uploadValidationMessage.set(null);
+  }
+
   protected onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (file) {
-      this.facade.uploadDocument(file);
+    this.uploadValidationMessage.set(null);
+    if (file && !this.isPdf(file)) {
+      this.showUploadValidationError('Unsupported file type. Please select a PDF document.');
+    } else if (file && file.size > DocumentsPageComponent.MAX_DOCUMENT_SIZE_BYTES) {
+      this.showUploadValidationError('File is too large. Maximum file size is 5 MB.');
+    } else if (file) {
+      this.selectedFile.set(file);
     }
     // Reset so selecting the exact same file again still fires 'change'.
     input.value = '';
+  }
+
+  protected uploadSelectedFile(): void {
+    const file = this.selectedFile();
+    if (file) {
+      this.facade.uploadDocument(file);
+      this.closeUploadDialog();
+    }
+  }
+
+  private isPdf(file: File): boolean {
+    return file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  }
+
+  private showUploadValidationError(message: string): void {
+    this.uploadValidationMessage.set(message);
+    this.notificationService.notify(message, 'error');
   }
 
   protected onDownload(document: KnowledgeDocument): void {

@@ -3,7 +3,7 @@
     <div class="eap-chat-sidebar__header">
       <eap-button variant="primary" [fullWidth]="true" (clicked)="newConversation.emit()">
         <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
-        New conversation
+        New chat
       </eap-button>
     </div>
 
@@ -17,7 +17,7 @@
           <eap-skeleton-loader [rows]="6" [lineHeight]="40"></eap-skeleton-loader>
         </div>
       } @else if (pinnedConversations().length === 0 && recentConversations().length === 0) {
-        <eap-empty-state title="No conversations" description="Start a new conversation to see it here."></eap-empty-state>
+        <eap-empty-state title="No chats yet" description="Start a new chat to see your history here."></eap-empty-state>
       } @else {
         @if (pinnedConversations().length > 0) {
           <div class="eap-chat-sidebar__section-label">Pinned</div>

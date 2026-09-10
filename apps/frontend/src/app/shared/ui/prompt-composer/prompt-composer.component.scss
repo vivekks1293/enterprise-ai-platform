@@ -7,7 +7,7 @@
 
 .eap-composer {
   border: 1px solid v.$color-border;
-  border-radius: v.$radius-lg;
+  border-radius: v.$radius-md;
   background-color: v.$color-bg-surface;
   padding: v.$space-3 v.$space-3 v.$space-2;
   box-shadow: v.$shadow-sm;
@@ -30,7 +30,7 @@
   font-size: v.$font-size-base;
   line-height: v.$line-height-base;
   color: v.$color-text-primary;
-  padding: v.$space-2 0;
+  padding: v.$space-2 v.$space-1;
 
   &::placeholder {
     color: v.$color-text-muted;
