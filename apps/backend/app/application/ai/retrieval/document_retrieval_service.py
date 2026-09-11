@@ -58,9 +58,14 @@ class DocumentRetrievalService:
         query: str,
         owner_id: UUID,
         top_k: int | None = None,
-        retrieval_mode: str = "semantic",
+        retrieval_mode: str | None = None,
     ) -> VectorSearchResult:
         started_at = perf_counter()
+        retrieval_mode = (
+            retrieval_mode
+            if retrieval_mode is not None
+            else getattr(settings, "knowledge_retrieval_mode", "hybrid")
+        )
         search_filter = VectorSearchFilter(owner_id=owner_id)
         resolved_top_k = (
             top_k

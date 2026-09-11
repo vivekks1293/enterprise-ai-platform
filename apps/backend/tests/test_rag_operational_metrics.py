@@ -103,7 +103,7 @@ class StubRetrievalService:
     def __init__(self, chunks: list[RetrievedChunk]) -> None:
         self._chunks = chunks
 
-    async def retrieve(self, *, query: str, owner_id: UUID) -> VectorSearchResult:
+    async def retrieve(self, *, query: str, owner_id: UUID, **kwargs) -> VectorSearchResult:
         return VectorSearchResult(chunks=self._chunks)
 
 
@@ -167,7 +167,8 @@ def test_successful_stream_records_one_success_and_latency_metrics():
         )
     )
 
-    request_labels = {"retrieval_mode": "semantic", "outcome": "success"}
+    mode = getattr(settings, "knowledge_retrieval_mode", "hybrid")
+    request_labels = {"retrieval_mode": mode, "outcome": "success"}
     provider_labels = {
         "provider": "StreamingProvider",
         "model": settings.openai_chat_model,
@@ -178,7 +179,7 @@ def test_successful_stream_records_one_success_and_latency_metrics():
         "citations",
         "complete",
     ]
-    assert metrics.counter_value("rag_requests_total", labels={"retrieval_mode": "semantic"}) == 1
+    assert metrics.counter_value("rag_requests_total", labels={"retrieval_mode": mode}) == 1
     assert metrics.counter_value("rag_requests_success_total", labels=request_labels) == 1
     assert metrics.counter_value("rag_requests_failed_total", labels=request_labels) == 0
     assert len(metrics.observations("rag_request_duration_ms", labels=request_labels)) == 1
@@ -202,13 +203,14 @@ def test_fallback_records_only_one_fallback_outcome_without_llm_metrics():
         )
     )
 
-    fallback_labels = {"retrieval_mode": "semantic", "outcome": "fallback"}
+    mode = getattr(settings, "knowledge_retrieval_mode", "hybrid")
+    fallback_labels = {"retrieval_mode": mode, "outcome": "fallback"}
     assert [event.type for event in events] == ["token", "complete"]
-    assert metrics.counter_value("rag_requests_total", labels={"retrieval_mode": "semantic"}) == 1
+    assert metrics.counter_value("rag_requests_total", labels={"retrieval_mode": mode}) == 1
     assert metrics.counter_value("rag_requests_fallback_total", labels=fallback_labels) == 1
     assert metrics.counter_value(
         "rag_requests_success_total",
-        labels={"retrieval_mode": "semantic", "outcome": "success"},
+        labels={"retrieval_mode": mode, "outcome": "success"},
     ) == 0
     assert metrics.observations("rag_llm_ttft_ms") == []
     assert metrics.observations("rag_llm_generation_duration_ms") == []
@@ -221,10 +223,11 @@ def test_failed_stream_records_one_failure_without_fake_ttft():
     with pytest.raises(RuntimeError, match="provider unavailable"):
         asyncio.run(collect_events(orchestrator, "What is the answer?"))
 
-    failure_labels = {"retrieval_mode": "semantic", "outcome": "failed"}
+    mode = getattr(settings, "knowledge_retrieval_mode", "hybrid")
+    failure_labels = {"retrieval_mode": mode, "outcome": "failed"}
     assert metrics.counter_value("rag_requests_failed_total", labels=failure_labels) == 1
     assert metrics.counter_value("rag_requests_success_total", labels={
-        "retrieval_mode": "semantic",
+        "retrieval_mode": mode,
         "outcome": "success",
     }) == 0
     assert metrics.observations("rag_llm_ttft_ms") == []

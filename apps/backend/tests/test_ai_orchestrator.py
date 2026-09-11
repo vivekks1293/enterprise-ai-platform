@@ -33,6 +33,8 @@ class StubRetrievalService:
         *,
         query: str,
         owner_id: UUID,
+        retrieval_mode: str = "hybrid",
+        **kwargs,
     ) -> VectorSearchResult:
         self.queries.append(query)
         return VectorSearchResult(chunks=self._chunks)

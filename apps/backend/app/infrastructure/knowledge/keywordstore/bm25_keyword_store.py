@@ -18,6 +18,21 @@ class BM25KeywordStore(KeywordStore):
 
     _TOKEN_PATTERN = re.compile(r"\b\w+\b", re.UNICODE)
     _CORPUS_FILENAME = "bm25_corpus.json"
+    _STOPWORDS = {
+        "a", "about", "above", "after", "again", "against", "all", "am", "an", "and",
+        "any", "are", "as", "at", "be", "because", "been", "before", "being", "below",
+        "between", "both", "but", "by", "can", "could", "did", "do", "does", "doing",
+        "down", "during", "each", "few", "for", "from", "further", "had", "has", "have",
+        "having", "he", "her", "here", "hers", "herself", "him", "himself", "his", "how",
+        "i", "if", "in", "into", "is", "it", "its", "itself", "just", "me", "more",
+        "most", "my", "myself", "no", "nor", "not", "now", "of", "off", "on", "once",
+        "only", "or", "other", "our", "ours", "ourselves", "out", "over", "own", "same",
+        "she", "should", "so", "some", "such", "than", "that", "the", "their", "theirs",
+        "them", "themselves", "then", "there", "these", "they", "this", "those", "through",
+        "to", "too", "under", "until", "up", "very", "was", "we", "were", "what", "when",
+        "where", "which", "while", "who", "whom", "why", "with", "would", "you", "your",
+        "yours", "yourself", "yourselves", "ok", "okay", "tell", "please",
+    }
 
     def __init__(self, directory: str | Path) -> None:
         self._directory = Path(directory)
@@ -59,7 +74,7 @@ class BM25KeywordStore(KeywordStore):
         filter: VectorSearchFilter,
         top_k: int,
     ) -> VectorSearchResult:
-        if top_k <= 0 or not (query_tokens := self._tokenize(query)):
+        if top_k <= 0 or not (query_tokens := self._tokenize_query(query)):
             return VectorSearchResult(chunks=[])
 
         owner_index = self._owner_indexes.get(filter.owner_id)
@@ -100,6 +115,12 @@ class BM25KeywordStore(KeywordStore):
     @classmethod
     def _tokenize(cls, value: str) -> list[str]:
         return cls._TOKEN_PATTERN.findall(value.lower())
+
+    @classmethod
+    def _tokenize_query(cls, value: str) -> list[str]:
+        tokens = cls._tokenize(value)
+        content_tokens = [t for t in tokens if t not in cls._STOPWORDS]
+        return content_tokens if content_tokens else tokens
 
     @staticmethod
     def _key(metadata: ChunkMetadata) -> str:

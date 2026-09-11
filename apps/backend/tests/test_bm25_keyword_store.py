@@ -169,3 +169,28 @@ async def _test_bm25_deletes_document_chunks_and_persists(tmp_path):
         top_k=5,
     )
     assert all(c.metadata.document_id == other_doc_id for c in res_b_reloaded.chunks)
+
+
+def test_bm25_filters_conversational_stopwords_from_query(tmp_path):
+    asyncio.run(_test_bm25_filters_conversational_stopwords_from_query(tmp_path))
+
+
+async def _test_bm25_filters_conversational_stopwords_from_query(tmp_path):
+    store = BM25KeywordStore(tmp_path)
+    vivek_chunk = make_chunk("chunk-1", "Vivek is an experienced Principal AI Architect and Lead Engineer.")
+    other_chunk = make_chunk("chunk-2", "The system was configured and ok for production deployment.")
+    third_chunk = make_chunk("chunk-3", "Database migrations and PostgreSQL query optimization.")
+    await store.add([vivek_chunk, other_chunk, third_chunk])
+
+    result = await store.search(
+        query="ok and who was Vivek",
+        filter=VectorSearchFilter(owner_id=OWNER_A),
+        top_k=5,
+    )
+
+    assert len(result.chunks) >= 1
+    assert result.chunks[0].metadata.chunk_id == "chunk-1"
+    assert "Vivek" in result.chunks[0].content
+    assert result.chunks[0].score > 0
+    if len(result.chunks) > 1:
+        assert result.chunks[0].score > result.chunks[1].score

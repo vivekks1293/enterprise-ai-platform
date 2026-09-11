@@ -6,6 +6,9 @@ from app.application.ai.retrieval.document_retrieval_service import (
 from app.application.knowledge.contracts.chunk_metadata import ChunkMetadata
 from app.application.knowledge.contracts.retrieved_chunk import RetrievedChunk
 from app.application.knowledge.contracts.vector_search_result import VectorSearchResult
+from app.infrastructure.knowledge.rerank.cross_encoder_reranker import (
+    CrossEncoderReranker,
+)
 from app.infrastructure.knowledge.rerank.simple_reranker import SimpleReranker
 
 
@@ -106,3 +109,46 @@ def test_simple_reranker_prioritizes_query_overlap():
     )
 
     assert [item.metadata.chunk_id for item in result.chunks] == ["best", "relevant"]
+
+
+def test_cross_encoder_reranker_calibrated_scoring_for_entity_query():
+    vivek_chunk = RetrievedChunk(
+        content="Vivek is an experienced Principal AI Architect and Lead Engineer specializing in Python and Docker.",
+        metadata=ChunkMetadata(
+            document_id=DOCUMENT_ID,
+            filename="Vivek_Resume.pdf",
+            chunk_id="vivek-1",
+            chunk_index=0,
+            page_number=1,
+            owner_id=OWNER_ID,
+        ),
+        score=0.032,
+    )
+    harshita_chunk = RetrievedChunk(
+        content="Harshita is a Senior Software Engineer with strong background in Spring Boot and Java.",
+        metadata=ChunkMetadata(
+            document_id=DOCUMENT_ID,
+            filename="Harshita-Resume.pdf",
+            chunk_id="harshita-1",
+            chunk_index=0,
+            page_number=1,
+            owner_id=OWNER_ID,
+        ),
+        score=0.016,
+    )
+
+    reranker = CrossEncoderReranker()
+    result = reranker.rerank(
+        query="ok and who was Vivek",
+        chunks=[harshita_chunk, vivek_chunk],
+        top_k=2,
+    )
+
+    assert len(result.chunks) == 2
+    # Vivek must be ranked #1
+    assert result.chunks[0].metadata.chunk_id == "vivek-1"
+    # Match percentage must be calibrated high (85%+)
+    assert result.chunks[0].score >= 0.85
+    # Unrelated document must have low score (< 40%)
+    assert result.chunks[1].metadata.chunk_id == "harshita-1"
+    assert result.chunks[1].score < 0.40
