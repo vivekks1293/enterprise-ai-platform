@@ -7,7 +7,7 @@ from app.domain.identity.entities.user import User
 from app.domain.identity.repositories.user_repository import UserRepository
 from app.domain.identity.value_objects.email import Email
 
-from app.infrastructure.identity.mappers.user_mapper import to_domain
+from app.infrastructure.identity.mappers.user_mapper import to_domain, to_model
 from app.infrastructure.identity.models.user_model import UserModel
 
 
@@ -15,6 +15,9 @@ class PostgresUserRepository(UserRepository):
 
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
+
+    async def create(self, user: User) -> None:
+        self._session.add(to_model(user))
 
     async def get_by_email(
         self,

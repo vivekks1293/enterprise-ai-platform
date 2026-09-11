@@ -34,6 +34,10 @@
 .eap-chat-sidebar__header {
   padding: v.$space-3;
   border-bottom: 1px solid v.$color-border;
+
+  eap-button {
+    display: block;
+  }
 }
 
 .eap-chat-sidebar__search {
@@ -48,7 +52,7 @@
 .eap-chat-sidebar__list {
   flex: 1;
   overflow-y: auto;
-  padding: v.$space-3;
+  padding: v.$space-3 v.$space-2;
 }
 
 .eap-chat-sidebar__skeleton {
@@ -61,7 +65,11 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: v.$color-text-muted;
-  padding: v.$space-3 v.$space-2 v.$space-1;
+  padding: v.$space-4 v.$space-2 v.$space-1;
+
+  &:first-child {
+    padding-top: v.$space-2;
+  }
 }
 
 .eap-chat-sidebar__toggle {

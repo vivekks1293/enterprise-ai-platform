@@ -8,6 +8,7 @@ from app.application.identity.exceptions import (
     InvalidTokenError,
     InactiveUserError,
     UserNotFoundError,
+    UserAlreadyExistsError,
 )
 
 from app.delivery.api.schemas.common import ErrorResponse
@@ -90,6 +91,17 @@ def register_exception_handlers(
             status.HTTP_404_NOT_FOUND,
             "User not found.",
         )
+
+    @app.exception_handler(UserAlreadyExistsError)
+    async def user_already_exists_handler(
+        request: Request,
+        exc: UserAlreadyExistsError,
+    ):
+        _log_application_exception(exc, "user_already_exists")
+        return _error_response(
+            status.HTTP_409_CONFLICT,
+            "A user with that username already exists.",
+        )
     
     @app.exception_handler(ConversationNotFoundError)
     async def conversation_not_found_handler(
@@ -105,4 +117,23 @@ def register_exception_handlers(
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content=response.model_dump(mode="json"),
+        )
+
+    @app.exception_handler(Exception)
+    async def generic_exception_handler(
+        request: Request,
+        exc: Exception,
+    ):
+        logger.exception(
+            "Unhandled exception in request",
+            extra={
+                "http_method": request.method,
+                "request_path": request.url.path,
+                "exception_type": type(exc).__name__,
+                "exception_message": str(exc),
+            },
+        )
+        return _error_response(
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            "Internal server error.",
         )

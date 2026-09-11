@@ -19,7 +19,8 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: v.$space-5;
+  padding: v.$space-5 clamp(1rem, 3vw, 2.5rem);
+  background-color: v.$color-bg-base;
 }
 
 .eap-msg-list__empty {
@@ -32,7 +33,7 @@
 .eap-msg-list__inner {
   display: flex;
   flex-direction: column;
-  gap: v.$space-5;
-  max-width: 800px;
+  gap: v.$space-6;
+  max-width: 840px;
   margin: 0 auto;
 }

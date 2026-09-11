@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.identity.ports.password_hasher import PasswordHasher
 from app.application.identity.ports.token_service import TokenService
+from app.application.common.ports.unit_of_work import UnitOfWork
+from app.application.identity.use_cases.create_user import CreateUserUseCase
 from app.application.identity.use_cases.get_current_user import (
     GetCurrentUserUseCase,
 )
@@ -14,6 +16,7 @@ from app.application.identity.use_cases.logout import LogoutUseCase
 
 from app.core.config.settings import settings
 from app.core.dependencies.database import get_db_session
+from app.core.dependencies.common import get_unit_of_work
 
 from app.domain.identity.repositories.user_repository import UserRepository
 
@@ -82,6 +85,17 @@ def get_login_use_case(
         user_repository=repository,
         password_hasher=get_password_hasher(),
         token_service=get_token_service(),
+    )
+
+
+def get_create_user_use_case(
+    repository: UserRepository = Depends(get_user_repository),
+    unit_of_work: UnitOfWork = Depends(get_unit_of_work),
+) -> CreateUserUseCase:
+    return CreateUserUseCase(
+        user_repository=repository,
+        password_hasher=get_password_hasher(),
+        unit_of_work=unit_of_work,
     )
 
 

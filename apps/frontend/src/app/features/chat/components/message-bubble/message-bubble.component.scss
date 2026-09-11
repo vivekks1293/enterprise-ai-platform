@@ -3,7 +3,7 @@
 .eap-msg {
   display: flex;
   gap: v.$space-3;
-  max-width: 720px;
+  max-width: 760px;
 
   &--user {
     flex-direction: row-reverse;
@@ -15,7 +15,7 @@
 
     .eap-msg__bubble {
       background-color: v.$color-primary-subtle;
-      border-color: transparent;
+      border-color: rgba(13, 110, 253, 0.12);
     }
 
     .eap-msg__actions {
@@ -50,8 +50,8 @@
 .eap-msg__bubble {
   background-color: v.$color-bg-surface;
   border: 1px solid v.$color-border;
-  border-radius: v.$radius-lg;
-  padding: v.$space-3 v.$space-4;
+  border-radius: v.$radius-md;
+  padding: v.$space-4 v.$space-5;
   min-height: 40px;
   display: flex;
   align-items: center;
@@ -90,7 +90,7 @@
 }
 
 .eap-msg__citations {
-  margin-top: v.$space-2;
+  margin-top: v.$space-3;
   display: flex;
   align-items: center;
   gap: v.$space-2;
@@ -100,7 +100,7 @@
 .eap-msg__citations-label {
   font-size: v.$font-size-xs;
   font-weight: v.$font-weight-semibold;
-  color: v.$color-text-muted;
+  color: v.$color-text-secondary;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   flex-shrink: 0;

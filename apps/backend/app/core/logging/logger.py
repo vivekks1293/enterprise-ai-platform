@@ -18,19 +18,33 @@ class StructuredFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         message = record.getMessage()
+
         fields = {
             key: value
             for key, value in record.__dict__.items()
             if key not in _STANDARD_LOG_RECORD_FIELDS
         }
-        if not fields:
-            return message
 
-        rendered_fields = " ".join(
-            f"{key}={value!r}"
-            for key, value in sorted(fields.items())
-        )
-        return f"{message} {rendered_fields}"
+        rendered_fields = ""
+        if fields:
+            rendered_fields = " ".join(
+                f"{key}={value!r}"
+                for key, value in sorted(fields.items())
+            )
+
+        exception_text = ""
+        if record.exc_info:
+            exception_text = self.formatException(record.exc_info)
+
+        parts = [message]
+
+        if rendered_fields:
+            parts.append(rendered_fields)
+
+        if exception_text:
+            parts.append(exception_text)
+
+        return "\n".join(parts)
 
 
 class RequestContextFilter(logging.Filter):

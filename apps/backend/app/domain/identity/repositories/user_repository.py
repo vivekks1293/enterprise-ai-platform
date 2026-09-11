@@ -11,6 +11,11 @@ class UserRepository(ABC):
     """
 
     @abstractmethod
+    async def create(self, user: User) -> None:
+        """Persist a new user."""
+        raise NotImplementedError
+
+    @abstractmethod
     async def get_by_email(self, email: Email) -> User | None:
         """
         Retrieve a user by email.

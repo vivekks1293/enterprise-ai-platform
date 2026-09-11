@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
-from app.delivery.api.schemas.health import HealthResponse
-from app.infrastructure.persistence.health import is_database_ready
+from app.delivery.api.schemas.health import DatabaseDiagnosticResponse, HealthResponse
+from app.infrastructure.persistence.health import get_database_diagnostic, is_database_ready
 
 router = APIRouter(
     prefix="/health",
@@ -49,3 +49,16 @@ async def readiness() -> HealthResponse:
     return HealthResponse(
         status="READY",
     )
+
+
+@router.get(
+    "/diagnostic-db-connection",
+    response_model=DatabaseDiagnosticResponse,
+)
+async def diagnostic_db_connection() -> DatabaseDiagnosticResponse:
+    """
+    Temporary diagnostic endpoint to confirm the actual PostgreSQL
+    database and schema being used by the running ECS application.
+    """
+    diagnostic = await get_database_diagnostic()
+    return DatabaseDiagnosticResponse(**diagnostic)

@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 from app.domain.identity.value_objects.email import Email
 from app.infrastructure.identity.mappers.user_mapper import to_model
-from app.domain.identity.entities.user import User
+from app.domain.identity.entities.user import RoleType, User
 from app.infrastructure.identity.models.user_model import UserModel
 from app.infrastructure.identity.security.bcrypt_password_hasher import (
     BCryptPasswordHasher,
@@ -43,6 +43,8 @@ async def seed_admin() -> None:
             name="Platform Administrator",
             is_active=True,
             created_at=datetime.now(timezone.utc),
+            role_type=RoleType.ADMIN,
+            role_type_name="admin",
         )
 
         session.add(to_model(admin))

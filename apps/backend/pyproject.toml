@@ -30,10 +30,10 @@ dependencies = [
     "opentelemetry-sdk==1.44.0",
     "opentelemetry-instrumentation-fastapi>=0.65b0",
     "langfuse>=4.0.0",
+    "alembic>=1.18.5"
 ]
 
 [dependency-groups]
 dev = [
-    "alembic>=1.18.5",
     "pytest>=9.1.1",
 ]

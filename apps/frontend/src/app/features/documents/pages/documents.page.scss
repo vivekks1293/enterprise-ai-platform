@@ -31,3 +31,69 @@
     color: v.$color-danger;
   }
 }
+
+.eap-upload-dialog__dropzone {
+  width: 100%;
+  min-height: 176px;
+  border: 1px dashed v.$color-border-strong;
+  border-radius: v.$radius-md;
+  background: v.$color-bg-muted;
+  color: v.$color-text-secondary;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: v.$space-2;
+  cursor: pointer;
+
+  i {
+    color: v.$color-primary;
+    font-size: 1.75rem;
+  }
+
+  span {
+    color: v.$color-text-muted;
+    font-size: v.$font-size-sm;
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: v.$color-primary;
+    background: v.$color-primary-subtle;
+    outline: none;
+  }
+}
+
+.eap-upload-dialog__selected {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  margin-top: v.$space-3;
+  padding: v.$space-3;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-sm;
+  color: v.$color-text-primary;
+
+  i {
+    color: v.$color-danger;
+  }
+
+  span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    margin-left: auto;
+    color: v.$color-text-muted;
+    white-space: nowrap;
+  }
+}
+
+.eap-upload-dialog__error {
+  margin: v.$space-3 0 0;
+  color: v.$color-danger;
+  font-size: v.$font-size-sm;
+}

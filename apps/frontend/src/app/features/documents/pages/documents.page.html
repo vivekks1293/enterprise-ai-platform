@@ -6,8 +6,7 @@
         <p class="text-secondary-eap">Upload and manage files for your knowledge base.</p>
       </div>
       <div>
-        <input #fileInput type="file" hidden (change)="onFileSelected($event)" />
-        <eap-button variant="primary" [loading]="facade.uploading()" (clicked)="triggerFilePicker()">
+        <eap-button variant="primary" [loading]="facade.uploading()" (clicked)="openUploadDialog()">
           <i class="bi bi-upload me-1" aria-hidden="true"></i>
           Upload document
         </eap-button>
@@ -30,7 +29,7 @@
           @if (!facade.hasDocuments()) {
             <eap-empty-state
               title="No documents yet"
-              description="Upload a file to add it to your knowledge base."
+              description="Upload PDFs to build your knowledge base."
             ></eap-empty-state>
           } @else {
             <eap-card [noPadding]="true">
@@ -124,6 +123,31 @@
     </div>
   </div>
 </div>
+
+<eap-modal [open]="uploadDialogOpen()" title="Upload document" (closed)="closeUploadDialog()">
+  <input #fileInput type="file" hidden accept="application/pdf,.pdf" (change)="onFileSelected($event)" />
+  <button type="button" class="eap-upload-dialog__dropzone" (click)="triggerFilePicker()" aria-label="Browse PDF files">
+    <i class="bi bi-file-earmark-arrow-up" aria-hidden="true"></i>
+    <strong>Choose a PDF document</strong>
+    <span>PDF files only. Maximum file size 5 MB.</span>
+  </button>
+  @if (selectedFile(); as file) {
+    <div class="eap-upload-dialog__selected">
+      <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
+      <span>{{ file.name }}</span>
+      <small>{{ file.size | eapFileSize }}</small>
+    </div>
+  }
+  @if (uploadValidationMessage(); as message) {
+    <p class="eap-upload-dialog__error" role="alert">{{ message }}</p>
+  }
+  <div modalFooter class="d-flex justify-content-end gap-2">
+    <eap-button variant="secondary" (clicked)="closeUploadDialog()">Cancel</eap-button>
+    <eap-button variant="primary" [disabled]="selectedFile() === null" [loading]="facade.uploading()" (clicked)="uploadSelectedFile()">
+      Upload
+    </eap-button>
+  </div>
+</eap-modal>
 
 <eap-modal [open]="pendingDelete() !== null" title="Delete document" size="sm" (closed)="cancelDelete()">
   @if (pendingDelete(); as document) {
