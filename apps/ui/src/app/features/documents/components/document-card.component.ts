@@ -28,18 +28,19 @@ import { IconComponent } from '@shared/components/icon.component';
       <!-- Status Badge -->
       <div class="doc-status-col">
         @switch (document().status) {
-          @case ('INDEXED') {
-            <span class="status-badge status-indexed">
+          @case ('indexed') {
+            <span class="status-badge status-indexed" title="Indexed and ready for AI chat grounding">
               <app-icon name="check" [size]="12"></app-icon>
               Indexed
             </span>
           }
-          @case ('PARSED') {
-            <span class="status-badge status-parsed">
-              Parsed
+          @case ('indexing') {
+            <span class="status-badge status-indexing">
+              <div class="badge-spinner"></div>
+              Indexing...
             </span>
           }
-          @case ('FAILED') {
+          @case ('failed') {
             <span class="status-badge status-failed">
               <app-icon name="alert-circle" [size]="12"></app-icon>
               Failed
@@ -55,21 +56,21 @@ import { IconComponent } from '@shared/components/icon.component';
 
       <!-- Action Buttons -->
       <div class="doc-actions-col">
-        <!-- Index Action (if not already indexed) -->
-        @if (document().status !== 'INDEXED') {
+        <!-- Retry Action only if failed -->
+        @if (document().status === 'failed') {
           <button
             type="button"
-            class="action-btn index-btn"
+            class="action-btn retry-btn"
             [disabled]="isIndexing() || isDeleting()"
             (click)="index.emit(document().id)"
-            title="Index chunks into vector database for AI grounding"
+            title="Retry indexing into vector database"
           >
             @if (isIndexing()) {
               <div class="btn-spinner"></div>
-              <span>Indexing...</span>
+              <span>Retrying...</span>
             } @else {
-              <app-icon name="sparkles" [size]="13"></app-icon>
-              <span>Index into AI</span>
+              <app-icon name="refresh-cw" [size]="13"></app-icon>
+              <span>Retry Indexing</span>
             }
           </button>
         }
@@ -205,7 +206,11 @@ import { IconComponent } from '@shared/components/icon.component';
         color: var(--success);
       }
 
-      .status-parsed,
+      .status-indexing {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+      }
+
       .status-uploaded {
         background: var(--warning-bg);
         color: var(--warning);
@@ -214,6 +219,15 @@ import { IconComponent } from '@shared/components/icon.component';
       .status-failed {
         background: var(--danger-bg);
         color: var(--danger);
+      }
+
+      .badge-spinner {
+        width: 10px;
+        height: 10px;
+        border: 2px solid rgba(96, 165, 250, 0.3);
+        border-top-color: #60a5fa;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
       }
 
       .doc-actions-col {
@@ -233,13 +247,14 @@ import { IconComponent } from '@shared/components/icon.component';
         transition: all var(--transition-fast);
       }
 
-      .index-btn {
-        background: var(--primary);
-        color: #ffffff;
-        border: 1px solid transparent;
+      .retry-btn {
+        background: rgba(239, 68, 68, 0.12);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
 
         &:hover:not(:disabled) {
-          background: var(--primary-hover);
+          background: rgba(239, 68, 68, 0.22);
+          border-color: #f87171;
           transform: translateY(-1px);
         }
 

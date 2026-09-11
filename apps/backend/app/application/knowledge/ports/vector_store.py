@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from uuid import UUID
 
 from app.application.knowledge.contracts.embedded_document_chunk import (
     EmbeddedDocumentChunk,
@@ -22,6 +23,13 @@ class VectorStore(ABC):
     async def add(
         self,
         chunks: list[EmbeddedDocumentChunk],
+    ) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def delete(
+        self,
+        document_id: UUID,
     ) -> None:
         raise NotImplementedError
 

@@ -27,7 +27,7 @@ export class KnowledgeFacade {
   public readonly stats = computed(() => {
     const docs = this.state.documents();
     const total = docs.length;
-    const indexed = docs.filter((d) => d.status === 'INDEXED').length;
+    const indexed = docs.filter((d) => d.status === 'indexed').length;
     const totalBytes = docs.reduce((acc, d) => acc + d.sizeBytes, 0);
     return { total, indexed, totalBytes };
   });
@@ -59,7 +59,7 @@ export class KnowledgeFacade {
       next: (doc) => {
         this.state.addDocument(doc);
         this.state.isUploading.set(false);
-        this.toast.success(`"${file.name}" uploaded successfully!`);
+        this.toast.success(`"${file.name}" uploaded and indexed into vector store!`);
       },
       error: () => {
         this.state.isUploading.set(false);
@@ -70,14 +70,16 @@ export class KnowledgeFacade {
 
   public indexDocument(id: string): void {
     this.state.setIndexing(id, true);
+    this.state.updateDocumentStatus(id, 'indexing');
     this.repository.indexDocument(id).subscribe({
       next: (res) => {
         this.state.setIndexing(id, false);
-        this.state.updateDocumentStatus(id, 'INDEXED');
+        this.state.updateDocumentStatus(id, 'indexed');
         this.toast.success(`Document indexed into vector store (${res.chunk_count ?? 0} chunks created)`);
       },
       error: () => {
         this.state.setIndexing(id, false);
+        this.state.updateDocumentStatus(id, 'failed');
         this.toast.error('Failed to index document');
       }
     });

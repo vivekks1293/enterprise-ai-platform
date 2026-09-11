@@ -1,4 +1,4 @@
-export type DocumentStatus = 'UPLOADED' | 'PARSED' | 'INDEXED' | 'FAILED';
+export type DocumentStatus = 'available' | 'indexing' | 'indexed' | 'failed' | 'uploading';
 
 export interface KnowledgeDocument {
   readonly id: string;

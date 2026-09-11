@@ -67,6 +67,13 @@ class DocumentIndexingService:
         try:
 
             # ------------------------------------------
+            # Ensure idempotency: purge prior chunks to prevent duplication
+            # ------------------------------------------
+
+            await self._keyword_store.delete(document.id)
+            await self._vector_store.delete(document.id)
+
+            # ------------------------------------------
             # Ingest document
             # ------------------------------------------
 

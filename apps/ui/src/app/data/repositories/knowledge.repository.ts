@@ -21,7 +21,7 @@ export class KnowledgeRepository {
           filename: item.filename,
           contentType: item.content_type,
           sizeBytes: item.size_bytes,
-          status: item.status as DocumentStatus,
+          status: (item.status?.toLowerCase() || 'available') as DocumentStatus,
           createdAt: item.created_at,
           updatedAt: item.updated_at
         }))
@@ -36,7 +36,7 @@ export class KnowledgeRepository {
         filename: res.filename,
         contentType: res.content_type,
         sizeBytes: res.size_bytes,
-        status: res.status as DocumentStatus,
+        status: (res.status?.toLowerCase() || 'indexed') as DocumentStatus,
         createdAt: res.created_at,
         updatedAt: res.created_at
       }))

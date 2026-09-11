@@ -36,6 +36,22 @@ class BM25KeywordStore(KeywordStore):
         self._persist_corpus()
         self._rebuild_indexes()
 
+    async def delete(self, document_id: UUID) -> None:
+        """Removes all chunks for the given document and rebuilds the BM25 index."""
+        keys_to_delete = [
+            key
+            for key, chunk in self._chunks_by_key.items()
+            if chunk.metadata.document_id == document_id
+        ]
+        if not keys_to_delete:
+            return
+
+        for key in keys_to_delete:
+            del self._chunks_by_key[key]
+
+        self._persist_corpus()
+        self._rebuild_indexes()
+
     async def search(
         self,
         *,

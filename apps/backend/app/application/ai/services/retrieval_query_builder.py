@@ -3,11 +3,10 @@ from app.domain.ai.models.chat_message import ChatMessage
 
 class RetrievalQueryBuilder:
     """
-    Builds a retrieval query using the current user prompt
-    and recent conversation context.
+    Builds a focused retrieval query for knowledge search.
+    Focuses specifically on the current user prompt to prevent
+    cross-turn query contamination and stale citation leakage.
     """
-
-    MAX_HISTORY_MESSAGES = 4
 
     @classmethod
     def build(
@@ -16,26 +15,7 @@ class RetrievalQueryBuilder:
         messages: list[ChatMessage],
         user_prompt: str,
     ) -> str:
-
-        history = [
-            message
-            for message in messages[:-1]
-            if message.content.strip()
-        ]
-
-        recent_history = history[-cls.MAX_HISTORY_MESSAGES:]
-
-        if not recent_history:
-            return user_prompt
-
-        context = "\n".join(
-            f"{message.role}: {message.content}"
-            for message in recent_history
-        )
-
-        return (
-            f"Conversation context:\n"
-            f"{context}\n\n"
-            f"Current question:\n"
-            f"{user_prompt}"
-        )
+        """
+        Extracts the retrieval query scoped strictly to the current user prompt.
+        """
+        return user_prompt.strip()

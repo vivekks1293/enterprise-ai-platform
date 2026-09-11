@@ -1,52 +1,61 @@
-import { Component, ChangeDetectionStrategy, input, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Citation } from '@data/models/chat.dto';
 import { IconComponent } from '@shared/components/icon.component';
+
+export interface GroupedSource {
+  readonly documentId: string;
+  readonly filename: string;
+  readonly pagesLabel: string;
+  readonly bestScore: number;
+  readonly excerptsCount: number;
+  readonly chunks: readonly Citation[];
+}
 
 @Component({
   selector: 'app-citation-chips',
   standalone: true,
   imports: [CommonModule, IconComponent],
   template: `
-    @if (citations() && citations()!.length > 0) {
+    @if (groupedSources().length > 0) {
       <div class="citations-container">
         <div class="citations-header">
           <app-icon name="sparkles" [size]="14"></app-icon>
-          <span>Sources & Citations ({{ citations()!.length }})</span>
+          <span>Sources ({{ groupedSources().length }})</span>
         </div>
 
         <div class="chips-row">
-          @for (citation of citations()!; track citation.chunkId + $index) {
+          @for (source of groupedSources(); track source.documentId) {
             <button
               type="button"
               class="citation-chip"
-              [class.active]="selectedCitation()?.chunkId === citation.chunkId"
-              (click)="toggleCitation(citation)"
-              title="Click to preview source excerpt"
+              [class.active]="selectedSource()?.documentId === source.documentId"
+              (click)="toggleSource(source)"
+              title="Click to preview source excerpts"
             >
               <app-icon name="file-text" [size]="13"></app-icon>
-              <span class="filename">{{ citation.filename }}</span>
-              @if (citation.pageNumber) {
-                <span class="page-badge">p.{{ citation.pageNumber }}</span>
+              <span class="filename">{{ source.filename }}</span>
+              @if (source.pagesLabel) {
+                <span class="page-badge">{{ source.pagesLabel }}</span>
               }
-              <span class="score-badge">{{ formatScore(citation.similarityScore) }}</span>
+              <span class="score-badge">{{ formatScore(source.bestScore) }}</span>
             </button>
           }
         </div>
 
         <!-- Inline Expandable Grounding Card -->
-        @if (selectedCitation(); as active) {
+        @if (selectedSource(); as active) {
           <div class="citation-detail-card">
             <div class="detail-header">
               <div class="detail-title">
                 <app-icon name="file-text" [size]="15"></app-icon>
                 <strong>{{ active.filename }}</strong>
-                @if (active.pageNumber) {
-                  <span class="detail-page">Page {{ active.pageNumber }}</span>
+                @if (active.pagesLabel) {
+                  <span class="detail-page">{{ active.pagesLabel }}</span>
                 }
               </div>
               <div class="detail-actions">
-                <span class="score-pill">Match: {{ formatScore(active.similarityScore) }}</span>
+                <span class="score-pill">Top Match: {{ formatScore(active.bestScore) }}</span>
                 <button type="button" class="close-btn" (click)="clearSelection()" title="Close details">
                   &times;
                 </button>
@@ -55,16 +64,32 @@ import { IconComponent } from '@shared/components/icon.component';
 
             <div class="detail-body">
               <p class="chunk-meta">
-                <span>Chunk ID: <code>{{ active.chunkId }}</code></span>
                 <span>Document ID: <code>{{ active.documentId.slice(0, 8) }}...</code></span>
+                <span>{{ active.excerptsCount }} referenced excerpt{{ active.excerptsCount > 1 ? 's' : '' }}</span>
               </p>
-              @if (active.contentSnippet) {
-                <div class="snippet-box">
-                  <p>{{ active.contentSnippet }}</p>
-                </div>
-              } @else {
+
+              <div class="excerpts-list">
+                @for (chunk of active.chunks; track chunk.chunkId) {
+                  <div class="excerpt-item">
+                    <div class="excerpt-header">
+                      <span class="chunk-tag">Chunk #{{ chunk.chunkId }}</span>
+                      @if (chunk.pageNumber) {
+                        <span class="page-tag">Page {{ chunk.pageNumber }}</span>
+                      }
+                      <span class="match-tag">{{ formatScore(chunk.similarityScore) }}</span>
+                    </div>
+                    @if (chunk.contentSnippet) {
+                      <div class="snippet-box">
+                        <p>{{ chunk.contentSnippet }}</p>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              @if (!hasAnySnippet(active.chunks)) {
                 <p class="snippet-fallback">
-                  This response was verified and grounded against this indexed document section.
+                  This response was verified and grounded against this indexed enterprise document.
                 </p>
               }
             </div>
@@ -114,13 +139,14 @@ import { IconComponent } from '@shared/components/icon.component';
         font-size: 0.78rem;
         color: var(--text-secondary);
         transition: all var(--transition-fast);
+        cursor: pointer;
 
         app-icon {
           color: var(--primary-light);
         }
 
         .filename {
-          max-width: 140px;
+          max-width: 160px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -225,6 +251,9 @@ import { IconComponent } from '@shared/components/icon.component';
         color: var(--text-muted);
         padding: 0.1rem 0.3rem;
         border-radius: var(--radius-sm);
+        cursor: pointer;
+        background: transparent;
+        border: none;
         &:hover {
           color: var(--text-primary);
           background: var(--bg-card-hover);
@@ -244,12 +273,54 @@ import { IconComponent } from '@shared/components/icon.component';
         margin-bottom: 0.4rem;
       }
 
+      .excerpts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        margin-top: 0.4rem;
+        max-height: 220px;
+        overflow-y: auto;
+      }
+
+      .excerpt-item {
+        background: rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm);
+        padding: 0.45rem 0.6rem;
+      }
+
+      .excerpt-header {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.72rem;
+        margin-bottom: 0.25rem;
+
+        .chunk-tag {
+          font-family: monospace;
+          color: var(--text-muted);
+        }
+
+        .page-tag {
+          background: rgba(255, 255, 255, 0.06);
+          padding: 0.05rem 0.3rem;
+          border-radius: var(--radius-sm);
+          color: var(--text-secondary);
+        }
+
+        .match-tag {
+          font-weight: 600;
+          color: var(--success);
+          margin-left: auto;
+        }
+      }
+
       .snippet-box {
         background: rgba(0, 0, 0, 0.2);
         border-left: 2px solid var(--primary);
-        padding: 0.5rem 0.75rem;
+        padding: 0.4rem 0.6rem;
         border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         line-height: 1.45;
         color: var(--text-primary);
       }
@@ -258,6 +329,7 @@ import { IconComponent } from '@shared/components/icon.component';
         font-style: italic;
         color: var(--text-muted);
         font-size: 0.78rem;
+        margin-top: 0.4rem;
       }
 
       @keyframes fadeIn {
@@ -276,27 +348,86 @@ import { IconComponent } from '@shared/components/icon.component';
 })
 export class CitationChipsComponent {
   public readonly citations = input<readonly Citation[] | undefined>();
-  public readonly selectedCitation = signal<Citation | null>(null);
+  public readonly selectedSource = signal<GroupedSource | null>(null);
 
-  public toggleCitation(citation: Citation): void {
-    if (this.selectedCitation()?.chunkId === citation.chunkId) {
-      this.selectedCitation.set(null);
+  public readonly groupedSources = computed<GroupedSource[]>(() => {
+    const raw = this.citations();
+    if (!raw || raw.length === 0) return [];
+
+    const map = new Map<string, {
+      documentId: string;
+      filename: string;
+      pages: Set<number>;
+      bestScore: number;
+      chunks: Citation[];
+    }>();
+
+    for (const c of raw) {
+      const key = c.documentId || c.filename;
+      let entry = map.get(key);
+      if (!entry) {
+        entry = {
+          documentId: c.documentId || key,
+          filename: c.filename,
+          pages: new Set<number>(),
+          bestScore: c.similarityScore ?? 0,
+          chunks: []
+        };
+        map.set(key, entry);
+      }
+
+      if (c.pageNumber != null) {
+        entry.pages.add(c.pageNumber);
+      }
+      if (c.similarityScore != null && c.similarityScore > entry.bestScore) {
+        entry.bestScore = c.similarityScore;
+      }
+      if (!entry.chunks.some((existing) => existing.chunkId === c.chunkId)) {
+        entry.chunks.push(c);
+      }
+    }
+
+    return Array.from(map.values()).map((entry) => {
+      const sortedPages = Array.from(entry.pages).sort((a, b) => a - b);
+      let pagesLabel = '';
+      if (sortedPages.length === 1) {
+        pagesLabel = `p.${sortedPages[0]}`;
+      } else if (sortedPages.length > 1) {
+        pagesLabel = `p.${sortedPages.join(', ')}`;
+      }
+
+      return {
+        documentId: entry.documentId,
+        filename: entry.filename,
+        pagesLabel,
+        bestScore: entry.bestScore,
+        excerptsCount: entry.chunks.length,
+        chunks: entry.chunks
+      };
+    });
+  });
+
+  public toggleSource(source: GroupedSource): void {
+    if (this.selectedSource()?.documentId === source.documentId) {
+      this.selectedSource.set(null);
     } else {
-      this.selectedCitation.set(citation);
+      this.selectedSource.set(source);
     }
   }
 
   public clearSelection(): void {
-    this.selectedCitation.set(null);
+    this.selectedSource.set(null);
+  }
+
+  public hasAnySnippet(chunks: readonly Citation[]): boolean {
+    return chunks.some((c) => !!c.contentSnippet);
   }
 
   public formatScore(score: number): string {
     if (!score) return '';
-    // If score is normalized between 0-1, show percentage; else show fixed decimal
     if (score <= 1) {
       return `${Math.round(score * 100)}%`;
     }
     return score.toFixed(2);
   }
 }
-
