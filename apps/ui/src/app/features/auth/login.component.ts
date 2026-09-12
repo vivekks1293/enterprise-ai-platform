@@ -18,8 +18,8 @@ import { ROUTE_PATHS } from '@core/constants/app.constants';
           <div class="brand-icon">
             <app-icon name="sparkles" [size]="24"></app-icon>
           </div>
-          <h1>Enterprise AI</h1>
-          <p class="brand-tagline">Secure, grounded intelligence workspace</p>
+          <h1>OmniDoc</h1>
+          <p class="brand-tagline">Grounded document intelligence workspace</p>
         </div>
 
         <form (ngSubmit)="onSubmit()" class="login-form">
@@ -64,7 +64,7 @@ import { ROUTE_PATHS } from '@core/constants/app.constants';
         </form>
 
         <div class="card-footer">
-          <span>Enterprise AI Platform • Version 1.0</span>
+          <span>OmniDoc Platform • Version 1.0</span>
         </div>
       </div>
     </div>

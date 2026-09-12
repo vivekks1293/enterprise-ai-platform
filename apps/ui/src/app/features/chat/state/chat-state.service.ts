@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { ChatMessage, ConversationSummary } from '@data/models/chat.dto';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class ChatStateService {
   public readonly conversations = signal<readonly ConversationSummary[]>([]);
   public readonly selectedConversationId = signal<string | null>(null);
@@ -11,6 +11,17 @@ export class ChatStateService {
   public readonly isSending = signal<boolean>(false);
   public readonly isStreaming = signal<boolean>(false);
   public readonly searchTerm = signal<string>('');
+
+  public reset(): void {
+    this.conversations.set([]);
+    this.selectedConversationId.set(null);
+    this.messages.set([]);
+    this.isConversationsLoading.set(false);
+    this.isMessagesLoading.set(false);
+    this.isSending.set(false);
+    this.isStreaming.set(false);
+    this.searchTerm.set('');
+  }
 
   public setConversations(items: readonly ConversationSummary[]): void {
     this.conversations.set(items);

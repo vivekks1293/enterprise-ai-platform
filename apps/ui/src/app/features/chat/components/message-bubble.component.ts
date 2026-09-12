@@ -1,4 +1,13 @@
-import { Component, ChangeDetectionStrategy, input, signal } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  input,
+  signal,
+  computed,
+  effect,
+  OnInit,
+  OnDestroy
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatMessage } from '@data/models/chat.dto';
 import { MarkdownPipe } from '@shared/pipes/markdown.pipe';
@@ -24,13 +33,35 @@ import { CitationChipsComponent } from './citation-chips.component';
           @if (message().role === 'user') {
             <p class="user-text">{{ message().content }}</p>
           } @else {
-            <div class="assistant-markdown" [innerHTML]="message().content | markdown"></div>
-            @if (message().isStreaming) {
-              <span class="streaming-cursor"></span>
-            }
+            @if (message().isStreaming && !message().content) {
+              <!-- Modern Minimalist Thinking / Retrieving State -->
+              <div class="thinking-container">
+                <div class="thinking-header">
+                  <div class="thinking-sparkle-pulse">
+                    <app-icon name="sparkles" [size]="14"></app-icon>
+                  </div>
+                  <span class="thinking-status-text">{{ currentThinkingText() }}</span>
+                  <div class="typing-dots">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                  </div>
+                </div>
 
-            <!-- Bottom Inline Citations -->
-            <app-citation-chips [citations]="message().citations"></app-citation-chips>
+                <div class="shimmer-placeholder">
+                  <div class="shimmer-bar shimmer-bar-wide"></div>
+                  <div class="shimmer-bar shimmer-bar-mid"></div>
+                </div>
+              </div>
+            } @else {
+              <div class="assistant-markdown" [innerHTML]="message().content | markdown"></div>
+              @if (message().isStreaming) {
+                <span class="streaming-cursor"></span>
+              }
+
+              <!-- Bottom Inline Citations -->
+              <app-citation-chips [citations]="message().citations"></app-citation-chips>
+            }
           }
         </div>
 
@@ -140,6 +171,138 @@ import { CitationChipsComponent } from './citation-chips.component';
         line-height: 1.6;
       }
 
+      .thinking-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        padding: 0.25rem 0.15rem;
+        min-width: 270px;
+        animation: fadeIn 0.2s ease-in-out;
+      }
+
+      .thinking-header {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        padding: 0.35rem 0.75rem;
+        border-radius: var(--radius-full);
+        width: fit-content;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .thinking-sparkle-pulse {
+        color: var(--primary-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse-glow 1.5s ease-in-out infinite;
+      }
+
+      .thinking-status-text {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        letter-spacing: -0.01em;
+      }
+
+      .typing-dots {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding-left: 0.1rem;
+
+        .dot {
+          width: 3.5px;
+          height: 3.5px;
+          border-radius: 50%;
+          background: var(--primary-light);
+          animation: dot-jump 1.4s infinite ease-in-out both;
+
+          &:nth-child(1) { animation-delay: -0.32s; }
+          &:nth-child(2) { animation-delay: -0.16s; }
+          &:nth-child(3) { animation-delay: 0s; }
+        }
+      }
+
+      .shimmer-placeholder {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        padding: 0.25rem 0;
+      }
+
+      .shimmer-bar {
+        height: 10px;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(
+          90deg,
+          var(--bg-card) 25%,
+          var(--bg-card-hover) 50%,
+          var(--bg-card) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.8s infinite linear;
+      }
+
+      .shimmer-bar-wide {
+        width: 70%;
+      }
+
+      .shimmer-bar-mid {
+        width: 42%;
+      }
+
+      .streaming-cursor {
+        display: inline-block;
+        width: 6px;
+        height: 15px;
+        background: var(--primary);
+        margin-left: 4px;
+        vertical-align: -2px;
+        border-radius: 2px;
+        animation: cursor-pulse 0.7s infinite alternate ease-in-out;
+        box-shadow: 0 0 8px var(--primary-glow);
+      }
+
+      @keyframes pulse-glow {
+        0%, 100% {
+          transform: scale(1);
+          filter: drop-shadow(0 0 2px var(--primary-glow));
+        }
+        50% {
+          transform: scale(1.15);
+          filter: drop-shadow(0 0 6px var(--primary-glow));
+        }
+      }
+
+      @keyframes dot-jump {
+        0%, 80%, 100% {
+          transform: scale(0.6);
+          opacity: 0.4;
+        }
+        40% {
+          transform: scale(1.2);
+          opacity: 1;
+        }
+      }
+
+      @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+
+      @keyframes cursor-pulse {
+        0% { opacity: 0.25; transform: scaleY(0.85); }
+        100% { opacity: 1; transform: scaleY(1); }
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(3px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
       .message-meta {
         display: flex;
         align-items: center;
@@ -164,9 +327,47 @@ import { CitationChipsComponent } from './citation-chips.component';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MessageBubbleComponent {
+export class MessageBubbleComponent implements OnInit, OnDestroy {
   public readonly message = input.required<ChatMessage>();
   public readonly copied = signal<boolean>(false);
+  public readonly thinkingPhase = signal<number>(0);
+
+  private timerId?: ReturnType<typeof setInterval>;
+
+  private readonly thinkingPhrases = [
+    'Searching knowledge base...',
+    'Analyzing relevant passages...',
+    'Synthesizing verified answer...'
+  ];
+
+  public readonly currentThinkingText = computed(() => {
+    return this.thinkingPhrases[this.thinkingPhase() % this.thinkingPhrases.length];
+  });
+
+  constructor() {
+    effect(
+      () => {
+        const msg = this.message();
+        if (msg.role === 'assistant' && msg.isStreaming && !msg.content) {
+          this.startThinkingTimer();
+        } else {
+          this.stopThinkingTimer();
+        }
+      },
+      { allowSignalWrites: true }
+    );
+  }
+
+  public ngOnInit(): void {
+    const msg = this.message();
+    if (msg.role === 'assistant' && msg.isStreaming && !msg.content) {
+      this.startThinkingTimer();
+    }
+  }
+
+  public ngOnDestroy(): void {
+    this.stopThinkingTimer();
+  }
 
   public formatTime(dateStr?: string): string {
     if (!dateStr) return '';
@@ -181,6 +382,26 @@ export class MessageBubbleComponent {
       this.copied.set(true);
       setTimeout(() => this.copied.set(false), 2000);
     });
+  }
+
+  private startThinkingTimer(): void {
+    if (this.timerId) return;
+    this.thinkingPhase.set(0);
+    this.timerId = setInterval(() => {
+      this.thinkingPhase.update((p) => {
+        if (p < this.thinkingPhrases.length - 1) {
+          return p + 1;
+        }
+        return p;
+      });
+    }, 1800);
+  }
+
+  private stopThinkingTimer(): void {
+    if (this.timerId) {
+      clearInterval(this.timerId);
+      this.timerId = undefined;
+    }
   }
 }
 

@@ -10,7 +10,6 @@ import {
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { ChatFacade } from './services/chat.facade';
-import { ChatStateService } from './state/chat-state.service';
 import { MessageBubbleComponent } from './components/message-bubble.component';
 import { PromptInputComponent } from './components/prompt-input.component';
 import { IconComponent } from '@shared/components/icon.component';
@@ -19,7 +18,6 @@ import { IconComponent } from '@shared/components/icon.component';
   selector: 'app-chat',
   standalone: true,
   imports: [CommonModule, MessageBubbleComponent, PromptInputComponent, IconComponent],
-  providers: [ChatFacade, ChatStateService],
   template: `
     <div class="chat-viewport">
       <!-- Top Conversation Bar -->
@@ -320,12 +318,16 @@ export class ChatComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.facade.loadConversations();
+    if (this.facade.conversations().length === 0) {
+      this.facade.loadConversations();
+    }
 
     this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
       if (id) {
         this.facade.selectConversation(id);
+      } else if (this.facade.selectedConversationId() !== null) {
+        this.facade.startNewChat();
       }
     });
   }

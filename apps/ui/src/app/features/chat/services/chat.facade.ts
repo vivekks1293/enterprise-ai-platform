@@ -6,7 +6,7 @@ import { ChatRepository } from '@data/repositories/chat.repository';
 import { NotificationService } from '@core/services/notification.service';
 import { ChatMessage, ConversationSummary, Citation } from '@data/models/chat.dto';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class ChatFacade {
   private readonly state = inject(ChatStateService);
   private readonly repository = inject(ChatRepository);
@@ -74,6 +74,14 @@ export class ChatFacade {
     this.stopGeneration();
     this.state.setSelectedId(null);
     this.state.setMessages([]);
+    if (this.router.url !== '/chat') {
+      this.router.navigate(['/chat']);
+    }
+  }
+
+  public resetState(): void {
+    this.stopGeneration();
+    this.state.reset();
   }
 
   public sendPrompt(text: string): void {
@@ -99,6 +107,7 @@ export class ChatFacade {
           this.state.addConversation(newSummary);
           this.state.setSelectedId(created.id);
           this.dispatchUserAndAssistantMessages(created.id, prompt);
+          this.router.navigate(['/chat', created.id], { replaceUrl: true });
         },
         error: () => {
           this.state.isSending.set(false);

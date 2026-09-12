@@ -1,14 +1,13 @@
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { AuthSessionService } from '@core/services/auth-session.service';
 import { AuthRepository } from '@data/repositories/auth.repository';
-import { ChatRepository } from '@data/repositories/chat.repository';
+import { ChatFacade } from '@features/chat/services/chat.facade';
 import { ThemeService } from '@core/services/theme.service';
 import { NotificationService } from '@core/services/notification.service';
 import { IconComponent } from '@shared/components/icon.component';
 import { ToastComponent } from '@shared/components/toast.component';
-import { ConversationSummary } from '@data/models/chat.dto';
 import { ROUTE_PATHS } from '@core/constants/app.constants';
 import { filter } from 'rxjs/operators';
 
@@ -31,7 +30,7 @@ import { filter } from 'rxjs/operators';
                 <app-icon name="sparkles" [size]="16"></app-icon>
               </div>
               @if (!isSidebarCollapsed()) {
-                <span class="brand-name">Enterprise AI</span>
+                <span class="brand-name">OmniDoc</span>
               }
             </div>
 
@@ -88,16 +87,28 @@ import { filter } from 'rxjs/operators';
             <div class="history-section">
               <div class="history-header">
                 <span>Recent Conversations</span>
-                <button type="button" class="refresh-history-btn" (click)="loadConversations()" title="Refresh list">
-                  <app-icon name="search" [size]="12"></app-icon>
+                <button
+                  type="button"
+                  class="refresh-history-btn"
+                  (click)="chatFacade.loadConversations()"
+                  [disabled]="chatFacade.isConversationsLoading()"
+                  title="Refresh list"
+                >
+                  <app-icon
+                    name="refresh-cw"
+                    [class.spin-icon]="chatFacade.isConversationsLoading()"
+                    [size]="12"
+                  ></app-icon>
                 </button>
               </div>
 
               <div class="history-list">
-                @if (conversations().length === 0) {
+                @if (chatFacade.isConversationsLoading() && chatFacade.conversations().length === 0) {
+                  <p class="no-history-hint">Loading conversations...</p>
+                } @else if (chatFacade.conversations().length === 0) {
                   <p class="no-history-hint">No past conversations</p>
                 } @else {
-                  @for (c of conversations(); track c.id) {
+                  @for (c of chatFacade.conversations(); track c.id) {
                     <a
                       [routerLink]="['/chat', c.id]"
                       routerLinkActive="active-conversation"
@@ -333,9 +344,30 @@ import { filter } from 'rxjs/operators';
 
       .refresh-history-btn {
         color: var(--text-muted);
-        &:hover {
+        transition: color var(--transition-fast);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.2rem;
+        border-radius: var(--radius-sm);
+
+        &:hover:not(:disabled) {
           color: var(--text-primary);
         }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+
+      .spin-icon {
+        display: inline-block;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
       }
 
       .history-list {
@@ -477,15 +509,25 @@ import { filter } from 'rxjs/operators';
 })
 export class AppComponent implements OnInit {
   public readonly session = inject(AuthSessionService);
+  public readonly chatFacade = inject(ChatFacade);
   private readonly authRepo = inject(AuthRepository);
-  private readonly chatRepo = inject(ChatRepository);
   public readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly toast = inject(NotificationService);
 
   public readonly isSidebarCollapsed = signal<boolean>(false);
   public readonly isAuthRoute = signal<boolean>(false);
-  public readonly conversations = signal<readonly ConversationSummary[]>([]);
+
+  constructor() {
+    effect(() => {
+      const isAuth = this.session.isAuthenticated();
+      if (isAuth) {
+        this.chatFacade.loadConversations();
+      } else {
+        this.chatFacade.resetState();
+      }
+    });
+  }
 
   public ngOnInit(): void {
     this.checkRoute(this.router.url);
@@ -493,10 +535,6 @@ export class AppComponent implements OnInit {
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe((event) => {
       this.checkRoute(event.urlAfterRedirects);
     });
-
-    if (this.session.isAuthenticated()) {
-      this.loadConversations();
-    }
   }
 
   public toggleSidebar(): void {
@@ -504,23 +542,18 @@ export class AppComponent implements OnInit {
   }
 
   public onNewChat(): void {
-    this.router.navigate(['/chat']);
-  }
-
-  public loadConversations(): void {
-    this.chatRepo.listConversations().subscribe({
-      next: (items) => this.conversations.set(items),
-      error: () => {}
-    });
+    this.chatFacade.startNewChat();
   }
 
   public onLogout(): void {
     this.authRepo.logout().subscribe({
       next: () => {
+        this.chatFacade.resetState();
         this.toast.info('Signed out');
         this.router.navigate([ROUTE_PATHS.login]);
       },
       error: () => {
+        this.chatFacade.resetState();
         this.session.clearSession();
         this.router.navigate([ROUTE_PATHS.login]);
       }

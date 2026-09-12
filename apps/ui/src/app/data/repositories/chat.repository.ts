@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, filter } from 'rxjs';
 import { ChatApiService } from '@data/api-services/chat-api.service';
 import {
   ChatMessage,
@@ -15,28 +15,32 @@ export class ChatRepository {
 
   public listConversations(): Observable<readonly ConversationSummary[]> {
     return this.api.listConversations().pipe(
-      map((items) =>
-        items.map((item) => ({
-          id: item.id,
-          title: item.title,
-          createdAt: item.createdAt ?? (item as any).created_at,
-          updatedAt: item.updatedAt ?? (item as any).updated_at
-        }))
-      )
+      map((raw: any) => {
+        const items: any[] = Array.isArray(raw) ? raw : (raw?.conversations ?? raw?.data ?? []);
+        return items.map((item: any) => ({
+          id: String(item.id),
+          title: item.title || 'Untitled Conversation',
+          createdAt: item.createdAt ?? item.created_at ?? new Date().toISOString(),
+          updatedAt: item.updatedAt ?? item.updated_at ?? new Date().toISOString()
+        }));
+      })
     );
   }
 
   public getConversation(id: string): Observable<{ title: string; messages: readonly ChatMessage[] }> {
     return this.api.getConversation(id).pipe(
-      map((res: ConversationDetailResponse) => ({
-        title: res.title,
-        messages: res.messages.map((m) => ({
-          id: m.id,
-          role: m.role as 'user' | 'assistant' | 'system',
-          content: m.content,
-          createdAt: m.createdAt ?? m.created_at ?? new Date().toISOString()
-        }))
-      }))
+      map((res: any) => {
+        const rawMessages: any[] = Array.isArray(res?.messages) ? res.messages : [];
+        return {
+          title: res?.title || 'Conversation',
+          messages: rawMessages.map((m: any) => ({
+            id: String(m.id),
+            role: (m.role || 'assistant') as 'user' | 'assistant' | 'system',
+            content: m.content || '',
+            createdAt: m.createdAt ?? m.created_at ?? new Date().toISOString()
+          }))
+        };
+      })
     );
   }
 
@@ -46,6 +50,7 @@ export class ChatRepository {
 
   public streamPrompt(conversationId: string, prompt: string): Observable<AIStreamEvent> {
     return this.api.streamPrompt(conversationId, prompt).pipe(
+      filter((streamEvent) => streamEvent.kind !== 'open'),
       map((streamEvent) => {
         if (streamEvent.kind === 'error') {
           return { type: 'error' } as AIStreamEvent;
@@ -78,11 +83,12 @@ export class ChatRepository {
             };
           }
           if (rawEvent === 'complete') {
-            return { type: 'complete' };
+            return { type: 'complete' } as AIStreamEvent;
           }
         }
-        return { type: 'complete' } as AIStreamEvent;
-      })
+        return null;
+      }),
+      filter((e): e is AIStreamEvent => e !== null)
     );
   }
 }

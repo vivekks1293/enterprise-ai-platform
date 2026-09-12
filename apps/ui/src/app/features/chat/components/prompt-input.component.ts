@@ -57,7 +57,7 @@ import { IconComponent } from '@shared/components/icon.component';
       </div>
 
       <div class="dock-footer">
-        <span>Enterprise AI • Grounded retrieval & verification</span>
+        <span>OmniDoc • Grounded retrieval & verification</span>
       </div>
     </div>
   `,
