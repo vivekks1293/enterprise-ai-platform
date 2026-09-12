@@ -81,6 +81,20 @@ class ChromaVectorStore(VectorStore):
             metadatas=metadatas,
         )
 
+    async def delete(
+        self,
+        document_id: UUID,
+    ) -> None:
+        """
+        Deletes all embedded chunks belonging to a document from ChromaDB.
+        """
+
+        self._collection._collection.delete(
+            where={
+                "document_id": str(document_id),
+            }
+        )
+
     async def search(
         self,
         *,

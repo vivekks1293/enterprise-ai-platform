@@ -92,3 +92,105 @@ async def _test_bm25_persists_and_upserts_duplicate_chunk_ids(tmp_path):
 
     assert [chunk.metadata.chunk_id for chunk in result.chunks] == ["chunk-1"]
     assert result.chunks[0].content == "content hash prevents redundant indexing"
+
+
+def test_bm25_deletes_document_chunks_and_persists(tmp_path):
+    asyncio.run(_test_bm25_deletes_document_chunks_and_persists(tmp_path))
+
+
+async def _test_bm25_deletes_document_chunks_and_persists(tmp_path):
+    store = BM25KeywordStore(tmp_path)
+    other_doc_id = UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+    doc_a_chunk = make_chunk("chunk-1", "confidential project strategy details")
+    doc_b_chunk = DocumentChunk(
+        content="public guidelines and company policies",
+        metadata=ChunkMetadata(
+            document_id=other_doc_id,
+            filename="guidelines.md",
+            chunk_id="chunk-2",
+            chunk_index=2,
+            page_number=1,
+            owner_id=OWNER_A,
+        ),
+    )
+    doc_c_chunk = DocumentChunk(
+        content="infrastructure deployment configuration guides",
+        metadata=ChunkMetadata(
+            document_id=other_doc_id,
+            filename="infra.md",
+            chunk_id="chunk-3",
+            chunk_index=3,
+            page_number=2,
+            owner_id=OWNER_A,
+        ),
+    )
+    await store.add([doc_a_chunk, doc_b_chunk, doc_c_chunk])
+
+    # Verify both documents are present in search results
+    res_before = await store.search(
+        query="confidential strategy",
+        filter=VectorSearchFilter(owner_id=OWNER_A),
+        top_k=5,
+    )
+    assert DOCUMENT_ID in [c.metadata.document_id for c in res_before.chunks]
+    assert res_before.chunks[0].metadata.document_id == DOCUMENT_ID
+
+    # Delete DOCUMENT_ID
+    await store.delete(DOCUMENT_ID)
+
+    # Verify DOCUMENT_ID is gone from search and owner index
+    res_after = await store.search(
+        query="confidential strategy",
+        filter=VectorSearchFilter(owner_id=OWNER_A),
+        top_k=5,
+    )
+    assert DOCUMENT_ID not in [c.metadata.document_id for c in res_after.chunks]
+
+    # Verify other document chunks remain intact
+    res_b = await store.search(
+        query="public guidelines",
+        filter=VectorSearchFilter(owner_id=OWNER_A),
+        top_k=5,
+    )
+    assert len(res_b.chunks) == 2
+    assert all(c.metadata.document_id == other_doc_id for c in res_b.chunks)
+
+    # Verify deletion persisted after re-instantiating store from disk
+    reloaded = BM25KeywordStore(tmp_path)
+    res_reloaded = await reloaded.search(
+        query="confidential strategy",
+        filter=VectorSearchFilter(owner_id=OWNER_A),
+        top_k=5,
+    )
+    assert DOCUMENT_ID not in [c.metadata.document_id for c in res_reloaded.chunks]
+    res_b_reloaded = await reloaded.search(
+        query="public guidelines",
+        filter=VectorSearchFilter(owner_id=OWNER_A),
+        top_k=5,
+    )
+    assert all(c.metadata.document_id == other_doc_id for c in res_b_reloaded.chunks)
+
+
+def test_bm25_filters_conversational_stopwords_from_query(tmp_path):
+    asyncio.run(_test_bm25_filters_conversational_stopwords_from_query(tmp_path))
+
+
+async def _test_bm25_filters_conversational_stopwords_from_query(tmp_path):
+    store = BM25KeywordStore(tmp_path)
+    vivek_chunk = make_chunk("chunk-1", "Vivek is an experienced Principal AI Architect and Lead Engineer.")
+    other_chunk = make_chunk("chunk-2", "The system was configured and ok for production deployment.")
+    third_chunk = make_chunk("chunk-3", "Database migrations and PostgreSQL query optimization.")
+    await store.add([vivek_chunk, other_chunk, third_chunk])
+
+    result = await store.search(
+        query="ok and who was Vivek",
+        filter=VectorSearchFilter(owner_id=OWNER_A),
+        top_k=5,
+    )
+
+    assert len(result.chunks) >= 1
+    assert result.chunks[0].metadata.chunk_id == "chunk-1"
+    assert "Vivek" in result.chunks[0].content
+    assert result.chunks[0].score > 0
+    if len(result.chunks) > 1:
+        assert result.chunks[0].score > result.chunks[1].score

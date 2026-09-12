@@ -33,6 +33,8 @@ class StubRetrievalService:
         *,
         query: str,
         owner_id: UUID,
+        retrieval_mode: str = "hybrid",
+        **kwargs,
     ) -> VectorSearchResult:
         self.queries.append(query)
         return VectorSearchResult(chunks=self._chunks)
@@ -270,3 +272,47 @@ def test_langfuse_generation_observes_streamed_generation_safely():
         "output": 4,
         "total": 16,
     }
+
+
+class StubNegativeProvider:
+    def __init__(self, message: str) -> None:
+        self.message = message
+        self.requests: list[ChatRequest] = []
+
+    async def stream(self, request: ChatRequest) -> AsyncIterator[ChatChunk]:
+        self.requests.append(request)
+        yield ChatChunk(content=self.message)
+        yield ChatChunk(
+            content="",
+            is_final=True,
+            usage=ChatUsage(
+                prompt_tokens=15,
+                completion_tokens=10,
+                total_tokens=25,
+            ),
+        )
+
+
+def test_negative_or_uninformative_answer_suppresses_citations():
+    retrieval_service = StubRetrievalService([retrieved_chunk()])
+    prompt_builder = StubPromptBuilder()
+    provider = StubNegativeProvider(
+        "I'm sorry, but the provided context does not contain any information about Harshita."
+    )
+    resolver = StubProviderResolver(provider)
+    orchestrator = AIOrchestrator(
+        retrieval_service=retrieval_service,
+        context_assembler=ContextAssembler(max_tokens=100),
+        prompt_builder=prompt_builder,
+        chat_provider_resolver=resolver,
+    )
+
+    events = asyncio.run(
+        collect_events(orchestrator, "who is Harshita?")
+    )
+
+    # Citations event must NOT be emitted when answer states info is not found in context
+    event_types = [event.type for event in events]
+    assert "citations" not in event_types
+    assert event_types == ["token", "complete"]
+    assert "Harshita" in events[0].content

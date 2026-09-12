@@ -128,3 +128,14 @@ def test_prompt_builder_remains_compatible_with_selected_chunks():
 def test_assemble_rejects_a_negative_budget():
     with pytest.raises(ValueError, match="must not be negative"):
         ContextAssembler(max_tokens=-1)
+
+
+def test_assemble_filters_chunks_below_minimum_relevance_score():
+    high_score = chunk("high", "high relevance content", score=0.92)
+    low_score = chunk("low", "low relevance content", score=0.25)
+
+    assembler = ContextAssembler(max_tokens=100, min_relevance_score=0.40)
+    selected = assembler.assemble([high_score, low_score])
+
+    assert len(selected) == 1
+    assert selected[0].metadata.chunk_id == "high"

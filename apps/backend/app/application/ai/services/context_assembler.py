@@ -27,12 +27,14 @@ class ContextAssembler:
     def __init__(
         self,
         max_tokens: int,
+        min_relevance_score: float = 0.0,
         metrics: MetricsRecorder | None = None,
     ) -> None:
         if max_tokens < 0:
             raise ValueError("max_tokens must not be negative.")
 
         self._max_tokens = max_tokens
+        self._min_relevance_score = min_relevance_score
         self._metrics = metrics or NullMetricsRecorder()
 
     def assemble(
@@ -50,6 +52,13 @@ class ContextAssembler:
                 duplicate_count = 0
 
                 for chunk in retrieved_chunks:
+                    if (
+                        self._min_relevance_score > 0.0
+                        and chunk.score is not None
+                        and chunk.score < self._min_relevance_score
+                    ):
+                        continue
+
                     chunk_id = chunk.metadata.chunk_id
                     if chunk_id in seen_chunk_ids:
                         duplicate_count += 1

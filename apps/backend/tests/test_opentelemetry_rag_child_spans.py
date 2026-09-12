@@ -110,7 +110,7 @@ class StubRetrievalService:
     def __init__(self, chunks: list[RetrievedChunk]) -> None:
         self._chunks = chunks
 
-    async def retrieve(self, *, query: str, owner_id: UUID) -> VectorSearchResult:
+    async def retrieve(self, *, query: str, owner_id: UUID, **kwargs) -> VectorSearchResult:
         return VectorSearchResult(chunks=self._chunks)
 
 

@@ -65,6 +65,7 @@ class Settings(BaseSettings):
     # Retrieval
     # ---------------------------------------------------------
 
+    knowledge_retrieval_mode: str = "hybrid"
     knowledge_retrieval_top_k: int = 5
 
     # Hybrid retrieval uses rank fusion, so this is the number of candidates
@@ -77,9 +78,9 @@ class Settings(BaseSettings):
 
     knowledge_rerank_top_k: int = 20
 
-    knowledge_rerank_model: str = "cross-encoder/stsb-roberta-base"
+    knowledge_rerank_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
-    knowledge_similarity_threshold: float = 0.75
+    knowledge_similarity_threshold: float = 0.40
 
     knowledge_max_context_chunks: int = 5
 

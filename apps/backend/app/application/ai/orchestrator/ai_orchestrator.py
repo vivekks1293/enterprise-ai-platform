@@ -144,7 +144,7 @@ class AIOrchestrator:
         ) = None,
     ) -> AsyncIterator[AIStreamEvent]:
         orchestration_started_at = perf_counter()
-        retrieval_mode = "semantic"
+        retrieval_mode = getattr(settings, "knowledge_retrieval_mode", "hybrid")
         context_count = 0
         citation_count = 0
         generation_status = "failed"
@@ -196,6 +196,7 @@ class AIOrchestrator:
             retrieval = await self._retrieval_service.retrieve(
                 query=retrieval_query,
                 owner_id=owner_id,
+                retrieval_mode=retrieval_mode,
             )
 
         # --------------------------------------------------
@@ -204,8 +205,14 @@ class AIOrchestrator:
 
             context_started_at = perf_counter()
             try:
+                candidate_chunks = [
+                    chunk
+                    for chunk in retrieval.chunks
+                    if chunk.score is None
+                    or chunk.score >= settings.knowledge_similarity_threshold
+                ]
                 selected_chunks = self._context_assembler.assemble(
-                    retrieval.chunks,
+                    candidate_chunks,
                 )
             except Exception as exc:
                 log_event(
@@ -437,6 +444,10 @@ class AIOrchestrator:
                     generation_started_at,
                     generation_completed_at,
                 )
+                full_answer = "".join(answer_parts).strip()
+                if self._is_uninformative_or_negative_answer(full_answer):
+                    citations = []
+                    citation_count = 0
                 llm_span.set_attributes(
                     {
                         "llm.time_to_first_token_ms": (
@@ -644,3 +655,34 @@ class AIOrchestrator:
                 citations=citations,
             )
         )
+
+    @staticmethod
+    def _is_uninformative_or_negative_answer(answer: str) -> bool:
+        """
+        Determines if the model's generated answer explicitly states that
+        no information was found in the knowledge base, in which case
+        attributing unrelated documents as citations is misleading.
+        """
+        normalized = answer.lower()
+        uninformative_patterns = [
+            "does not contain any information",
+            "do not contain any information",
+            "no information about",
+            "no information regarding",
+            "not mentioned in the available",
+            "not mentioned in the provided",
+            "not found in the available",
+            "not found in the provided",
+            "cannot provide details about",
+            "cannot provide any details",
+            "available knowledge is insufficient",
+            "available knowledge base does not contain",
+            "available knowledge does not contain",
+            "knowledge base does not contain",
+            "i do not have relevant enterprise knowledge",
+            "i do not have information",
+            "i don't have information",
+            "i couldn't find enough information",
+            "i could not find enough information",
+        ]
+        return any(pattern in normalized for pattern in uninformative_patterns)

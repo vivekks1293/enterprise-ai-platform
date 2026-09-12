@@ -81,6 +81,7 @@ def get_context_assembler() -> ContextAssembler:
 
     return ContextAssembler(
         max_tokens=settings.knowledge_context_max_tokens,
+        min_relevance_score=settings.knowledge_similarity_threshold,
         metrics=get_metrics_recorder(),
     )
 
